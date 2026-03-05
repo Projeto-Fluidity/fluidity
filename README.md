@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+# Fluidity
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Fluidity é uma aplicação web focada em bem-estar emocional.
+O objetivo do projeto é permitir que usuários registrem seu humor diário, acompanhem seu histórico emocional e recebam lembretes para manter o hábito de autoavaliação.
 
-Currently, two official plugins are available:
+Este projeto está sendo desenvolvido como um **MVP (Minimum Viable Product)** utilizando React, TypeScript e uma arquitetura moderna de frontend.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+# Funcionalidade atual (MVP)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Atualmente o sistema já permite:
 
-## Expanding the ESLint configuration
+* Registro diário de humor
+* Seleção de humor através de emojis
+* Persistência local utilizando **localStorage**
+* Regra que impede múltiplos registros no mesmo dia
+* Feedback visual ao usuário
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# Tecnologias utilizadas
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+* React
+* TypeScript
+* Vite
+* Node.js
+* Git
+* GitHub
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Tecnologias planejadas para as próximas versões:
+
+* Supabase (backend e banco de dados)
+* PWA (Progressive Web App)
+* Notificações Push
+* Inteligência Artificial para geração de insights emocionais
+
+---
+
+# Estrutura do projeto
+
+```
+src
+├── components
+│   ├── MoodButton.tsx
+│   └── MoodSelector.tsx
+│
+├── pages
+│   └── Dashboard.tsx
+│
+├── services
+│   └── moodService.ts
+│
+├── lib
+│   └── moods.ts
+│
+├── types
+│   └── mood.ts
+│
+├── App.tsx
+└── main.tsx
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+# Como rodar o projeto
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Clone o repositório:
+
 ```
+git clone https://github.com/pipocaagil-hash/projeto-fluidity.git
+```
+
+Entre na pasta do projeto:
+
+```
+cd projeto-fluidity
+```
+
+Instale as dependências:
+
+```
+npm install
+```
+
+Execute o projeto:
+
+```
+npm run dev
+```
+
+A aplicação estará disponível em:
+
+```
+http://localhost:5173
+```
+
+---
+
+# Roadmap do projeto
+
+Próximas funcionalidades planejadas:
+
+* Integração com Supabase
+* Autenticação de usuários
+* Histórico de humor
+* Lembretes inteligentes
+* Biblioteca de exercícios de bem-estar
+* Transformação da aplicação em PWA
+
+---
+
+# Autores
+
+Jair Sousa
+Carlos
