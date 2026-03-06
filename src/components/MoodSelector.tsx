@@ -14,16 +14,16 @@ export default function MoodSelector() {
 
     const [message, setMessage] = useState<string | null>(null)
 
-    function handleSelectMood(mood: MoodType) {
+    async function handleSelectMood(mood: MoodType) {
 
-        if (hasMoodToday()) {
-            setMessage("Você já registrou seu humor hoje")
-            return
-        }
-        setSelectedMood(mood)
+      if (await hasMoodToday()) {
+          setMessage("Você já registrou seu humor hoje")
+          return
+      }
+      setSelectedMood(mood)
 
-        saveMood(mood)
-        setMessage("Humor registrado com sucesso")
+      saveMood(mood)
+      setMessage("Humor registrado com sucesso")
     }
 
   return (
