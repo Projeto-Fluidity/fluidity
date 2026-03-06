@@ -1,21 +1,20 @@
 # Fluidity
 
-Fluidity é uma aplicação web focada em bem-estar emocional.
-O objetivo do projeto é permitir que usuários registrem seu humor diário, acompanhem seu histórico emocional e recebam lembretes para manter o hábito de autoavaliação.
+Aplicação web para registro e acompanhamento do humor diário do usuário.
 
-Este projeto está sendo desenvolvido como um **MVP (Minimum Viable Product)** utilizando React, TypeScript e uma arquitetura moderna de frontend.
+O objetivo do projeto é permitir que o usuário registre como está se sentindo ao longo do tempo e visualize o histórico de seus registros.
+
+Este projeto está sendo desenvolvido como MVP utilizando React, TypeScript e Supabase.
 
 ---
 
-# Funcionalidade atual (MVP)
+# Funcionalidades
 
-Atualmente o sistema já permite:
-
-* Registro diário de humor
-* Seleção de humor através de emojis
-* Persistência local utilizando **localStorage**
-* Regra que impede múltiplos registros no mesmo dia
-* Feedback visual ao usuário
+* Registro de humor diário
+* Persistência de dados no Supabase
+* Histórico de registros de humor
+* Ordenação do histórico do mais recente para o mais antigo
+* Gerenciamento de estado com hook customizado
 
 ---
 
@@ -24,46 +23,41 @@ Atualmente o sistema já permite:
 * React
 * TypeScript
 * Vite
+* Supabase
 * Node.js
-* Git
-* GitHub
-
-Tecnologias planejadas para as próximas versões:
-
-* Supabase (backend e banco de dados)
-* PWA (Progressive Web App)
-* Notificações Push
-* Inteligência Artificial para geração de insights emocionais
 
 ---
 
-# Estrutura do projeto
+# Arquitetura do projeto
+
+A aplicação segue separação de responsabilidades em camadas.
 
 ```
 src
-├── components
-│   ├── MoodButton.tsx
-│   └── MoodSelector.tsx
-│
-├── pages
-│   └── Dashboard.tsx
-│
-├── services
-│   └── moodService.ts
-│
-├── lib
-│   └── moods.ts
-│
-├── types
-│   └── mood.ts
-│
-├── App.tsx
-└── main.tsx
+ ├ components
+ │   ├ MoodSelector.tsx
+ │   └ MoodHistory.tsx
+ │
+ ├ hooks
+ │   └ useMood.ts
+ │
+ ├ services
+ │   ├ moodService.ts
+ │   └ supabaseClient.ts
+ │
+ ├ types
+ │   ├ mood.ts
+ │   └ moodRecord.ts
+ │
+ └ pages
+     └ Dashboard.tsx
 ```
+
+Essa estrutura facilita manutenção, escalabilidade e organização do código.
 
 ---
 
-# Como rodar o projeto
+# Como executar o projeto
 
 Clone o repositório:
 
@@ -89,7 +83,7 @@ Execute o projeto:
 npm run dev
 ```
 
-A aplicação estará disponível em:
+A aplicação ficará disponível em:
 
 ```
 http://localhost:5173
@@ -97,16 +91,25 @@ http://localhost:5173
 
 ---
 
-# Roadmap do projeto
+# Variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto.
+
+```
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+---
+
+# Roadmap
 
 Próximas funcionalidades planejadas:
 
-* Integração com Supabase
+* Integração com layout do UX
+* Visualização gráfica do histórico de humor
+* Sistema de lembretes para registro diário
 * Autenticação de usuários
-* Histórico de humor
-* Lembretes inteligentes
-* Biblioteca de exercícios de bem-estar
-* Transformação da aplicação em PWA
 
 ---
 
