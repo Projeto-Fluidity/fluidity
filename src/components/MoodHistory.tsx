@@ -1,4 +1,4 @@
-import type { MoodRecord } from "../types/moodRecord"
+import type { MoodRecord } from "../types/moodRecord";
 
 /**
  * Componente responsável por apresentar o histórico
@@ -8,13 +8,12 @@ import type { MoodRecord } from "../types/moodRecord"
  * para o mais antigo.
  */
 type MoodHistoryProps = {
-  records: MoodRecord[]
-}
+  records: MoodRecord[];
+};
 
 export default function MoodHistory({ records }: MoodHistoryProps) {
-
   if (records.length === 0) {
-    return <p>Nenhum registro encontrado.</p>
+    return <p>Nenhum registro encontrado.</p>;
   }
 
   return (
@@ -24,10 +23,11 @@ export default function MoodHistory({ records }: MoodHistoryProps) {
       <ul>
         {records.map((record) => (
           <li key={record.id}>
-            <strong>{record.mood}</strong> — {new Date(record.created_at).toLocaleDateString()}
+            <strong>{record.mood}</strong> —{" "}
+            {new Date(record.created_at).toLocaleDateString()}
           </li>
         ))}
       </ul>
     </section>
-  )
+  );
 }

@@ -1,0 +1,16 @@
+# Arquivo responsável por definir quais diretórios
+# não devem ser processados pelo Prettier durante
+# a formatação automática do projeto.
+#
+# Isso evita que o formatter tente modificar
+# arquivos gerados automaticamente ou dependências externas.
+
+# Dependências instaladas via npm
+node_modules
+
+# Arquivos gerados no processo de build
+dist
+
+# Diretório de build utilizado em alguns ambientes
+build
+

@@ -10,21 +10,21 @@ Este projeto está sendo desenvolvido como MVP utilizando React, TypeScript e Su
 
 # Funcionalidades
 
-* Registro de humor diário
-* Persistência de dados no Supabase
-* Histórico de registros de humor
-* Ordenação do histórico do mais recente para o mais antigo
-* Gerenciamento de estado com hook customizado
+- Registro de humor diário
+- Persistência de dados no Supabase
+- Histórico de registros de humor
+- Ordenação do histórico do mais recente para o mais antigo
+- Gerenciamento de estado com hook customizado
 
 ---
 
 # Tecnologias utilizadas
 
-* React
-* TypeScript
-* Vite
-* Supabase
-* Node.js
+- React
+- TypeScript
+- Vite
+- Supabase
+- Node.js
 
 ---
 
@@ -106,10 +106,10 @@ VITE_SUPABASE_ANON_KEY=
 
 Próximas funcionalidades planejadas:
 
-* Integração com layout do UX
-* Visualização gráfica do histórico de humor
-* Sistema de lembretes para registro diário
-* Autenticação de usuários
+- Integração com layout do UX
+- Visualização gráfica do histórico de humor
+- Sistema de lembretes para registro diário
+- Autenticação de usuários
 
 ---
 

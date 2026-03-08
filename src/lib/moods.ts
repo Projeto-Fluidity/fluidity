@@ -1,18 +1,18 @@
-import type { MoodType } from "../types/mood"
+import type { MoodType } from "../types/mood";
 
 /**
  * Estrutura de um item de humor utilizado na interface.
  */
 type MoodOption = {
   /** Descrição textual do humor */
-  label: string
+  label: string;
 
   /** Valor utilizado para persistência no banco */
-  value: MoodType
+  value: MoodType;
 
   /** Emoji que representa visualmente o humor */
-  emoji: string
-}
+  emoji: string;
+};
 
 /**
  * Lista de humores disponíveis na aplicação.
@@ -25,5 +25,5 @@ export const moods: MoodOption[] = [
   { label: "Feliz", value: "happy", emoji: "🙂" },
   { label: "Neutro", value: "neutral", emoji: "😐" },
   { label: "Triste", value: "sad", emoji: "😔" },
-  { label: "Muito triste", value: "very_sad", emoji: "😢" }
-]
+  { label: "Muito triste", value: "very_sad", emoji: "😢" },
+];

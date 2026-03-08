@@ -1,7 +1,11 @@
-import { useEffect, useState } from "react"
-import type { MoodType } from "../types/mood"
-import type { MoodRecord } from "../types/moodRecord"
-import { getMoodHistory, saveMood, hasMoodToday } from "../services/moodService"
+import { useEffect, useState } from "react";
+import type { MoodType } from "../types/mood";
+import type { MoodRecord } from "../types/moodRecord";
+import {
+  getMoodHistory,
+  saveMood,
+  hasMoodToday,
+} from "../services/moodService";
 
 /**
  * Hook responsável por centralizar o estado e as operações
@@ -16,23 +20,22 @@ import { getMoodHistory, saveMood, hasMoodToday } from "../services/moodService"
  * ao service `moodService`.
  */
 export function useMood() {
-
-  const [history, setHistory] = useState<MoodRecord[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [history, setHistory] = useState<MoodRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Carrega o histórico de humores do banco.
    */
   async function loadHistory() {
     try {
-      const data = await getMoodHistory()
-      setHistory(data)
+      const data = await getMoodHistory();
+      setHistory(data);
     } catch (err) {
-      console.error(err)
-      setError("Erro ao carregar histórico")
+      console.error(err);
+      setError("Erro ao carregar histórico");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -44,18 +47,19 @@ export function useMood() {
    */
   async function registerMood(mood: MoodType) {
     try {
-      const alreadyRegistered = await hasMoodToday()
+      const alreadyRegistered = await hasMoodToday();
 
       if (alreadyRegistered) {
-        throw new Error("Humor já registrado hoje")
+        throw new Error("Humor já registrado hoje");
       }
 
-      await saveMood(mood)
-      await loadHistory()
-
+      await saveMood(mood);
+      await loadHistory();
     } catch (err) {
-      console.error(err)
-      setError("Erro ao registrar humor")
+      console.error(err);
+      setError("Erro ao registrar humor");
+
+      throw err;
     }
   }
 
@@ -63,14 +67,14 @@ export function useMood() {
    * Carrega o histórico ao montar o componente.
    */
   useEffect(() => {
-    loadHistory()
-  }, [])
+    loadHistory();
+  }, []);
 
   return {
     history,
     loading,
     error,
     registerMood,
-    reload: loadHistory
-  }
+    reload: loadHistory,
+  };
 }
