@@ -1,6 +1,7 @@
 import AppLayout from "../components/layout/AppLayout";
 import { useMood } from "../hooks/useMood";
 import { getMoodDefinition } from "../lib/moods";
+import { formatDate, formatTime } from "../lib/date";
 
 /**
  * Tela responsável por exibir
@@ -35,7 +36,7 @@ export default function History() {
                 </span>
 
                 <span className="text-sm text-gray-500">
-                  {new Date(lastCheckin.created_at).toLocaleTimeString()}
+                  {formatTime(lastCheckin.created_at)}
                 </span>
               </div>
             </div>
@@ -68,7 +69,7 @@ export default function History() {
                 </span>
 
                 <span className="text-sm text-gray-500">
-                  {new Date(record.created_at).toLocaleDateString()}
+                  {formatDate(record.created_at)}
                 </span>
               </div>
             );
