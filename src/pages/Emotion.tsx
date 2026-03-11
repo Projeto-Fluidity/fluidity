@@ -1,13 +1,18 @@
 import AppLayout from "../components/layout/AppLayout";
+import MoodSelector from "../components/MoodSelector";
+import { useMood } from "../hooks/useMood";
 
 /**
  * Tela principal onde o usuário registra
  * como está se sentindo no dia.
  */
 export default function Emotion() {
+
+  const { registerMood } = useMood();
+
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
 
         {/* Greeting */}
         <div>
@@ -19,6 +24,9 @@ export default function Emotion() {
             Como você está?
           </p>
         </div>
+
+        {/* Mood Selector */}
+        <MoodSelector registerMood={registerMood} />
 
       </div>
     </AppLayout>
