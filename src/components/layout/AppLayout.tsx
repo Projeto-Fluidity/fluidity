@@ -1,3 +1,5 @@
+import BottomNav from "../navigation/BottomNav";
+
 /**
  * Layout base da aplicação.
  *
@@ -15,6 +17,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className="w-full max-w-md bg-white min-h-screen p-6">
         {children}
       </div>
+
+      <BottomNav />
     </div>
   );
 }

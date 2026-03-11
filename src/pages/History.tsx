@@ -2,6 +2,7 @@ import AppLayout from "../components/layout/AppLayout";
 import { useMood } from "../hooks/useMood";
 import LastCheckinCard from "../components/history/LastCheckinCard";
 import MoodHistoryList from "../components/history/MoodHistoryList";
+import WeeklyChart from "../components/history/WeeklyChart";
 
 /**
  * Tela responsável por exibir
@@ -28,6 +29,8 @@ export default function History() {
           history={history}
           loading={loading}
         />
+        
+        <WeeklyChart />
 
       </div>
     </AppLayout>
