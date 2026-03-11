@@ -48,6 +48,7 @@ export default function MoodSelector({ registerMood }: MoodSelectorProps) {
           <MoodButton
             key={mood.value}
             emoji={mood.emoji}
+            label={mood.label}
             selected={selectedMood === mood.value}
             onSelect={() => handleSelectMood(mood.value)}
           />
