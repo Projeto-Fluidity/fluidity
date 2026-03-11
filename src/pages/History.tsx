@@ -1,5 +1,6 @@
 import AppLayout from "../components/layout/AppLayout";
 import { useMood } from "../hooks/useMood";
+import { getMoodDefinition } from "../lib/moods";
 
 /**
  * Tela responsável por exibir
@@ -19,23 +20,27 @@ export default function History() {
         </h1>
 
         {/* Último check-in */}
-        {lastCheckin && (
-          <div className="bg-white rounded-xl p-4 border shadow-sm">
-            <p className="text-sm text-gray-500">
-              Último check-in
-            </p>
+        {lastCheckin && (() => {
+          const moodInfo = getMoodDefinition(lastCheckin.mood);
 
-            <div className="flex justify-between items-center mt-2">
-              <span className="font-medium text-gray-800">
-                {lastCheckin.mood}
-              </span>
+          return (
+            <div className="bg-white rounded-xl p-4 border shadow-sm">
+              <p className="text-sm text-gray-500">
+                Último check-in
+              </p>
 
-              <span className="text-sm text-gray-500">
-                {new Date(lastCheckin.created_at).toLocaleTimeString()}
-              </span>
+              <div className="flex justify-between items-center mt-2">
+                <span className="font-medium text-gray-800">
+                  {moodInfo?.emoji} {moodInfo?.label}
+                </span>
+
+                <span className="text-sm text-gray-500">
+                  {new Date(lastCheckin.created_at).toLocaleTimeString()}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Histórico */}
         <div className="bg-white rounded-xl p-4 border shadow-sm">
@@ -50,20 +55,24 @@ export default function History() {
             </p>
           )}
 
-          {!loading && history.map((record) => (
-            <div
-              key={record.id}
-              className="flex justify-between py-2 border-b last:border-none"
-            >
-              <span className="text-gray-700">
-                {record.mood}
-              </span>
+          {!loading && history.map((record) => {
+            const moodInfo = getMoodDefinition(record.mood);
 
-              <span className="text-sm text-gray-500">
-                {new Date(record.created_at).toLocaleDateString()}
-              </span>
-            </div>
-          ))}
+            return (
+              <div
+                key={record.id}
+                className="flex justify-between py-2 border-b last:border-none"
+              >
+                <span className="text-gray-700">
+                  {moodInfo?.emoji} {moodInfo?.label}
+                </span>
+
+                <span className="text-sm text-gray-500">
+                  {new Date(record.created_at).toLocaleDateString()}
+                </span>
+              </div>
+            );
+          })}
 
         </div>
 
