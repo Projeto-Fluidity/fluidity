@@ -10,7 +10,7 @@ type MoodSelectorProps = {
   /**
    * Função responsável por registrar um novo humor.
    * Essa função é fornecida pelo hook `useMood`
-   * através do componente Dashboard.
+   * através da página Emotion.
    */
   registerMood: (mood: MoodType) => Promise<void>;
 };
@@ -22,73 +22,57 @@ type MoodSelectorProps = {
  * Funcionalidades:
  * - Exibe opções de humor através de emojis
  * - Permite selecionar um humor
- * - Registra o humor utilizando o hook `useMood`
- * - Exibe mensagens de feedback ao usuário
+ * - Executa o registro utilizando o hook `useMood`
  *
- * O estado selecionado também é carregado do localStorage
- * caso exista um registro anterior salvo localmente.
- *
- * @returns Interface de seleção de humor
+ * A navegação para telas de sucesso ou erro
+ * é controlada pela página Emotion.
  */
 export default function MoodSelector({ registerMood }: MoodSelectorProps) {
-  /**
-   * Hook responsável por controlar
-   * o registro de humor e atualização do histórico.
-   */
 
   /**
    * Estado responsável por armazenar o humor selecionado.
-   * Inicialmente tenta recuperar valor salvo no localStorage.
    */
-  const [selectedMood, setSelectedMood] = useState<MoodType | null>(() => {
-    const savedMood = localStorage.getItem("mood-value");
-    return savedMood ? (savedMood as MoodType) : null;
-  });
-
-  /**
-   * Estado responsável por exibir mensagens
-   * de feedback para o usuário.
-   */
-  const [message, setMessage] = useState<string | null>(null);
+  const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
 
   /**
    * Manipula a seleção de humor pelo usuário.
    *
-   * O registro é delegado ao hook `useMood`,
-   * que centraliza as regras de negócio e comunicação
-   * com o banco de dados.
-   *
-   * @param mood Humor selecionado pelo usuário
+   * @param mood Humor selecionado
    */
   async function handleSelectMood(mood: MoodType) {
-    try {
-      setSelectedMood(mood);
-
-      await registerMood(mood);
-
-      setSelectedMood(mood);
-      setMessage("Humor registrado com sucesso");
-    } catch {
-      setMessage("Você já registrou seu humor hoje");
-    }
+    setSelectedMood(mood);
+    await registerMood(mood);
   }
 
   return (
-    <div>
-      <h2>Como você está hoje?</h2>
+    <div className="bg-white rounded-2xl p-5 border shadow-sm">
 
-      <div className="flex gap-3">
+      {/* Título */}
+      <div className="flex items-center gap-2 mb-4">
+
+        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+
+        <h2 className="text-lg font-semibold text-gray-800">
+          Como você está se sentindo hoje?
+        </h2>
+
+      </div>
+
+      {/* Grid de emoções */}
+      <div className="grid grid-cols-3 gap-3">
+
         {moods.map((mood) => (
           <MoodButton
             key={mood.value}
             emoji={mood.emoji}
+            label={mood.label}
             selected={selectedMood === mood.value}
             onSelect={() => handleSelectMood(mood.value)}
           />
         ))}
+
       </div>
 
-      {message && <p className="mt-3 text-sm text-slate-600">{message}</p>}
     </div>
   );
 }
