@@ -1,24 +1,23 @@
 import BottomNav from "../navigation/BottomNav";
 
-/**
- * Layout base da aplicação.
- *
- * Responsável por centralizar o conteúdo
- * e manter consistência visual entre telas.
- */
-
-type AppLayoutProps = {
+type Props = {
   children: React.ReactNode;
 };
 
-export default function AppLayout({ children }: AppLayoutProps) {
+/**
+ * Layout principal da aplicação.
+ * Envolve todas as páginas e inclui a navegação inferior.
+ */
+export default function AppLayout({ children }: Props) {
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center">
-      <div className="w-full max-w-md bg-white min-h-screen p-6">
+    <div className="min-h-screen bg-gray-100 pb-20">
+
+      <main className="max-w-md mx-auto p-4">
         {children}
-      </div>
+      </main>
 
       <BottomNav />
+
     </div>
   );
 }
