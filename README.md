@@ -1,10 +1,32 @@
 # Fluidity
 
-Aplicação web para registro e acompanhamento do humor diário do usuário.
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Node](https://img.shields.io/badge/Node-22.13.0-green)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E)
+![Status](https://img.shields.io/badge/status-MVP-yellow)
 
-O objetivo do projeto é permitir que o usuário registre como está se sentindo ao longo do tempo e acompanhe seu histórico emocional.
+Aplicação web para **registro e acompanhamento do humor diário do usuário**.
 
-O **Fluidity** está sendo desenvolvido inicialmente como um **MVP (Minimum Viable Product)** com foco em validar a experiência de registro diário de humor e incentivar práticas simples de bem-estar.
+O objetivo do projeto é permitir que o usuário registre como está se sentindo ao longo do tempo e acompanhe seu histórico emocional, incentivando práticas simples de bem-estar.
+
+O **Fluidity** está sendo desenvolvido inicialmente como um **MVP (Minimum Viable Product)** focado em validar a experiência de registro diário de humor.
+
+---
+
+# Interface do projeto
+
+Algumas telas do **Fluidity** baseadas no design do UX.
+
+> As imagens abaixo representam as principais telas do MVP.
+
+![Tela de emoção](docs/screens/emotion.png)
+
+![Tela de sucesso](docs/screens/success.png)
+
+![Tela de erro](docs/screens/error.png)
+
+![Tela de histórico](docs/screens/history.png)
 
 ---
 
@@ -14,14 +36,12 @@ O Fluidity busca oferecer uma experiência simples e acessível para que usuári
 
 * registrar seu humor diariamente
 * acompanhar padrões emocionais ao longo do tempo
-* receber lembretes para manter a prática do registro
-* acessar exercícios curtos de bem-estar
+* visualizar seu histórico de registros
+* acessar exercícios simples de bem-estar
 
 ---
 
 # Funcionalidades do MVP
-
-As funcionalidades planejadas para o MVP incluem:
 
 ### Check-in diário de humor
 
@@ -29,15 +49,15 @@ O usuário pode registrar como está se sentindo no dia através de uma seleçã
 
 ### Histórico de humor
 
-O sistema armazena e apresenta o histórico de registros ordenado do mais recente para o mais antigo.
+Visualização do histórico de registros de humor, ordenados do mais recente para o mais antigo.
 
-### Lembretes inteligentes simples
+### Gráfico semanal
 
-Notificações para incentivar o usuário a realizar o registro diário de humor.
+Apresentação visual dos registros de humor ao longo da semana.
 
-### Biblioteca de exercícios
+### Exercícios de bem-estar
 
-Coleção de exercícios curtos e simples voltados ao bem-estar emocional.
+Recomendações de exercícios simples voltados ao equilíbrio emocional.
 
 ---
 
@@ -45,78 +65,112 @@ Coleção de exercícios curtos e simples voltados ao bem-estar emocional.
 
 Atualmente o projeto já possui:
 
-* Registro de humor diário
-* Persistência de dados utilizando Supabase
+* Registro diário de humor
+* Persistência de dados utilizando **Supabase**
 * Histórico de registros de humor
 * Ordenação automática do histórico
 * Atualização reativa da interface após registro
 * Prevenção de múltiplos registros no mesmo dia
+* Camada de analytics para o histórico
+* Gráfico semanal baseado nos registros
 * Gerenciamento de estado com hook customizado
 * Arquitetura organizada em camadas
 
 ---
 
-# Tecnologias utilizadas
+# Stack do projeto
 
-Frontend:
+| Camada         | Tecnologia         |
+| -------------- | ------------------ |
+| Frontend       | React + TypeScript |
+| Build Tool     | Vite               |
+| Estilização    | Tailwind CSS       |
+| Backend        | Supabase           |
+| Banco de dados | PostgreSQL         |
+| Ícones         | Lucide React       |
 
-* React
-* TypeScript
-* Vite
+---
 
-Estilização:
+# Versão do Node
 
-* Tailwind CSS
+O projeto foi desenvolvido utilizando:
 
-Backend / Banco de dados:
+```
+Node.js 22.13.0
+```
 
-* Supabase (PostgreSQL + API)
-
-Interface:
-
-* Lucide React (biblioteca de ícones)
-
-Qualidade de código:
-
-* ESLint
-* Prettier
+Recomenda-se utilizar a mesma versão para evitar incompatibilidades.
 
 ---
 
 # Arquitetura do projeto
 
-A aplicação segue separação de responsabilidades em camadas.
+A aplicação segue uma arquitetura baseada em **separação de responsabilidades em camadas**.
 
 ```
 src
  ├ components
+ │   ├ history
+ │   │   ├ LastCheckinCard.tsx
+ │   │   ├ MoodHistoryList.tsx
+ │   │   └ WeeklyChart.tsx
+ │   │
+ │   ├ layout
+ │   │   └ AppLayout.tsx
+ │   │
+ │   ├ navigation
+ │   │   └ BottomNav.tsx
+ │   │
+ │   ├ ui
+ │   │   └ UnderDevelopment.tsx
+ │   │
+ │   ├ ExerciseCard.tsx
  │   ├ MoodButton.tsx
- │   ├ MoodSelector.tsx
- │   └ MoodHistory.tsx
+ │   ├ MoodHistory.tsx
+ │   └ MoodSelector.tsx
  │
  ├ hooks
- │   └ useMood.ts
+ │   ├ useMood.ts
+ │   └ useMoodAnalytics.ts
  │
  ├ services
  │   ├ moodService.ts
  │   └ supabaseClient.ts
  │
- ├ types
- │   ├ mood.ts
- │   └ moodRecord.ts
- │
  ├ lib
- │   ├ moods.ts
+ │   ├ moodAnalytics.ts
+ │   ├ date.ts
  │   └ utils.ts
  │
- └ pages
-     └ Dashboard.tsx
+ ├ types
+ │   ├ mood.ts
+ │   ├ moodRecord.ts
+ │   └ analytics.ts
+ │
+ ├ pages
+ │   ├ Emotion.tsx
+ │   ├ History.tsx
+ │   ├ MoodSuccess.tsx
+ │   ├ MoodError.tsx
+ │   ├ Practices.tsx
+ │   └ Profile.tsx
+ │
+ ├ App.tsx
+ └ main.tsx
 ```
 
-Fluxo da aplicação:
+---
+
+# Fluxo da aplicação
 
 ```
-components → hooks → services → Supabase
+components
+     ↓
+hooks
+     ↓
+services
+     ↓
+Supabase
 ```
 
 Essa abordagem permite:
@@ -179,10 +233,9 @@ Essas variáveis são necessárias para conectar a aplicação ao banco de dados
 
 Próximas funcionalidades planejadas:
 
-* Integração com layout oficial do UX
-* Sistema de lembretes inteligentes
+* Integração completa com layout oficial do UX
 * Biblioteca de exercícios de bem-estar
-* Visualização gráfica do histórico de humor
+* Melhorias visuais no dashboard de humor
 * Autenticação de usuários
 * Evolução para PWA
 
@@ -191,4 +244,4 @@ Próximas funcionalidades planejadas:
 # Autores
 
 Jair Sousa
-Carlos
+Carlos Eduardo
