@@ -7,6 +7,9 @@ type MoodButtonProps = {
   /** Emoji que representa o humor */
   emoji: string;
 
+  /** Label descritiva do humor */
+  label: string;
+
   /** Indica se o humor está selecionado */
   selected: boolean;
 
@@ -17,7 +20,9 @@ type MoodButtonProps = {
 /**
  * Componente responsável por renderizar um botão de seleção de humor.
  *
- * Cada botão representa um estado emocional através de um emoji.
+ * Cada botão representa um estado emocional através de um emoji
+ * e uma descrição textual.
+ *
  * O botão aplica estilos visuais diferentes quando está selecionado,
  * proporcionando feedback imediato ao usuário.
  *
@@ -30,6 +35,7 @@ type MoodButtonProps = {
  */
 export default function MoodButton({
   emoji,
+  label,
   selected,
   onSelect,
 }: MoodButtonProps) {
@@ -37,13 +43,18 @@ export default function MoodButton({
     <button
       onClick={onSelect}
       className={cn(
-        "m-2 rounded-lg border p-3 text-2xl transition duration-200 hover:scale-105",
+        "flex flex-col items-center justify-center rounded-xl border p-3 transition",
+        "hover:bg-gray-50",
         selected
-          ? "border-blue-500 bg-blue-100"
-          : "border-gray-300 hover:bg-gray-100",
+          ? "border-green-500 bg-green-50"
+          : "border-gray-200"
       )}
     >
-      {emoji}
+      <span className="text-2xl">{emoji}</span>
+
+      <span className="mt-1 text-sm text-gray-600">
+        {label}
+      </span>
     </button>
   );
 }

@@ -1,29 +1,60 @@
 import type { MoodType } from "../types/mood";
 
 /**
- * Estrutura de um item de humor utilizado na interface.
+ * Estrutura que representa um humor disponível na aplicação.
  */
-type MoodOption = {
-  /** Descrição textual do humor */
-  label: string;
-
-  /** Valor utilizado para persistência no banco */
+export type MoodDefinition = {
   value: MoodType;
-
-  /** Emoji que representa visualmente o humor */
   emoji: string;
+  label: string;
 };
 
 /**
- * Lista de humores disponíveis na aplicação.
+ * Dicionário central de humores do sistema.
  *
- * Essa lista é utilizada para renderizar os botões
- * de seleção de humor no componente MoodSelector.
+ * Esse objeto funciona como a fonte única de verdade
+ * para representar estados emocionais na aplicação.
  */
-export const moods: MoodOption[] = [
-  { label: "Muito feliz", value: "very_happy", emoji: "😄" },
-  { label: "Feliz", value: "happy", emoji: "🙂" },
-  { label: "Neutro", value: "neutral", emoji: "😐" },
-  { label: "Triste", value: "sad", emoji: "😔" },
-  { label: "Muito triste", value: "very_sad", emoji: "😢" },
+export const moods: MoodDefinition[] = [
+  {
+    value: "happy",
+    emoji: "🙂",
+    label: "Feliz",
+  },
+  {
+    value: "sad",
+    emoji: "😢",
+    label: "Triste",
+  },
+  {
+    value: "tired",
+    emoji: "😴",
+    label: "Cansado",
+  },
+  {
+    value: "excited",
+    emoji: "😄",
+    label: "Entusiasmado",
+  },
+  {
+    value: "angry",
+    emoji: "😡",
+    label: "Irritado",
+  },
+  {
+    value: "anxious",
+    emoji: "😟",
+    label: "Ansioso",
+  },
 ];
+
+/**
+ * Função utilitária para recuperar
+ * a definição completa de um humor.
+ *
+ * @param mood valor armazenado no banco
+ * @returns objeto com emoji e label
+ */
+export function getMoodDefinition(mood: MoodType) {
+  return moods.find((m) => m.value === mood);
+}
