@@ -45,14 +45,14 @@ export default function MoodSelector({ registerMood }: MoodSelectorProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 border shadow-sm">
+    <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
 
       {/* Título */}
       <div className="flex items-center gap-2 mb-4">
 
         <span className="w-2 h-2 rounded-full bg-green-500"></span>
 
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-base font-semibold">
           Como você está se sentindo hoje?
         </h2>
 

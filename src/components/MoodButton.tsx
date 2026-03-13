@@ -40,21 +40,21 @@ export default function MoodButton({
   onSelect,
 }: MoodButtonProps) {
   return (
-    <button
-      onClick={onSelect}
-      className={cn(
-        "flex flex-col items-center justify-center rounded-xl border p-3 transition",
-        "hover:bg-gray-50",
-        selected
-          ? "border-green-500 bg-green-50"
-          : "border-gray-200"
-      )}
-    >
-      <span className="text-2xl">{emoji}</span>
+<button
+  onClick={onSelect}
+  className={cn(
+  "flex flex-col items-center justify-center rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-4 transition",
+  "hover:bg-[#F3F4F6]",
+  selected
+    ? "border-green-500 bg-green-50"
+    : ""
+)}
+>
+  <span className="text-4xl">{emoji}</span>
 
-      <span className="mt-1 text-sm text-gray-600">
-        {label}
-      </span>
-    </button>
+  <span className="mt-2 text-xs text-gray-500">
+    {label}
+  </span>
+</button>
   );
 }

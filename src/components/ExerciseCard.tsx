@@ -1,27 +1,61 @@
+import { ArrowRight, Wind, Sparkles } from "lucide-react";
+
 /**
  * Props do componente ExerciseCard.
  */
 type ExerciseCardProps = {
   title: string;
   duration: string;
+  icon?: "breathing" | "meditation";
 };
 
 /**
  * Card responsável por exibir um exercício
  * recomendado para o usuário.
- *
- * @param title Nome do exercício
- * @param duration Duração estimada
  */
-export default function ExerciseCard({ title, duration }: ExerciseCardProps) {
+export default function ExerciseCard({
+  title,
+  duration,
+  icon,
+}: ExerciseCardProps) {
+
+  const Icon =
+    icon === "breathing"
+      ? Wind
+      : icon === "meditation"
+      ? Sparkles
+      : Wind;
+
   return (
-    <div className="flex items-center justify-between bg-gray-50 border rounded-lg p-4 hover:bg-gray-100 transition">
-      <div>
-        <p className="font-medium text-gray-800">{title}</p>
-        <p className="text-sm text-gray-500">{duration}</p>
+    <div className="
+    group
+    flex items-center justify-between
+    bg-white border border-[#E5E7EB]
+    rounded-xl p-4
+    transition-all duration-200
+    hover:bg-gray-50
+    hover:shadow-sm
+    cursor-pointer">
+
+      {/* Lado esquerdo */}
+      <div className="flex items-center gap-3">
+
+        {/* Ícone circular */}
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600">
+          <Icon size={20} />
+        </div>
+
+        {/* Texto */}
+        <div>
+          <p className="font-medium text-gray-800">{title}</p>
+          <p className="text-sm text-gray-500">{duration}</p>
+        </div>
+
       </div>
 
-      <span className="text-gray-400">›</span>
+      {/* Seta */}
+      <ArrowRight size={18} className="text-gray-400 transition-transform group-hover:translate-x-1" />
+
     </div>
   );
 }
