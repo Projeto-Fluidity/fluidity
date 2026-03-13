@@ -1,35 +1,93 @@
-import { Link, useLocation } from "react-router-dom";
+import { Home, BarChart3, Calendar, User } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 /**
- * Barra de navegação inferior da aplicação.
+ * Componente responsável pela navegação inferior da aplicação.
+ *
+ * A BottomNav fornece acesso rápido às principais seções do sistema:
+ *
+ * - Home
+ * - Práticas
+ * - Histórico
+ * - Perfil
+ *
+ * Características de layout:
+ * - Barra fixa na base do layout principal
+ * - Ícones com labels organizados verticalmente
+ * - Destaque visual para a rota ativa
+ *
+ * Estilização:
+ * - Utiliza Tailwind CSS para layout e espaçamento
+ * - Ícones provenientes da biblioteca Lucide React
+ * - Linha superior verde para reforçar identidade visual
+ *
+ * Comportamento:
+ * - Utiliza `NavLink` do React Router para controlar o estado ativo
+ * - A rota ativa recebe destaque automático
  */
 export default function BottomNav() {
-  const location = useLocation();
-
-  const linkClass = (path: string) =>
-    location.pathname === path
-      ? "text-green-600"
-      : "text-gray-400";
+  /**
+   * Classe base aplicada a todos os itens da navegação.
+   */
+  const baseItemClass =
+    "flex flex-col items-center justify-center text-xs transition-colors";
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-3">
+    <nav className="border-t-2 border-[#B9F8CF] bg-white h-11 flex justify-around items-center">
 
-      <Link to="/" className={linkClass("/")}>
+      {/* Home */}
+      <NavLink
+        to="/"
+        className={({ isActive }) =>
+          `${baseItemClass} ${
+            isActive ? "text-[#008236]" : "text-gray-400"
+          }`
+        }
+      >
+        <Home size={20} />
         Home
-      </Link>
+      </NavLink>
 
-      <Link to="/practices" className={linkClass("/practices")}>
+      {/* Práticas */}
+      <NavLink
+        to="/practices"
+        className={({ isActive }) =>
+          `${baseItemClass} ${
+            isActive ? "text-[#008236]" : "text-gray-400"
+          }`
+        }
+      >
+        <BarChart3 size={20} />
         Práticas
-      </Link>
+      </NavLink>
 
-      <Link to="/history" className={linkClass("/history")}>
+      {/* Histórico */}
+      <NavLink
+        to="/history"
+        className={({ isActive }) =>
+          `${baseItemClass} ${
+            isActive ? "text-[#008236]" : "text-gray-400"
+          }`
+        }
+      >
+        <Calendar size={20} />
         Histórico
-      </Link>
+      </NavLink>
 
-      <Link to="/profile" className={linkClass("/profile")}>
+      {/* Perfil */}
+      <NavLink
+        to="/profile"
+        className={({ isActive }) =>
+          `${baseItemClass} ${
+            isActive ? "text-[#008236]" : "text-gray-400"
+          }`
+        }
+      >
+        <User size={20} />
         Perfil
-      </Link>
+      </NavLink>
 
     </nav>
   );
 }
+

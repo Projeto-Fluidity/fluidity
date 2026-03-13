@@ -7,16 +7,21 @@ type Props = {
 /**
  * Layout principal da aplicação.
  * Envolve todas as páginas e inclui a navegação inferior.
+ * Simula um container mobile centralizado.
  */
 export default function AppLayout({ children }: Props) {
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
+    <div className="min-h-screen bg-gray-100 flex justify-center">
 
-      <main className="max-w-md mx-auto p-4">
-        {children}
-      </main>
+      <div className="w-full max-w-md min-h-screen flex flex-col">
 
-      <BottomNav />
+        <main className="flex-1">
+          {children}
+        </main>
+
+        <BottomNav />
+
+      </div>
 
     </div>
   );
