@@ -244,4 +244,7 @@ Próximas funcionalidades planejadas:
 # Autores
 
 Jair Sousa
+https://github.com/jair-sousa
+
 Carlos Eduardo
+https://github.com/Carlosedukj

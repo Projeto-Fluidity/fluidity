@@ -52,7 +52,7 @@ export default function WeeklyChart({
       </h2>
 
       {/* Gráfico */}
-      <div className="flex items-end justify-between h-32 mb-4">
+      <div className="flex items-end justify-between h-32 mb-4 gap-3">
 
         {normalizedData.map((item) => (
           <div
@@ -61,7 +61,7 @@ export default function WeeklyChart({
           >
 
             <div
-              className="bg-green-400 rounded-md w-6 transition-all"
+              className="bg-green-500 rounded-md w-6 transition-all"
               style={{
                 height: `${item.percent}%`,
               }}

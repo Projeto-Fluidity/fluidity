@@ -3,45 +3,96 @@ import { formatDate } from "../../lib/date";
 import type { MoodRecord } from "../../types/moodRecord";
 
 /**
- * Lista de registros de humor do usuário.
+ * Props esperadas pelo componente MoodHistoryList.
  */
 type Props = {
   history: MoodRecord[];
   loading: boolean;
 };
 
+/**
+ * Componente responsável por exibir
+ * o histórico de registros de humor do usuário.
+ *
+ * O layout segue o design definido no Figma,
+ * exibindo emoji, humor, data e horário do registro.
+ */
 export default function MoodHistoryList({ history, loading }: Props) {
-  return (
-    <div className="bg-white rounded-xl p-4 border shadow-sm">
 
-      <h2 className="font-semibold text-gray-800 mb-3">
+  if (loading) {
+    return (
+      <div className="bg-gray-100 rounded-3xl p-4">
+        <p className="text-sm text-gray-500">
+          Carregando histórico...
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-gray-100 rounded-3xl p-4">
+
+      {/* Título da seção */}
+      <h2 className="text-[20px] font-semibold text-[#1E2939] mb-4">
         Histórico de Humor
       </h2>
 
-      {loading && (
-        <p className="text-gray-500">
-          Carregando histórico...
-        </p>
-      )}
+      <div>
 
-      {!loading && history.map((record) => {
-        const moodInfo = getMoodDefinition(record.mood);
+        {history.map((record, index) => {
 
-        return (
-          <div
-            key={record.id}
-            className="flex justify-between py-2 border-b last:border-none"
-          >
-            <span className="text-gray-700">
-              {moodInfo?.emoji} {moodInfo?.label}
-            </span>
+          const moodInfo = getMoodDefinition(record.mood);
 
-            <span className="text-sm text-gray-500">
-              {formatDate(record.created_at)}
-            </span>
-          </div>
-        );
-      })}
+          const time = new Date(record.created_at)
+            .toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+          return (
+            <div
+              key={record.id}
+              className={`
+                flex items-center justify-between
+                py-3
+                ${index !== history.length - 1 ? "border-b border-gray-200" : ""}
+              `}
+            >
+
+              {/* Lado esquerdo */}
+              <div className="flex items-center gap-3">
+
+                {/* Emoji */}
+                <div className="w-10 h-10 flex items-center justify-center text-2xl">
+                  {moodInfo?.emoji}
+                </div>
+
+                {/* Texto */}
+                <div>
+
+                  <p className="text-[16px] font-semibold text-[#1E2939]">
+                    {moodInfo?.label}
+                  </p>
+
+                  <p className="text-sm text-gray-500">
+                    {formatDate(record.created_at)}
+                  </p>
+
+                </div>
+
+              </div>
+
+              {/* Hora */}
+              <span className="text-sm text-gray-500">
+                {time}
+              </span>
+
+            </div>
+          );
+        })}
+
+      </div>
+
     </div>
   );
 }

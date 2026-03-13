@@ -1,53 +1,95 @@
 import AppLayout from "../components/layout/AppLayout";
 import { useMood } from "../hooks/useMood";
-import { useMoodAnalytics } from "../hooks/useMoodAnalytics";
 
 import LastCheckinCard from "../components/history/LastCheckinCard";
 import MoodHistoryList from "../components/history/MoodHistoryList";
-import WeeklyChart from "../components/history/WeeklyChart";
+import ExerciseCard from "../components/ExerciseCard";
 
 /**
- * Tela responsável por exibir
- * o histórico de humor do usuário.
+ * Página responsável por exibir o histórico
+ * de humor do usuário.
  *
- * A página conecta os dados retornados
- * pelo hook useMood com as métricas
- * derivadas pelo hook useMoodAnalytics.
+ * A tela apresenta:
+ * - último check-in realizado
+ * - exercícios recomendados
+ * - histórico completo de registros
+ *
+ * Esta página consome dados do hook `useMood`
+ * e delega a renderização para componentes visuais.
  */
 export default function History() {
 
+  /**
+   * Recupera o histórico de registros do usuário.
+   */
   const { history, loading } = useMood();
 
-  const analytics = useMoodAnalytics(history);
-
+  /**
+   * Obtém o último check-in registrado.
+   */
   const lastCheckin = history[0];
+
+  /**
+   * Exercícios recomendados exibidos na tela.
+   * Mantidos como estrutura de dados para facilitar manutenção.
+   */
+  const exercises = [
+{
+      title: "Respiração Guiada",
+      duration: "5 min",
+      icon: "breathing" as const,
+    },
+    {
+      title: "Água",
+      duration: "3 de 10 copos",
+      icon: "water" as const,
+    },
+    {
+      title: "Descanso Visual",
+      duration: "5 min",
+      icon: "rest" as const,
+    },
+  ];
 
   return (
     <AppLayout>
 
-      <div className="space-y-6">
+      <div className="bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] px-4 pt-6 pb-8">
 
-        <h1 className="text-2xl font-semibold text-gray-800">
-          Histórico de Humor
-        </h1>
+        {/* Cabeçalho da página */}
+        <header className="mb-6">
 
-        {lastCheckin && (
-          <LastCheckinCard record={lastCheckin} />
-        )}
+          <h1 className="text-2xl font-bold text-gray-800">
+            Histórico de Hoje
+          </h1>
 
-        <MoodHistoryList
-          history={history}
-          loading={loading}
-        />
+        </header>
 
-        <WeeklyChart
-          data={analytics.weeklyFrequency}
-          weeklyAverage={analytics.weeklyAverage}
-          bestDay={analytics.bestDay}
-          bestDayValue={analytics.bestDayValue}
-          dominantMood={analytics.dominantMood}
-          totalCheckins={analytics.totalCheckins}
-        />
+        {/* Conteúdo principal */}
+        <div className="space-y-4">
+
+          {/* Último check-in */}
+          {lastCheckin && (
+            <LastCheckinCard record={lastCheckin} />
+          )}
+
+          {/* Cards de práticas recomendadas */}
+          {exercises.map((exercise) => (
+            <ExerciseCard
+              key={exercise.title}
+              title={exercise.title}
+              duration={exercise.duration}
+              icon={exercise.icon}
+            />
+          ))}
+
+          {/* Lista de histórico */}
+          <MoodHistoryList
+            history={history}
+            loading={loading}
+          />
+
+        </div>
 
       </div>
 

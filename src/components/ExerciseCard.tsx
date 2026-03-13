@@ -1,4 +1,4 @@
-import { ArrowRight, Wind, Sparkles } from "lucide-react";
+import { ArrowRight, Check, CheckCircle, Monitor } from "lucide-react";
 
 /**
  * Props do componente ExerciseCard.
@@ -6,12 +6,15 @@ import { ArrowRight, Wind, Sparkles } from "lucide-react";
 type ExerciseCardProps = {
   title: string;
   duration: string;
-  icon?: "breathing" | "meditation";
+  icon?: "breathing" | "water" | "rest";
 };
 
 /**
  * Card responsável por exibir um exercício
  * recomendado para o usuário.
+ *
+ * Este componente segue o design definido
+ * no Figma da aplicação Fluidity.
  */
 export default function ExerciseCard({
   title,
@@ -19,42 +22,74 @@ export default function ExerciseCard({
   icon,
 }: ExerciseCardProps) {
 
+  /**
+   * Seleciona o ícone apropriado
+   * com base no tipo do exercício.
+   */
   const Icon =
     icon === "breathing"
-      ? Wind
-      : icon === "meditation"
-      ? Sparkles
-      : Wind;
+      ? Check
+      : icon === "water"
+      ? CheckCircle
+      : icon === "rest"
+      ? Monitor
+      : Check;
 
   return (
-    <div className="
-    group
-    flex items-center justify-between
-    bg-white border border-[#E5E7EB]
-    rounded-xl p-4
-    transition-all duration-200
-    hover:bg-gray-50
-    hover:shadow-sm
-    cursor-pointer">
+    <div
+      className="
+      group
+      flex items-center justify-between
+      bg-[#008236]
+      rounded-3xl
+      px-5 py-4
+      shadow-[0_1px_3px_rgba(0,0,0,0.10)]
+      transition-all duration-200
+      hover:brightness-110
+      cursor-pointer
+    "
+    >
 
       {/* Lado esquerdo */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
 
         {/* Ícone circular */}
-        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100 text-green-600">
+        <div
+          className="
+          flex items-center justify-center
+          w-11 h-11
+          rounded-full
+          border border-white/40
+          text-white
+        "
+        >
           <Icon size={20} />
         </div>
 
         {/* Texto */}
         <div>
-          <p className="font-medium text-gray-800">{title}</p>
-          <p className="text-sm text-gray-500">{duration}</p>
+
+          <p className="font-semibold text-white">
+            {title}
+          </p>
+
+          <p className="text-sm text-white/80">
+            {duration}
+          </p>
+
         </div>
 
       </div>
 
       {/* Seta */}
-      <ArrowRight size={18} className="text-gray-400 transition-transform group-hover:translate-x-1" />
+      <ArrowRight
+        size={20}
+        className="
+        text-white
+        transition-transform
+        group-hover:translate-x-1
+      "
+      />
 
     </div>
   );
