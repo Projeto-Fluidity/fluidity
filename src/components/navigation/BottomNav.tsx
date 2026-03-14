@@ -33,15 +33,12 @@ export default function BottomNav() {
     "flex flex-col items-center justify-center text-xs transition-colors";
 
   return (
-    <nav className="border-t-2 border-[#B9F8CF] bg-white h-11 flex justify-around items-center">
-
+    <nav className="flex h-11 items-center justify-around border-t-2 border-[#B9F8CF] bg-white">
       {/* Home */}
       <NavLink
         to="/"
         className={({ isActive }) =>
-          `${baseItemClass} ${
-            isActive ? "text-[#008236]" : "text-gray-400"
-          }`
+          `${baseItemClass} ${isActive ? "text-[#008236]" : "text-gray-400"}`
         }
       >
         <Home size={20} />
@@ -52,9 +49,7 @@ export default function BottomNav() {
       <NavLink
         to="/practices"
         className={({ isActive }) =>
-          `${baseItemClass} ${
-            isActive ? "text-[#008236]" : "text-gray-400"
-          }`
+          `${baseItemClass} ${isActive ? "text-[#008236]" : "text-gray-400"}`
         }
       >
         <BarChart3 size={20} />
@@ -65,9 +60,7 @@ export default function BottomNav() {
       <NavLink
         to="/history"
         className={({ isActive }) =>
-          `${baseItemClass} ${
-            isActive ? "text-[#008236]" : "text-gray-400"
-          }`
+          `${baseItemClass} ${isActive ? "text-[#008236]" : "text-gray-400"}`
         }
       >
         <Calendar size={20} />
@@ -78,16 +71,12 @@ export default function BottomNav() {
       <NavLink
         to="/profile"
         className={({ isActive }) =>
-          `${baseItemClass} ${
-            isActive ? "text-[#008236]" : "text-gray-400"
-          }`
+          `${baseItemClass} ${isActive ? "text-[#008236]" : "text-gray-400"}`
         }
       >
         <User size={20} />
         Perfil
       </NavLink>
-
     </nav>
   );
 }
-

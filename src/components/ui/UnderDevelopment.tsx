@@ -1,36 +1,43 @@
-import AppLayout from "../layout/AppLayout";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 /**
- * Componente utilizado para indicar
- * funcionalidades que ainda estão em desenvolvimento.
+ * Props do componente UnderDevelopment.
  */
-type Props = {
+type UnderDevelopmentProps = {
   title: string;
-  description?: string;
+  description: string;
 };
 
+/**
+ * Componente reutilizável para exibir
+ * funcionalidades que ainda estão em desenvolvimento.
+ */
 export default function UnderDevelopment({
   title,
   description,
-}: Props) {
+}: UnderDevelopmentProps) {
+  const navigate = useNavigate();
+
   return (
-    <AppLayout>
-      <div className="flex flex-col items-center justify-center text-center space-y-6">
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 text-center">
+      {/* Ícone */}
+      <div className="mb-4 text-5xl">🚧</div>
 
-        <div className="text-5xl">
-          🚧
-        </div>
+      {/* Título */}
+      <h1 className="text-xl font-semibold text-gray-800">{title}</h1>
 
-        <h1 className="text-xl font-semibold text-gray-800">
-          {title}
-        </h1>
+      {/* Descrição */}
+      <p className="mt-2 max-w-sm text-gray-500">{description}</p>
 
-        <p className="text-gray-500 max-w-sm">
-          {description ??
-            "Esta funcionalidade ainda está em desenvolvimento. Em breve estará disponível."}
-        </p>
-
-      </div>
-    </AppLayout>
+      {/* Botão voltar */}
+      <button
+        onClick={() => navigate(-1)}
+        className="mt-6 flex items-center gap-2 text-sm text-green-600 transition hover:text-green-700"
+      >
+        <ArrowLeft size={16} />
+        Voltar
+      </button>
+    </div>
   );
 }

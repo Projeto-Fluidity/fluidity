@@ -2,7 +2,6 @@ import type { MoodRecord } from "../types/moodRecord";
 import type { MoodType } from "../types/mood";
 import type { WeeklyFrequency, MoodAnalytics } from "../types/analytics";
 
-
 const WEEK_DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 /**
@@ -11,9 +10,7 @@ const WEEK_DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
  * @param history Lista de registros de humor
  * @returns Distribuição semanal de registros
  */
-export function getWeeklyFrequency(
-  history: MoodRecord[]
-): WeeklyFrequency[] {
+export function getWeeklyFrequency(history: MoodRecord[]): WeeklyFrequency[] {
   const counts = Array(7).fill(0);
 
   for (const record of history) {
@@ -34,9 +31,7 @@ export function getWeeklyFrequency(
  * @param history Lista de registros de humor
  * @returns média semanal de check-ins
  */
-export function getWeeklyAverage(
-  history: MoodRecord[]
-): number {
+export function getWeeklyAverage(history: MoodRecord[]): number {
   if (history.length === 0) {
     return 0;
   }
@@ -47,7 +42,7 @@ export function getWeeklyAverage(
       const year = date.getFullYear();
       const week = getWeekNumber(date);
       return `${year}-${week}`;
-    })
+    }),
   );
 
   return Number((history.length / weeks.size).toFixed(2));
@@ -59,13 +54,14 @@ export function getWeeklyAverage(
  * @param history Lista de registros de humor
  * @returns dia e valor de frequência
  */
-export function getBestDay(
-  history: MoodRecord[]
-): { day: string | null; value: number } {
+export function getBestDay(history: MoodRecord[]): {
+  day: string | null;
+  value: number;
+} {
   const frequency = getWeeklyFrequency(history);
 
   const best = frequency.reduce((prev, current) =>
-    current.value > prev.value ? current : prev
+    current.value > prev.value ? current : prev,
   );
 
   if (best.value === 0) {
@@ -85,9 +81,7 @@ export function getBestDay(
  * @param history Lista de registros de humor
  * @returns tipo de humor predominante
  */
-export function getDominantMood(
-  history: MoodRecord[]
-): MoodType | null {
+export function getDominantMood(history: MoodRecord[]): MoodType | null {
   if (history.length === 0) {
     return null;
   }
@@ -105,9 +99,8 @@ export function getDominantMood(
     counts[record.mood]++;
   }
 
-  const dominant = Object.entries(counts).reduce(
-    (prev, current) =>
-      current[1] > prev[1] ? current : prev
+  const dominant = Object.entries(counts).reduce((prev, current) =>
+    current[1] > prev[1] ? current : prev,
   );
 
   return dominant[0] as MoodType;
@@ -120,9 +113,7 @@ export function getDominantMood(
  * @param history Lista de registros de humor
  * @returns objeto contendo métricas derivadas
  */
-export function getMoodAnalytics(
-  history: MoodRecord[]
-): MoodAnalytics {
+export function getMoodAnalytics(history: MoodRecord[]): MoodAnalytics {
   const weeklyFrequency = getWeeklyFrequency(history);
   const bestDay = getBestDay(history);
 
@@ -142,10 +133,7 @@ export function getMoodAnalytics(
 function getWeekNumber(date: Date): number {
   const firstDay = new Date(date.getFullYear(), 0, 1);
 
-  const pastDays =
-    (date.getTime() - firstDay.getTime()) / 86400000;
+  const pastDays = (date.getTime() - firstDay.getTime()) / 86400000;
 
-  return Math.ceil(
-    (pastDays + firstDay.getDay() + 1) / 7
-  );
+  return Math.ceil((pastDays + firstDay.getDay() + 1) / 7);
 }

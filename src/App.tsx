@@ -6,6 +6,8 @@ import MoodSuccess from "./pages/MoodSuccess";
 import MoodError from "./pages/MoodError";
 import Practices from "./pages/Practices";
 import Profile from "./pages/Profile";
+import BreathingGuide from "./pages/BreathingGuide";
+import QuickMeditation from "./pages/QuickMeditation";
 
 /**
  * Componente raiz da aplicação.
@@ -22,6 +24,8 @@ function App() {
       {/* novas telas */}
       <Route path="/practices" element={<Practices />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/breathing" element={<BreathingGuide />} />
+      <Route path="/meditation" element={<QuickMeditation />} />
     </Routes>
   );
 }

@@ -28,7 +28,6 @@ type MoodSelectorProps = {
  * é controlada pela página Emotion.
  */
 export default function MoodSelector({ registerMood }: MoodSelectorProps) {
-
   /**
    * Estado responsável por armazenar o humor selecionado.
    */
@@ -45,22 +44,18 @@ export default function MoodSelector({ registerMood }: MoodSelectorProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm">
-
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       {/* Título */}
-      <div className="flex items-center gap-2 mb-4">
-
-        <span className="w-2 h-2 rounded-full bg-green-500"></span>
+      <div className="mb-4 flex items-center gap-2">
+        <span className="h-2 w-2 rounded-full bg-green-500"></span>
 
         <h2 className="text-base font-semibold">
           Como você está se sentindo hoje?
         </h2>
-
       </div>
 
       {/* Grid de emoções */}
       <div className="grid grid-cols-3 gap-3">
-
         {moods.map((mood) => (
           <MoodButton
             key={mood.value}
@@ -70,9 +65,7 @@ export default function MoodSelector({ registerMood }: MoodSelectorProps) {
             onSelect={() => handleSelectMood(mood.value)}
           />
         ))}
-
       </div>
-
     </div>
   );
 }

@@ -32,7 +32,6 @@ export default function WeeklyChart({
   dominantMood,
   totalCheckins,
 }: WeeklyChartProps) {
-
   /**
    * Calcula o maior valor da semana para normalizar
    * a altura das barras em percentual.
@@ -45,45 +44,29 @@ export default function WeeklyChart({
   }));
 
   return (
-    <div className="bg-white rounded-xl p-4 border shadow-sm">
-
-      <h2 className="font-semibold text-gray-800 mb-4">
-        Gráfico semanal
-      </h2>
+    <div className="rounded-xl border bg-white p-4 shadow-sm">
+      <h2 className="mb-4 font-semibold text-gray-800">Gráfico semanal</h2>
 
       {/* Gráfico */}
-      <div className="flex items-end justify-between h-32 mb-4 gap-3">
-
+      <div className="mb-4 flex h-32 items-end justify-between gap-3">
         {normalizedData.map((item) => (
-          <div
-            key={item.day}
-            className="flex flex-col items-center"
-          >
-
+          <div key={item.day} className="flex flex-col items-center">
             <div
-              className="bg-green-500 rounded-md w-6 transition-all"
+              className="w-6 rounded-md bg-green-500 transition-all"
               style={{
                 height: `${item.percent}%`,
               }}
             />
 
-            <span className="text-xs text-gray-500 mt-2">
-              {item.day}
-            </span>
-
+            <span className="mt-2 text-xs text-gray-500">{item.day}</span>
           </div>
         ))}
-
       </div>
 
       {/* Métricas */}
-      <div className="text-sm text-gray-600 space-y-1">
-
+      <div className="space-y-1 text-sm text-gray-600">
         <p>
-          Média semanal{" "}
-          <strong>
-            {weeklyAverage}%
-          </strong>
+          Média semanal <strong>{weeklyAverage}%</strong>
         </p>
 
         <p>
@@ -94,21 +77,13 @@ export default function WeeklyChart({
         </p>
 
         <p>
-          Total de check-ins{" "}
-          <strong>
-            {totalCheckins} dias
-          </strong>
+          Total de check-ins <strong>{totalCheckins} dias</strong>
         </p>
 
         <p>
-          Humor predominante{" "}
-          <strong>
-            {dominantMood ?? "-"}
-          </strong>
+          Humor predominante <strong>{dominantMood ?? "-"}</strong>
         </p>
-
       </div>
-
     </div>
   );
 }

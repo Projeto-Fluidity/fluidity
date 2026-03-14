@@ -10,11 +10,8 @@ export default function MoodSuccess() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col items-center justify-center text-center space-y-6">
-
-        <div className="text-green-500 text-5xl">
-          ✔
-        </div>
+      <div className="flex flex-col items-center justify-center space-y-6 text-center">
+        <div className="text-5xl text-green-500">✔</div>
 
         <h1 className="text-xl font-semibold text-gray-800">
           Humor registrado!
@@ -26,11 +23,10 @@ export default function MoodSuccess() {
 
         <button
           onClick={() => navigate("/")}
-          className="bg-green-600 text-white px-6 py-3 rounded-lg"
+          className="rounded-lg bg-green-600 px-6 py-3 text-white"
         >
           Ir para Home
         </button>
-
       </div>
     </AppLayout>
   );

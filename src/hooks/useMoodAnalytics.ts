@@ -15,10 +15,7 @@ import { getMoodAnalytics } from "../lib/moodAnalytics";
  * @param history Lista de registros de humor
  * @returns métricas analíticas derivadas
  */
-export function useMoodAnalytics(
-  history: MoodRecord[]
-): MoodAnalytics {
-
+export function useMoodAnalytics(history: MoodRecord[]): MoodAnalytics {
   const analytics = useMemo(() => {
     return getMoodAnalytics(history);
   }, [history]);

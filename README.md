@@ -34,10 +34,10 @@ Algumas telas do **Fluidity** baseadas no design do UX.
 
 O Fluidity busca oferecer uma experiência simples e acessível para que usuários possam:
 
-* registrar seu humor diariamente
-* acompanhar padrões emocionais ao longo do tempo
-* visualizar seu histórico de registros
-* acessar exercícios simples de bem-estar
+- registrar seu humor diariamente
+- acompanhar padrões emocionais ao longo do tempo
+- visualizar seu histórico de registros
+- acessar exercícios simples de bem-estar
 
 ---
 
@@ -65,16 +65,16 @@ Recomendações de exercícios simples voltados ao equilíbrio emocional.
 
 Atualmente o projeto já possui:
 
-* Registro diário de humor
-* Persistência de dados utilizando **Supabase**
-* Histórico de registros de humor
-* Ordenação automática do histórico
-* Atualização reativa da interface após registro
-* Prevenção de múltiplos registros no mesmo dia
-* Camada de analytics para o histórico
-* Gráfico semanal baseado nos registros
-* Gerenciamento de estado com hook customizado
-* Arquitetura organizada em camadas
+- Registro diário de humor
+- Persistência de dados utilizando **Supabase**
+- Histórico de registros de humor
+- Ordenação automática do histórico
+- Atualização reativa da interface após registro
+- Prevenção de múltiplos registros no mesmo dia
+- Camada de analytics para o histórico
+- Gráfico semanal baseado nos registros
+- Gerenciamento de estado com hook customizado
+- Arquitetura organizada em camadas
 
 ---
 
@@ -175,10 +175,10 @@ Supabase
 
 Essa abordagem permite:
 
-* melhor organização do código
-* maior facilidade de manutenção
-* escalabilidade da aplicação
-* separação clara entre interface e regras de negócio
+- melhor organização do código
+- maior facilidade de manutenção
+- escalabilidade da aplicação
+- separação clara entre interface e regras de negócio
 
 ---
 
@@ -233,11 +233,11 @@ Essas variáveis são necessárias para conectar a aplicação ao banco de dados
 
 Próximas funcionalidades planejadas:
 
-* Integração completa com layout oficial do UX
-* Biblioteca de exercícios de bem-estar
-* Melhorias visuais no dashboard de humor
-* Autenticação de usuários
-* Evolução para PWA
+- Integração completa com layout oficial do UX
+- Biblioteca de exercícios de bem-estar
+- Melhorias visuais no dashboard de humor
+- Autenticação de usuários
+- Evolução para PWA
 
 ---
 

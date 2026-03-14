@@ -11,18 +11,12 @@ type Props = {
  */
 export default function AppLayout({ children }: Props) {
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
-
-      <div className="w-full max-w-md min-h-screen flex flex-col">
-
-        <main className="flex-1">
-          {children}
-        </main>
+    <div className="flex min-h-screen justify-center bg-gray-100">
+      <div className="flex min-h-screen w-full max-w-md flex-col">
+        <main className="flex-1">{children}</main>
 
         <BottomNav />
-
       </div>
-
     </div>
   );
 }

@@ -10,11 +10,8 @@ export default function MoodError() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col items-center justify-center text-center space-y-6">
-
-        <div className="text-red-500 text-5xl">
-          !
-        </div>
+      <div className="flex flex-col items-center justify-center space-y-6 text-center">
+        <div className="text-5xl text-red-500">!</div>
 
         <h1 className="text-xl font-semibold text-gray-800">
           Ops! Algo deu errado
@@ -26,11 +23,10 @@ export default function MoodError() {
 
         <button
           onClick={() => navigate("/")}
-          className="bg-red-500 text-white px-6 py-3 rounded-lg"
+          className="rounded-lg bg-red-500 px-6 py-3 text-white"
         >
           Tentar novamente
         </button>
-
       </div>
     </AppLayout>
   );

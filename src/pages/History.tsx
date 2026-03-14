@@ -18,7 +18,6 @@ import ExerciseCard from "../components/ExerciseCard";
  * e delega a renderização para componentes visuais.
  */
 export default function History() {
-
   /**
    * Recupera o histórico de registros do usuário.
    */
@@ -34,7 +33,7 @@ export default function History() {
    * Mantidos como estrutura de dados para facilitar manutenção.
    */
   const exercises = [
-{
+    {
       title: "Respiração Guiada",
       duration: "5 min",
       icon: "breathing" as const,
@@ -53,25 +52,18 @@ export default function History() {
 
   return (
     <AppLayout>
-
-      <div className="bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] px-4 pt-6 pb-8">
-
+      <div className="bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] px-4 pb-8 pt-6">
         {/* Cabeçalho da página */}
         <header className="mb-6">
-
           <h1 className="text-2xl font-bold text-gray-800">
             Histórico de Hoje
           </h1>
-
         </header>
 
         {/* Conteúdo principal */}
         <div className="space-y-4">
-
           {/* Último check-in */}
-          {lastCheckin && (
-            <LastCheckinCard record={lastCheckin} />
-          )}
+          {lastCheckin && <LastCheckinCard record={lastCheckin} />}
 
           {/* Cards de práticas recomendadas */}
           {exercises.map((exercise) => (
@@ -84,15 +76,9 @@ export default function History() {
           ))}
 
           {/* Lista de histórico */}
-          <MoodHistoryList
-            history={history}
-            loading={loading}
-          />
-
+          <MoodHistoryList history={history} loading={loading} />
         </div>
-
       </div>
-
     </AppLayout>
   );
 }

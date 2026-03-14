@@ -11,4 +11,3 @@ export type MoodType =
   | "excited"
   | "angry"
   | "anxious";
-  
