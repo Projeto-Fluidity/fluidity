@@ -1,16 +1,23 @@
 import AppLayout from "../components/layout/AppLayout";
 import MoodSelector from "../components/MoodSelector";
-import ExerciseCard from "../components/ExerciseCard";
+import EmotionExerciseCard from "../components/EmotionExerciseCard";
 import { useMood } from "../hooks/useMood";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, User } from "lucide-react";
-import type { Exercise } from "../types/exercises";
 
 /**
- * Lista de exercícios recomendados.
+ * Lista de exercícios recomendados exibidos
+ * na tela principal de registro de humor.
  */
-const exercises: Exercise[] = [
+type EmotionExercise = {
+  title: string;
+  duration: string;
+  icon: "breathing" | "meditation";
+  route: string;
+};
+
+const exercises: EmotionExercise[] = [
   {
     title: "Respiração Guiada",
     duration: "5 min",
@@ -20,7 +27,7 @@ const exercises: Exercise[] = [
   {
     title: "Meditação Rápida",
     duration: "3 min",
-    icon: "rest",
+    icon: "meditation",
     route: "/meditation",
   },
 ];
@@ -68,12 +75,12 @@ export default function Emotion() {
             </h2>
 
             {exercises.map((exercise) => (
-              <ExerciseCard
+              <EmotionExerciseCard
                 key={exercise.title}
                 title={exercise.title}
                 duration={exercise.duration}
                 icon={exercise.icon}
-                route={exercise.route}
+                onClick={() => navigate(exercise.route)}
               />
             ))}
           </div>

@@ -18,7 +18,6 @@ export default function History() {
     <AppLayout>
       <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
         <div className="space-y-4">
-
           {/* Título */}
           <h1 className="text-2xl font-semibold text-gray-800">
             Histórico de Hoje
@@ -54,7 +53,6 @@ export default function History() {
 
           {/* Histórico completo */}
           <MoodHistoryList history={previousHistory} loading={loading} />
-
         </div>
       </div>
     </AppLayout>
