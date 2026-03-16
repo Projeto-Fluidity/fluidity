@@ -2,20 +2,25 @@ import type { ReactNode } from "react";
 import AppLayout from "../layout/AppLayout";
 
 interface StatusScreenProps {
-  icon: ReactNode;
-  title: string;
-  descriptionPrimary?: ReactNode;
-  descriptionSecondary?: ReactNode;
-  errorCard?: ReactNode;
-  action?: ReactNode;
-  footer?: string;
+icon: ReactNode;
+title: string;
+descriptionPrimary?: ReactNode;
+descriptionSecondary?: ReactNode;
+errorCard?: ReactNode;
+action?: ReactNode;
+footer?: string;
+hideBottomNav?: boolean;
 }
 
 /**
- * Layout reutilizável para telas de status
- * como sucesso, erro ou estados vazios.
- */
-export default function StatusScreen({
+
+* Layout reutilizável para telas de status
+* como sucesso, erro ou estados vazios.
+*
+* Por padrão utiliza o AppLayout (com BottomNav).
+* Pode opcionalmente ocultar o BottomNav.
+  */
+  export default function StatusScreen({
   icon,
   title,
   descriptionPrimary,
@@ -23,36 +28,64 @@ export default function StatusScreen({
   errorCard,
   action,
   footer,
-}: StatusScreenProps) {
-  return (
-    <AppLayout>
-      <div className="flex h-full flex-col items-center px-6 text-center">
-        <div className="flex w-full max-w-sm flex-1 flex-col items-center justify-center">
-          <div className="mb-8">{icon}</div>
+  hideBottomNav,
+  }: StatusScreenProps) {
 
-          <h1 className="text-[30px] font-semibold leading-[36px] text-[#1E2939]">
-            {title}
-          </h1>
+const content = ( <div className="flex flex-1 flex-col items-center justify-center px-6 text-center"> <div className="flex w-full max-w-sm flex-col items-center">
 
-          {descriptionPrimary && (
-            <p className="mt-3 text-base leading-6 text-[#4A5565]">
-              {descriptionPrimary}
-            </p>
-          )}
 
-          {descriptionSecondary && (
-            <p className="mt-1 text-sm leading-5 text-[#6A7282]">
-              {descriptionSecondary}
-            </p>
-          )}
+    {/* Ícone principal */}
+    <div className="mb-6">{icon}</div>
 
-          {errorCard && <div className="mt-6 w-full">{errorCard}</div>}
+    {/* Título */}
+    <h1 className="text-[30px] font-semibold leading-[36px] text-[#1E2939]">
+      {title}
+    </h1>
 
-          {action && <div className="mt-8 w-full">{action}</div>}
+    {/* Descrição principal */}
+    {descriptionPrimary && (
+      <p className="mt-3 text-base leading-6 text-[#4A5565]">
+        {descriptionPrimary}
+      </p>
+    )}
 
-          {footer && <p className="mt-8 text-xs text-[#9AA1AC]">{footer}</p>}
-        </div>
-      </div>
-    </AppLayout>
-  );
+    {/* Descrição secundária */}
+    {descriptionSecondary && (
+      <p className="mt-1 text-sm leading-5 text-[#6A7282]">
+        {descriptionSecondary}
+      </p>
+    )}
+
+    {/* Card de erro */}
+    {errorCard && <div className="mt-6 w-full">{errorCard}</div>}
+
+    {/* Botão de ação */}
+    {action && <div className="mt-8 w-full">{action}</div>}
+
+    {/* Rodapé */}
+    {footer && (
+      <p className="mt-8 text-xs text-[#9AA1AC]">{footer}</p>
+    )}
+  </div>
+</div>
+
+
+);
+
+/**
+
+* Caso hideBottomNav seja verdadeiro,
+  apenas renderiza o conteúdo normalmente.
+  O AppLayout continua responsável pelo layout geral
+  */
+  if (hideBottomNav) {
+  return <AppLayout>{ content }</AppLayout>;
+
 }
+
+/**
+
+* Comportamento padrão da aplicação
+  */
+  return <AppLayout>{content}</AppLayout>;
+  }
