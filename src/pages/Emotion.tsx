@@ -9,10 +9,6 @@ import type { Exercise } from "../types/exercises";
 
 /**
  * Lista de exercícios recomendados.
- *
- * Manter os dados separados da renderização
- * facilita a manutenção e permite adicionar
- * novos exercícios sem alterar o JSX principal.
  */
 const exercises: Exercise[] = [
   {
@@ -38,18 +34,9 @@ export default function Emotion() {
 
   const { registerMood, status } = useMood();
 
-  /**
-   * Redireciona o usuário após tentativa
-   * de registro de humor.
-   */
   useEffect(() => {
-    if (status === "success") {
-      navigate("/success");
-    }
-
-    if (status === "error") {
-      navigate("/error");
-    }
+    if (status === "success") navigate("/success");
+    if (status === "error") navigate("/error");
   }, [status, navigate]);
 
   return (
@@ -66,7 +53,6 @@ export default function Emotion() {
               <p className="mt-1 text-gray-500">Como você está?</p>
             </div>
 
-            {/* Avatar */}
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-green-600 shadow-sm backdrop-blur">
               <User size={20} />
             </div>

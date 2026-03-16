@@ -20,14 +20,14 @@ type Props = {
 export default function MoodHistoryList({ history, loading }: Props) {
   if (loading) {
     return (
-      <div className="rounded-3xl bg-gray-100 p-4">
+      <div className="rounded-3xl bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.10)]">
         <p className="text-sm text-gray-500">Carregando histórico...</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-3xl bg-gray-100 p-4">
+    <div className="rounded-3xl bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.10)]">
       {/* Título da seção */}
       <h2 className="mb-4 text-[20px] font-semibold text-[#1E2939]">
         Histórico de Humor
@@ -45,7 +45,11 @@ export default function MoodHistoryList({ history, loading }: Props) {
           return (
             <div
               key={record.id}
-              className={`flex items-center justify-between py-3 ${index !== history.length - 1 ? "border-b border-gray-200" : ""} `}
+              className={`flex items-center justify-between py-3 ${
+                index !== history.length - 1
+                  ? "border-b border-gray-200"
+                  : ""
+              }`}
             >
               {/* Lado esquerdo */}
               <div className="flex items-center gap-3">
