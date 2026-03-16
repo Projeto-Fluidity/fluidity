@@ -2,79 +2,55 @@ import { Home, BarChart3, Calendar, User } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 /**
- * Componente responsável pela navegação inferior da aplicação.
- *
- * A BottomNav fornece acesso rápido às principais seções do sistema:
- *
- * - Home
- * - Práticas
- * - Histórico
- * - Perfil
- *
- * Características de layout:
- * - Barra fixa na base do layout principal
- * - Ícones com labels organizados verticalmente
- * - Destaque visual para a rota ativa
- *
- * Estilização:
- * - Utiliza Tailwind CSS para layout e espaçamento
- * - Ícones provenientes da biblioteca Lucide React
- * - Linha superior verde para reforçar identidade visual
- *
- * Comportamento:
- * - Utiliza `NavLink` do React Router para controlar o estado ativo
- * - A rota ativa recebe destaque automático
+ * Navegação inferior da aplicação.
+ * Utilizada em todas as telas principais do sistema.
  */
 export default function BottomNav() {
-  /**
-   * Classe base aplicada a todos os itens da navegação.
-   */
   const baseItemClass =
     "flex flex-col items-center justify-center text-xs transition-colors";
 
+  const activeColor = "text-[#008236]";
+  const inactiveColor = "text-[rgba(0,166,62,0.6)]";
+
   return (
     <nav className="flex h-11 items-center justify-around border-t-2 border-[#B9F8CF] bg-white">
-      {/* Home */}
       <NavLink
         to="/"
         className={({ isActive }) =>
-          `${baseItemClass} ${isActive ? "text-[#008236]" : "text-gray-400"}`
+          `${baseItemClass} ${isActive ? activeColor : inactiveColor}`
         }
       >
-        <Home size={20} />
+        <Home size={24} />
         Home
       </NavLink>
 
-      {/* Práticas */}
       <NavLink
         to="/practices"
         className={({ isActive }) =>
-          `${baseItemClass} ${isActive ? "text-[#008236]" : "text-gray-400"}`
+          `${baseItemClass} ${isActive ? activeColor : inactiveColor}`
         }
       >
-        <BarChart3 size={20} />
+        <BarChart3 size={24} />
         Práticas
       </NavLink>
 
-      {/* Histórico */}
       <NavLink
         to="/history"
         className={({ isActive }) =>
-          `${baseItemClass} ${isActive ? "text-[#008236]" : "text-gray-400"}`
+          `${baseItemClass} ${isActive ? activeColor : inactiveColor}`
         }
       >
-        <Calendar size={20} />
+        <Calendar size={24} />
         Histórico
       </NavLink>
 
-      {/* Perfil */}
       <NavLink
         to="/profile"
         className={({ isActive }) =>
-          `${baseItemClass} ${isActive ? "text-[#008236]" : "text-gray-400"}`
+          `${baseItemClass} ${isActive ? activeColor : inactiveColor}`
         }
       >
-        <User size={20} />
+        <User size={24} />
         Perfil
       </NavLink>
     </nav>

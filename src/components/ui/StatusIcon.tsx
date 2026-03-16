@@ -3,47 +3,63 @@ import clsx from "clsx";
 
 type Variant = "error" | "success";
 
-interface Props {
-  icon: ReactNode;
-  variant: Variant;
+interface StatusIconProps {
+icon: ReactNode;
+variant: Variant;
 }
 
 /**
- * Ícone visual utilizado em telas de feedback
- * como sucesso ou erro.
- */
-export default function StatusIcon({ icon, variant }: Props) {
-  const variants = {
-    error: {
-      outer: "bg-[#FF6467]/40",
-      inner: "bg-error border-[#FFB3B5]",
-      icon: "text-[#FFB3B5]",
-    },
-    success: {
-      outer: "bg-success/20",
-      inner: "bg-success border-green-200",
-      icon: "text-green-200",
-    },
-  };
 
-  return (
-    <div
-      className={clsx(
-        "flex items-center justify-center rounded-full",
-        "h-[136px] w-[136px]",
-        variants[variant].outer,
-      )}
-    >
-      <div
-        className={clsx(
-          "flex items-center justify-center rounded-full",
-          "h-[130px] w-[130px]",
-          "border-[2px]",
-          variants[variant].inner,
-        )}
-      >
-        <div className={variants[variant].icon}>{icon}</div>
-      </div>
-    </div>
+* Ícone utilizado nas telas de feedback da aplicação.
+*
+* success → layout fiel ao Figma
+* error   → layout atual preservado para MoodError
+  */
+  export default function StatusIcon({ icon, variant }: StatusIconProps) {
+  /**
+
+  * Variante SUCCESS
+    */
+    if (variant === "success") {
+    return (
+
+     <div className="flex items-center justify-center rounded-full bg-[#DCFCE7] h-[128px] w-[128px]">
+       <div className="flex items-center justify-center rounded-full border-[8px] border-[#008236] h-[80px] w-[80px] text-[#008236]">
+         {icon}
+       </div>
+     </div>
+
   );
+  }
+
+/**
+
+* Variante ERROR
+* Mantida para não alterar MoodError
+  */
+  return (
+  <div
+  className={clsx(
+  "flex items-center justify-center rounded-full",
+  "h-[136px] w-[136px]",
+  "bg-[#FF6467]/40"
+  )}
+  >
+
+   <div
+     className={clsx(
+       "flex items-center justify-center rounded-full",
+       "h-[130px] w-[130px]",
+       "border-[2px]",
+       "bg-error border-[#FFB3B5]"
+     )}
+   >
+     <div className="text-[#FFB3B5]">{icon}</div>
+   </div>
+
+
+</div>
+
+
+);
 }
