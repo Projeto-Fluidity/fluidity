@@ -36,15 +36,13 @@ export default function MoodHistory({ records }: MoodHistoryProps) {
   return (
     <div className="space-y-4">
       {/* Último check-in */}
-      <div className="rounded-2xl bg-white p-4 shadow-sm flex items-center justify-between">
+      <div className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="text-2xl">
-            {moodEmoji[latest.mood] ?? "🙂"}
-          </div>
+          <div className="text-2xl">{moodEmoji[latest.mood] ?? "🙂"}</div>
 
           <div>
             <p className="text-sm text-gray-500">Último check-in</p>
-            <p className="font-medium text-gray-800 capitalize">
+            <p className="font-medium capitalize text-gray-800">
               {latest.mood}
             </p>
           </div>
@@ -60,23 +58,18 @@ export default function MoodHistory({ records }: MoodHistoryProps) {
 
       {/* Histórico completo */}
       <div className="rounded-2xl bg-white p-4 shadow-sm">
-        <h3 className="mb-3 font-semibold text-gray-800">
-          Histórico de Humor
-        </h3>
+        <h3 className="mb-3 font-semibold text-gray-800">Histórico de Humor</h3>
 
         <ul className="space-y-3">
           {history.map((record) => (
-            <li
-              key={record.id}
-              className="flex items-center justify-between"
-            >
+            <li key={record.id} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span className="text-xl">
                   {moodEmoji[record.mood] ?? "🙂"}
                 </span>
 
                 <div>
-                  <p className="font-medium text-gray-800 capitalize">
+                  <p className="font-medium capitalize text-gray-800">
                     {record.mood}
                   </p>
 

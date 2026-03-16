@@ -46,9 +46,7 @@ export default function MoodHistoryList({ history, loading }: Props) {
             <div
               key={record.id}
               className={`flex items-center justify-between py-3 ${
-                index !== history.length - 1
-                  ? "border-b border-gray-200"
-                  : ""
+                index !== history.length - 1 ? "border-b border-gray-200" : ""
               }`}
             >
               {/* Lado esquerdo */}

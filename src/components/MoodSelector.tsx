@@ -19,13 +19,15 @@ type MoodSelectorProps = {
  * Componente responsável por permitir que o usuário
  * registre seu humor diário.
  *
- * Funcionalidades:
- * - Exibe opções de humor através de emojis
- * - Permite selecionar um humor
- * - Executa o registro utilizando o hook `useMood`
+ * Responsabilidades:
+ * - Exibir opções de humor através de emojis
+ * - Permitir seleção de humor
+ * - Executar o registro utilizando o hook `useMood`
  *
- * A navegação para telas de sucesso ou erro
- * é controlada pela página Emotion.
+ * Observação:
+ * Este componente não controla navegação.
+ * A página `Emotion` é responsável por redirecionar
+ * para telas de sucesso ou erro.
  */
 export default function MoodSelector({ registerMood }: MoodSelectorProps) {
   /**
@@ -44,12 +46,14 @@ export default function MoodSelector({ registerMood }: MoodSelectorProps) {
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-      {/* Título */}
+    <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      {/* Cabeçalho */}
       <div className="mb-4 flex items-center gap-2">
+        {/* Indicador visual */}
         <span className="h-2 w-2 rounded-full bg-green-500"></span>
 
-        <h2 className="text-base font-semibold">
+        {/* Título */}
+        <h2 className="text-base font-medium text-gray-800">
           Como você está se sentindo hoje?
         </h2>
       </div>

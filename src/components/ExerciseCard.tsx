@@ -37,8 +37,7 @@ export default function ExerciseCard({
       ? "border border-white/40 text-white"
       : "bg-[#DCFCE7] text-green-600";
 
-  const arrowStyles =
-    variant === "highlight" ? "text-white" : "text-gray-400";
+  const arrowStyles = variant === "highlight" ? "text-white" : "text-gray-400";
 
   return (
     <div
