@@ -4,7 +4,6 @@ import type { MoodRecord } from "../types/moodRecord";
 import {
   getMoodHistory,
   saveMood,
-  hasMoodToday,
 } from "../services/moodService";
 
 /**
@@ -51,7 +50,7 @@ export function useMood() {
       const data = await getMoodHistory();
       setHistory(data);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao carregar histórico:", err);
       setError("Erro ao carregar histórico");
     } finally {
       setLoading(false);
@@ -61,30 +60,25 @@ export function useMood() {
   /**
    * Registra um novo humor.
    *
-   * Após salvar, o histórico é recarregado
-   * para refletir o novo estado da aplicação.
+   * O controle de duplicidade é garantido pelo banco de dados.
+   * O frontend apenas reage ao erro retornado.
    *
    * @param mood Humor selecionado pelo usuário
    */
   async function registerMood(mood: MoodType) {
     try {
       setStatus("loading");
-
-      const alreadyRegistered = await hasMoodToday();
-
-      if (alreadyRegistered) {
-        throw new Error("Humor já registrado hoje");
-      }
+      setError(null);
 
       await saveMood(mood);
 
       await loadHistory();
 
       setStatus("success");
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Erro ao registrar humor:", err);
 
-      setError("Erro ao registrar humor");
+      setError(err.message || "Erro ao registrar humor");
       setStatus("error");
 
       throw err;
