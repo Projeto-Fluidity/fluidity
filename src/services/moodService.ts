@@ -19,7 +19,12 @@ export async function saveMood(mood: MoodType): Promise<void> {
 
   if (error) {
     console.error("Erro ao salvar humor:", error);
-    throw new Error("Não foi possível salvar o humor");
+
+  if (error.code === "23505") {
+    throw new Error("Você já registrou seu humor hoje");
+  }
+
+    throw new Error(error.message || "Não foi possível salvar o humor");
   }
 
   console.log("Humor salvo:", mood);
