@@ -75,11 +75,14 @@ export function useMood() {
       await loadHistory();
 
       setStatus("success");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Erro ao registrar humor:", err);
 
-      setError(err.message || "Erro ao registrar humor");
-      setStatus("error");
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erro ao registrar humor");
+      };
 
       throw err;
     }
