@@ -83,8 +83,7 @@ export function useMood() {
       } else {
         setError("Erro ao registrar humor");
       };
-
-      throw err;
+        setStatus("error");
     }
   }
 
