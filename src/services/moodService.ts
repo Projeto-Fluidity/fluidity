@@ -85,10 +85,15 @@ export async function getMoodHistory(): Promise<MoodRecord[]> {
     .select("*")
     .order("created_at", { ascending: false });
 
+      if (import.meta.env.DEV) {
+      console.log("DATA FROM DB:", data);
+    }
+
   if (error) {
     console.error("Erro ao buscar histórico:", error);
     return [];
   }
 
   return data ?? [];
+  
 }
