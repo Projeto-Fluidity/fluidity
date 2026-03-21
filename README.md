@@ -34,10 +34,10 @@ Algumas telas do **Fluidity** baseadas no design do UX.
 
 O Fluidity busca oferecer uma experiência simples e acessível para que usuários possam:
 
-- registrar seu humor diariamente
-- acompanhar padrões emocionais ao longo do tempo
-- visualizar seu histórico de registros
-- acessar exercícios simples de bem-estar
+* registrar seu humor diariamente
+* acompanhar padrões emocionais ao longo do tempo
+* visualizar seu histórico de registros
+* acessar exercícios simples de bem-estar
 
 ---
 
@@ -51,10 +51,6 @@ O usuário pode registrar como está se sentindo no dia através de uma seleçã
 
 Visualização do histórico de registros de humor, ordenados do mais recente para o mais antigo.
 
-### Gráfico semanal
-
-Apresentação visual dos registros de humor ao longo da semana.
-
 ### Exercícios de bem-estar
 
 Recomendações de exercícios simples voltados ao equilíbrio emocional.
@@ -65,16 +61,15 @@ Recomendações de exercícios simples voltados ao equilíbrio emocional.
 
 Atualmente o projeto já possui:
 
-- Registro diário de humor
-- Persistência de dados utilizando **Supabase**
-- Histórico de registros de humor
-- Ordenação automática do histórico
-- Atualização reativa da interface após registro
-- Prevenção de múltiplos registros no mesmo dia
-- Camada de analytics para o histórico
-- Gráfico semanal baseado nos registros
-- Gerenciamento de estado com hook customizado
-- Arquitetura organizada em camadas
+* Registro diário de humor
+* Persistência de dados utilizando **Supabase**
+* Histórico de registros de humor
+* Ordenação automática do histórico
+* Atualização reativa da interface após registro
+* Prevenção de múltiplos registros no mesmo dia
+* Gerenciamento de estado com hook customizado
+* Arquitetura organizada em camadas
+* Modo QA com dados mockados
 
 ---
 
@@ -95,7 +90,7 @@ Atualmente o projeto já possui:
 
 O projeto foi desenvolvido utilizando:
 
-```
+```id="nodever"
 Node.js 22.13.0
 ```
 
@@ -107,78 +102,38 @@ Recomenda-se utilizar a mesma versão para evitar incompatibilidades.
 
 A aplicação segue uma arquitetura baseada em **separação de responsabilidades em camadas**.
 
-```
+```id="archtree"
 src
  ├ components
- │   ├ history
- │   │   ├ LastCheckinCard.tsx
- │   │   ├ MoodHistoryList.tsx
- │   │   └ WeeklyChart.tsx
- │   │
- │   ├ layout
- │   │   └ AppLayout.tsx
- │   │
- │   ├ navigation
- │   │   └ BottomNav.tsx
- │   │
- │   ├ ui
- │   │   └ UnderDevelopment.tsx
- │   │
- │   ├ ExerciseCard.tsx
- │   ├ MoodButton.tsx
- │   ├ MoodHistory.tsx
- │   └ MoodSelector.tsx
- │
  ├ hooks
- │   ├ useMood.ts
- │   └ useMoodAnalytics.ts
- │
  ├ services
- │   ├ moodService.ts
- │   └ supabaseClient.ts
- │
+ ├ mocks
+ ├ config
  ├ lib
- │   ├ moodAnalytics.ts
- │   ├ date.ts
- │   └ utils.ts
- │
  ├ types
- │   ├ mood.ts
- │   ├ moodRecord.ts
- │   └ analytics.ts
- │
  ├ pages
- │   ├ Emotion.tsx
- │   ├ History.tsx
- │   ├ MoodSuccess.tsx
- │   ├ MoodError.tsx
- │   ├ Practices.tsx
- │   └ Profile.tsx
- │
- ├ App.tsx
- └ main.tsx
 ```
 
 ---
 
 # Fluxo da aplicação
 
-```
+```id="flowapp"
 components
      ↓
 hooks
      ↓
 services
      ↓
-Supabase
+Supabase / Mock
 ```
 
 Essa abordagem permite:
 
-- melhor organização do código
-- maior facilidade de manutenção
-- escalabilidade da aplicação
-- separação clara entre interface e regras de negócio
+* melhor organização do código
+* maior facilidade de manutenção
+* escalabilidade da aplicação
+* separação clara entre interface e regras de negócio
 
 ---
 
@@ -186,31 +141,31 @@ Essa abordagem permite:
 
 Clone o repositório:
 
-```
+```id="clone"
 git clone https://github.com/pipocaagil-hash/projeto-fluidity.git
 ```
 
 Entre na pasta do projeto:
 
-```
+```id="cd"
 cd projeto-fluidity
 ```
 
 Instale as dependências:
 
-```
+```id="install"
 npm install
 ```
 
 Execute o projeto:
 
-```
+```id="run"
 npm run dev
 ```
 
 A aplicação ficará disponível em:
 
-```
+```id="url"
 http://localhost:5173
 ```
 
@@ -220,12 +175,54 @@ http://localhost:5173
 
 Crie um arquivo `.env` na raiz do projeto:
 
-```
+```id="env"
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
+VITE_USE_MOCK=false
 ```
 
-Essas variáveis são necessárias para conectar a aplicação ao banco de dados do Supabase.
+---
+
+# 🧪 Modo QA (Mock de dados)
+
+O projeto possui um modo de execução com dados mockados, permitindo testes da aplicação sem dependência do Supabase.
+
+## Como ativar
+
+No arquivo `.env`:
+
+```id="mockon"
+VITE_USE_MOCK=true
+```
+
+## O que é simulado
+
+Quando o modo mock está ativo:
+
+* O histórico de humor é carregado a partir de dados locais
+* O registro de humor é simulado
+* A regra de 1 registro por dia é mantida
+* A ordenação por data continua funcionando
+* Não há comunicação com o Supabase
+
+## Quando usar
+
+* Testes locais sem backend
+* Validação de fluxo pelo QA
+* Demonstrações do sistema
+* Desenvolvimento offline
+
+## Como desativar
+
+```id="mockoff"
+VITE_USE_MOCK=false
+```
+
+ou remover a variável do `.env`.
+
+## Importante
+
+Em ambiente de produção, o modo mock deve estar desativado.
 
 ---
 
@@ -233,11 +230,11 @@ Essas variáveis são necessárias para conectar a aplicação ao banco de dados
 
 Próximas funcionalidades planejadas:
 
-- Integração completa com layout oficial do UX
-- Biblioteca de exercícios de bem-estar
-- Melhorias visuais no dashboard de humor
-- Autenticação de usuários
-- Evolução para PWA
+* Integração completa com layout oficial do UX
+* Biblioteca de exercícios de bem-estar
+* Melhorias visuais no dashboard de humor
+* Autenticação de usuários
+* Evolução para PWA
 
 ---
 
