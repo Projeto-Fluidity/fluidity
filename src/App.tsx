@@ -8,6 +8,7 @@ import Practices from "./pages/Practices";
 import Profile from "./pages/Profile";
 import BreathingGuide from "./pages/BreathingGuide";
 import QuickMeditation from "./pages/QuickMeditation";
+import Reminders from "./pages/Reminders";
 
 /**
  * Componente raiz da aplicação.
@@ -20,12 +21,11 @@ function App() {
       <Route path="/history" element={<History />} />
       <Route path="/success" element={<MoodSuccess />} />
       <Route path="/error" element={<MoodError />} />
-
-      {/* novas telas */}
       <Route path="/practices" element={<Practices />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/breathing" element={<BreathingGuide />} />
       <Route path="/meditation" element={<QuickMeditation />} />
+      <Route path="/reminders" element={<Reminders />}/>
     </Routes>
   );
 }

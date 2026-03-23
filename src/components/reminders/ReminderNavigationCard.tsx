@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 /**
  * Card de navegação para a tela de lembretes.
  */
-export default function ReminderCard() {
+export default function ReminderNavigationCard() {
   const navigate = useNavigate();
 
   return (

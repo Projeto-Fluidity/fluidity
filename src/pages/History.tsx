@@ -3,7 +3,7 @@ import ExerciseCard from "../components/ExerciseCard";
 import LastCheckinCard from "../components/history/LastCheckinCard";
 import MoodHistoryList from "../components/history/MoodHistoryList";
 import { useMood } from "../hooks/useMood";
-import ReminderCard from "../components/ReminderCard";
+import ReminderNavigationCard from "../components/reminders/ReminderNavigationCard";
 
 /**
  * Tela responsável por exibir o histórico
@@ -55,7 +55,7 @@ export default function History() {
           {/* Histórico completo */}
           <MoodHistoryList history={previousHistory} loading={loading} />
 
-          <ReminderCard />
+          <ReminderNavigationCard />
         </div>
       </div>
     </AppLayout>
