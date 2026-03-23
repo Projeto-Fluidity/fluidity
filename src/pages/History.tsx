@@ -3,6 +3,7 @@ import ExerciseCard from "../components/ExerciseCard";
 import LastCheckinCard from "../components/history/LastCheckinCard";
 import MoodHistoryList from "../components/history/MoodHistoryList";
 import { useMood } from "../hooks/useMood";
+import ReminderCard from "../components/ReminderCard";
 
 /**
  * Tela responsável por exibir o histórico
@@ -16,8 +17,8 @@ export default function History() {
 
   return (
     <AppLayout>
-      <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
-        <div className="space-y-4">
+      <div className=" bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4 pb-2 flex-1">
+        <div className="space-y-2">
           {/* Título */}
           <h1 className="text-2xl font-semibold text-gray-800">
             Histórico de Hoje
@@ -53,6 +54,8 @@ export default function History() {
 
           {/* Histórico completo */}
           <MoodHistoryList history={previousHistory} loading={loading} />
+
+          <ReminderCard />
         </div>
       </div>
     </AppLayout>
