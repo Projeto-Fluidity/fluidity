@@ -2,84 +2,19 @@ import AppLayout from "../components/layout/AppLayout";
 import ReminderStatsCard from "../components/reminders/ReminderStatsCard";
 import ReminderItemCard from "../components/reminders/ReminderItemCard";
 import ReminderToggleCard from "../components/reminders/ReminderToggleCard";
-import { useState, useEffect } from "react";
-import type { Reminder } from "../types/reminder";
+import { useReminders } from "../hooks/useReminders";
 
 /**
  * Tela responsável por exibir lembretes inteligentes
  * com base no comportamento do usuário.
  */
 export default function Reminders() {
-  const [reminders, setReminders] = useState<Reminder[]>([
-    {
-      id: "1",
-      title: "Hora de se hidratar",
-      description: "Você não bebe água há 2 horas",
-      time: "14:30",
-      variant: "info",
-      status: "pending",
-    },
-    {
-      id: "2",
-      title: "Faça uma pausa",
-      description: "Você está trabalhando há 3 horas seguidas",
-      time: "15:00",
-      variant: "warning",
-      status: "pending",
-    },
-    {
-      id: "3",
-      title: "Como está seu humor?",
-      description: "Registre seu humor do momento",
-      time: "16:00",
-      variant: "emotion",
-      status: "pending",
-    },
-    {
-      id: "4",
-      title: "Hora de relaxar",
-      description: "Pratique respiração guiada antes de dormir",
-      time: "21:00",
-      variant: "relax",
-      status: "pending",
-    },
-  ]);
-
-  const [feedback, setFeedback] = useState<string | null>(null);
-
-  const handleAccept = (id: string) => {
-    setReminders((prev) =>
-      prev.map((reminder) =>
-        reminder.id === id
-          ? { ...reminder, status: "accepted" }
-          : reminder
-      )
-    );
-
-    setFeedback("Lembrete aceito");
-  };
-
-  const handlePostpone = (id: string) => {
-    setReminders((prev) =>
-      prev.map((reminder) =>
-        reminder.id === id
-          ? { ...reminder, status: "postponed" }
-          : reminder
-      )
-    );
-
-    setFeedback("Lembrete adiado");
-  };
-
-  useEffect(() => {
-    if (!feedback) return;
-
-    const timer = setTimeout(() => {
-      setFeedback(null);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [feedback]);
+  const {
+    reminders,
+    feedback,
+    acceptReminder,
+    postponeReminder,
+  } = useReminders();
 
   return (
     <AppLayout>
@@ -121,8 +56,8 @@ export default function Reminders() {
                 time={reminder.time}
                 variant={reminder.variant}
                 status={reminder.status}
-                onAccept={() => handleAccept(reminder.id)}
-                onPostpone={() => handlePostpone(reminder.id)}
+                onAccept={() => acceptReminder(reminder.id)}
+                onPostpone={() => postponeReminder(reminder.id)}
               />
             ))}
 
