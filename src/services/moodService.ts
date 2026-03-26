@@ -116,3 +116,10 @@ export async function getMoodHistory(): Promise<MoodRecord[]> {
 
   return data ?? [];
 }
+
+if (import.meta.env.DEV) {
+  window.resetMoodMock = () => {
+    localStorage.removeItem("fluidity:mood_mock");
+    console.log("🧪 Mock de humor resetado");
+  };
+}
