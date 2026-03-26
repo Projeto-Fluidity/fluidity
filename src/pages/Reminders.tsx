@@ -3,6 +3,8 @@ import ReminderStatsCard from "../components/reminders/ReminderStatsCard";
 import ReminderItemCard from "../components/reminders/ReminderItemCard";
 import ReminderToggleCard from "../components/reminders/ReminderToggleCard";
 import { useReminders } from "../hooks/useReminders";
+import { resetReminders } from "../services/reminderService";
+import { useEffect } from "react";
 
 /**
  * Tela responsável por exibir lembretes inteligentes
@@ -15,6 +17,11 @@ export default function Reminders() {
     acceptReminder,
     postponeReminder,
   } = useReminders();
+
+  // RESET AQUI (dentro do componente)
+  useEffect(() => {
+    resetReminders();
+  }, []);
 
   return (
     <AppLayout>
@@ -64,6 +71,16 @@ export default function Reminders() {
           {/* Configuração */}
           <ReminderToggleCard />
         </div>
+        {import.meta.env.DEV && (
+  <div className="mt-4 flex justify-center">
+    <button
+      onClick={() => window.resetRemindersMock?.()}
+      className="rounded-lg border border-red-400 px-3 py-2 text-xs text-red-500 hover:bg-red-50"
+    >
+      🧪 Resetar lembretes (QA)
+    </button>
+  </div>
+)}
       </div>
     </AppLayout>
   );
