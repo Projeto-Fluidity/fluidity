@@ -105,6 +105,16 @@ export default function Emotion() {
             <ArrowRight size={18} />
           </button>
         </div>
+        {import.meta.env.DEV && (
+  <div className="mt-4 flex justify-center">
+    <button
+      onClick={() => window.resetMoodMock?.()}
+      className="rounded-lg border border-blue-400 px-3 py-2 text-xs text-red-500 hover:bg-red-50"
+    >
+      🧪 Resetar humor (QA)
+    </button>
+  </div>
+)}
       </div>
 
       {/* 🔥 MODAL */}
