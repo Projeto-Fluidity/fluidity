@@ -80,7 +80,7 @@ export default function Dashboard() {
           </div>
 
           {/* Componente responsável por registrar um novo humor */}
-          <MoodSelector registerMood={registerMood} />
+          <MoodSelector onSelect={registerMood} />
         </section>
 
         {/* Seção de histórico de humor */}

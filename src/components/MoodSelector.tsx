@@ -8,51 +8,25 @@ import type { MoodType } from "../types/mood";
  */
 type MoodSelectorProps = {
   /**
-   * Função responsável por registrar um novo humor.
-   * Essa função é fornecida pelo hook `useMood`
-   * através da página Emotion.
+   * Apenas notifica o humor selecionado
    */
-  registerMood: (mood: MoodType) => Promise<void>;
+  onSelect: (mood: MoodType) => void;
 };
 
-/**
- * Componente responsável por permitir que o usuário
- * registre seu humor diário.
- *
- * Responsabilidades:
- * - Exibir opções de humor através de emojis
- * - Permitir seleção de humor
- * - Executar o registro utilizando o hook `useMood`
- *
- * Observação:
- * Este componente não controla navegação.
- * A página `Emotion` é responsável por redirecionar
- * para telas de sucesso ou erro.
- */
-export default function MoodSelector({ registerMood }: MoodSelectorProps) {
-  /**
-   * Estado responsável por armazenar o humor selecionado.
-   */
+export default function MoodSelector({ onSelect }: MoodSelectorProps) {
   const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
 
-  /**
-   * Manipula a seleção de humor pelo usuário.
-   *
-   * @param mood Humor selecionado
-   */
-  async function handleSelectMood(mood: MoodType) {
+  function handleSelectMood(mood: MoodType) {
     setSelectedMood(mood);
-    await registerMood(mood);
+    onSelect(mood);
   }
 
   return (
     <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
       {/* Cabeçalho */}
       <div className="mb-4 flex items-center gap-2">
-        {/* Indicador visual */}
         <span className="h-2 w-2 rounded-full bg-green-500"></span>
 
-        {/* Título */}
         <h2 className="text-base font-medium text-gray-800">
           Como você está se sentindo hoje?
         </h2>

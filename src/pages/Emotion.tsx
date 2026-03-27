@@ -2,14 +2,12 @@ import AppLayout from "../components/layout/AppLayout";
 import MoodSelector from "../components/MoodSelector";
 import EmotionExerciseCard from "../components/EmotionExerciseCard";
 import { useMood } from "../hooks/useMood";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, User } from "lucide-react";
+import { MoodConfirmModal } from "../components/MoodConfirmModal";
+import type { MoodType } from "../types/mood";
 
-/**
- * Lista de exercícios recomendados exibidos
- * na tela principal de registro de humor.
- */
 type EmotionExercise = {
   title: string;
   duration: string;
@@ -32,19 +30,33 @@ const exercises: EmotionExercise[] = [
   },
 ];
 
-/**
- * Tela principal onde o usuário registra
- * como está se sentindo no dia.
- */
 export default function Emotion() {
   const navigate = useNavigate();
-
   const { registerMood, status } = useMood();
+
+  const [selectedMood, setSelectedMood] = useState<MoodType | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (status === "success") navigate("/success");
     if (status === "error") navigate("/error");
   }, [status, navigate]);
+
+  function handleSelectMood(mood: MoodType) {
+    setSelectedMood(mood);
+    setIsConfirmOpen(true);
+  }
+
+  function handleConfirm() {
+    if (!selectedMood) return;
+
+    registerMood(selectedMood);
+    setIsConfirmOpen(false);
+  }
+
+  function handleCancel() {
+    setIsConfirmOpen(false);
+  }
 
   return (
     <AppLayout>
@@ -56,7 +68,6 @@ export default function Emotion() {
               <h1 className="text-2xl font-semibold text-gray-800">
                 Olá, Mariana!
               </h1>
-
               <p className="mt-1 text-gray-500">Como você está?</p>
             </div>
 
@@ -65,8 +76,8 @@ export default function Emotion() {
             </div>
           </div>
 
-          {/* Mood Selector */}
-          <MoodSelector registerMood={registerMood} />
+          {/* 🔥 AGORA COM CONFIRMAÇÃO */}
+          <MoodSelector onSelect={handleSelectMood} />
 
           {/* Exercises */}
           <div className="space-y-3">
@@ -95,6 +106,15 @@ export default function Emotion() {
           </button>
         </div>
       </div>
+
+      {/* 🔥 MODAL */}
+      {isConfirmOpen && (
+        <MoodConfirmModal
+          mood={selectedMood}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+        />
+      )}
     </AppLayout>
   );
 }
