@@ -1,7 +1,27 @@
 /**
- * Formata uma data para exibir
- * dia da semana e data no padrão brasileiro.
+ * =========================
+ * 📊 LÓGICA DE NEGÓCIO (CORE)
+ * =========================
  */
+
+export function getLocalDate(): string {
+  return new Date().toLocaleDateString("en-CA");
+}
+
+export function getCurrentTimestamp(): string {
+  return new Date().toISOString();
+}
+
+export function toLocalDate(date: string): string {
+  return new Date(date).toLocaleDateString("en-CA");
+}
+
+/**
+ * =========================
+ * 🎨 FORMATAÇÃO (UI)
+ * =========================
+ */
+
 export function formatDate(date: string) {
   const d = new Date(date);
 
@@ -12,9 +32,6 @@ export function formatDate(date: string) {
   });
 }
 
-/**
- * Formata apenas o horário.
- */
 export function formatTime(date: string) {
   const d = new Date(date);
 

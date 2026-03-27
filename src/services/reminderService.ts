@@ -5,8 +5,10 @@ import {
   getMockReminders,
   setMockReminders,
 } from "../mocks/reminderMock";
+import { getLocalDate } from "../lib/date";
 
 const USE_MOCK = env.useMock;
+const LAST_RESET_KEY = "reminders_last_reset";
 
 if (import.meta.env.DEV) {
   console.log("USE_MOCK (reminders):", USE_MOCK);
@@ -101,6 +103,15 @@ export async function resetReminders(): Promise<void> {
   if (USE_MOCK) {
     console.log("[MOCK] Resetando lembretes");
 
+    const today = getLocalDate();
+    const lastReset = localStorage.getItem(LAST_RESET_KEY);
+
+    // evita múltiplos resets no mesmo dia
+    if (lastReset === today) {
+      console.log("[MOCK] Reset já executado hoje");
+      return;
+    }
+
     const data = getMockReminders();
 
     const reset: Reminder[] = data.map((r) => ({
@@ -110,6 +121,17 @@ export async function resetReminders(): Promise<void> {
 
     setMockReminders(reset);
 
+    // salva controle do dia
+    localStorage.setItem(LAST_RESET_KEY, today);
+
     return;
   }
+}
+
+if (import.meta.env.DEV) {
+  window.resetRemindersMock = async () => {
+    localStorage.removeItem("reminders_last_reset");
+    await resetReminders();
+    console.log("🧪 Mock de lembretes resetado manualmente");
+  };
 }

@@ -3,45 +3,68 @@ import type { MoodRecord } from "../types/moodRecord";
 import { supabase } from "./supabaseClient";
 import { moodMock } from "../mocks/moodMock";
 import { env } from "../config/env";
+import {
+  getLocalDate,
+  getCurrentTimestamp,
+  toLocalDate,
+} from "../lib/date";
+
+const STORAGE_KEY = "fluidity:mood_mock";
+
+function loadMock(): MoodRecord[] {
+  const stored = localStorage.getItem(STORAGE_KEY);
+
+  if (!stored) return [...moodMock];
+
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [...moodMock];
+  }
+}
+
+function saveMock(data: MoodRecord[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
 const USE_MOCK = env.useMock;
 
 if (import.meta.env.DEV) {
   console.log("USE_MOCK:", USE_MOCK);
 }
+
 /**
  * Persiste no banco de dados o humor selecionado pelo usuário.
- *
- * O campo `checkin_date` é definido com base no fuso local do usuário,
- * garantindo consistência com a regra de 1 registro por dia.
- *
- * @param mood Valor do humor selecionado pelo usuário
- * @throws Error caso ocorra falha na inserção do registro
  */
 export async function saveMood(mood: MoodType): Promise<void> {
   if (USE_MOCK) {
     console.log("[MOCK] Salvando humor:", mood);
 
-    const today = new Date().toISOString().split("T")[0];
+    const mockData = loadMock();
+    const today = getLocalDate();
 
-    const alreadyExists = moodMock.some((item) =>
-      item.created_at.startsWith(today)
+    const alreadyExists = mockData.some(
+      (item) => toLocalDate(item.created_at) === today
     );
 
     if (alreadyExists) {
       throw new Error("Você já registrou seu humor hoje");
     }
 
-    moodMock.unshift({
+    const newRecord: MoodRecord = {
       id: String(Date.now()),
       mood,
-      created_at: new Date().toISOString(),
-    });
+      created_at: getCurrentTimestamp(),
+    };
+
+    const updated = [newRecord, ...mockData];
+
+    saveMock(updated);
 
     return;
   }
 
-  const today = new Date().toLocaleDateString("en-CA");
+  const today = getLocalDate();
 
   const { error } = await supabase.from("moods").insert({
     mood,
@@ -63,17 +86,14 @@ export async function saveMood(mood: MoodType): Promise<void> {
 
 /**
  * Recupera o histórico de humores registrados.
- *
- * Os registros são retornados ordenados do mais recente
- * para o mais antigo com base no campo `created_at`.
- *
- * @returns lista de registros de humor
  */
 export async function getMoodHistory(): Promise<MoodRecord[]> {
   if (USE_MOCK) {
     console.log("[MOCK] Buscando histórico");
 
-    return [...moodMock].sort(
+    const data = loadMock();
+
+    return data.sort(
       (a, b) =>
         new Date(b.created_at).getTime() -
         new Date(a.created_at).getTime()
@@ -85,9 +105,9 @@ export async function getMoodHistory(): Promise<MoodRecord[]> {
     .select("*")
     .order("created_at", { ascending: false });
 
-      if (import.meta.env.DEV) {
-      console.log("DATA FROM DB:", data);
-    }
+  if (import.meta.env.DEV) {
+    console.log("DATA FROM DB:", data);
+  }
 
   if (error) {
     console.error("Erro ao buscar histórico:", error);
@@ -95,5 +115,11 @@ export async function getMoodHistory(): Promise<MoodRecord[]> {
   }
 
   return data ?? [];
-  
+}
+
+if (import.meta.env.DEV) {
+  window.resetMoodMock = () => {
+    localStorage.removeItem("fluidity:mood_mock");
+    console.log("🧪 Mock de humor resetado");
+  };
 }
