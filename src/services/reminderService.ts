@@ -1,30 +1,35 @@
-import type { Reminder } from "../types/reminder";
-import { supabase } from "./supabaseClient";
-
 /**
  * ============================================================
- * 🧠 CONCEITO GERAL
+ * REMINDER SERVICE
  * ============================================================
  *
- * Este service trabalha com DUAS fontes de dados:
+ * Responsável por:
+ * - Buscar lembretes disponíveis no dia
+ * - Registrar interações do usuário (histórico)
  *
- * 1. reminders → dados fixos (templates)
- * 2. reminder_logs → histórico de interação do usuário
+ * Arquitetura:
+ * - reminders → dados estáticos (templates)
+ * - reminder_logs → histórico de uso
  *
- * Regra principal:
- * 👉 Um lembrete NÃO deve aparecer se já foi utilizado HOJE
- *
- * Ou seja:
- * - Se NÃO tem log hoje → aparece
- * - Se tem log hoje → NÃO aparece
- *
- * Isso elimina a necessidade de controlar "status" no reminder.
+ * Regra de negócio:
+ * - Um lembrete só pode aparecer 1x por dia
+ * - Após interação → não aparece novamente no mesmo dia
+ * - No dia seguinte → volta automaticamente
  */
+
+import type { Reminder } from "../types/reminder";
+import { supabase } from "./supabaseClient";
+import { env } from "../config/env";
+import { getMockReminders } from "../mocks/reminderMock";
+import {
+  getMockLogs,
+  addMockLog,
+} from "../mocks/reminderLogMock";
+
+const USE_MOCK = env.useMock;
 
 /**
  * Retorna a data atual no formato YYYY-MM-DD
- *
- * Exemplo: "2026-03-28"
  */
 function getToday(): string {
   return new Date().toISOString().split("T")[0];
@@ -32,20 +37,41 @@ function getToday(): string {
 
 /**
  * ============================================================
- * 📥 BUSCAR LEMBRETES DISPONÍVEIS
+ * BUSCAR LEMBRETES DISPONÍVEIS
  * ============================================================
  *
  * Fluxo:
- * 1. Busca todos os lembretes (reminders)
- * 2. Busca logs de interação
- * 3. Filtra apenas os lembretes NÃO utilizados hoje
+ * 1. Buscar todos os reminders
+ * 2. Buscar logs de interação
+ * 3. Filtrar lembretes já utilizados hoje
  */
 export async function getReminders(): Promise<Reminder[]> {
   const today = getToday();
 
   /**
-   * 1. Buscar todos os lembretes (templates)
+   * ========================
+   * MODO MOCK
+   * ========================
    */
+  if (USE_MOCK) {
+    const reminders = getMockReminders();
+    const logs = getMockLogs();
+
+    const usedToday = new Set(
+      logs
+        .filter((l) => l.created_at.startsWith(today))
+        .map((l) => l.reminder_id)
+    );
+
+    return reminders.filter((r) => !usedToday.has(r.id));
+  }
+
+  /**
+   * ========================
+   * PRODUÇÃO (SUPABASE)
+   * ========================
+   */
+
   const { data: reminders, error: remindersError } = await supabase
     .from("reminders")
     .select("*");
@@ -55,9 +81,6 @@ export async function getReminders(): Promise<Reminder[]> {
     return [];
   }
 
-  /**
-   * 2. Buscar logs de interação
-   */
   const { data: logs, error: logsError } = await supabase
     .from("reminder_logs")
     .select("reminder_id, created_at");
@@ -67,18 +90,12 @@ export async function getReminders(): Promise<Reminder[]> {
     return reminders ?? [];
   }
 
-  /**
-   * 3. Identificar quais lembretes já foram usados HOJE
-   */
   const usedToday = new Set(
     (logs ?? [])
       .filter((log) => log.created_at.startsWith(today))
       .map((log) => log.reminder_id)
   );
 
-  /**
-   * 4. Retornar apenas lembretes que NÃO foram usados hoje
-   */
   return (reminders ?? []).filter(
     (reminder) => !usedToday.has(reminder.id)
   );
@@ -86,50 +103,49 @@ export async function getReminders(): Promise<Reminder[]> {
 
 /**
  * ============================================================
- * 📝 CRIAR LOG DE INTERAÇÃO
+ * REGISTRAR INTERAÇÃO DO USUÁRIO
  * ============================================================
  *
- * Cada ação do usuário gera um registro na tabela reminder_logs.
+ * Cria um registro na tabela reminder_logs.
  *
- * Exemplos:
+ * Cada interação gera um evento:
  * - accepted
  * - postponed
  */
-export async function createReminderLog(
-  reminderId: string,
+export async function updateReminderStatus(
+  id: string,
   action: "accepted" | "postponed"
 ): Promise<void> {
+  /**
+   * ========================
+   * MODO MOCK
+   * ========================
+   */
+  if (USE_MOCK) {
+    addMockLog({
+      id: crypto.randomUUID(),
+      reminder_id: id,
+      action,
+      created_at: new Date().toISOString(),
+    });
+
+    return;
+  }
+
+  /**
+   * ========================
+   * PRODUÇÃO (SUPABASE)
+   * ========================
+   */
   const { error } = await supabase
     .from("reminder_logs")
     .insert({
-      reminder_id: reminderId,
+      reminder_id: id,
       action,
     });
 
   if (error) {
-    console.error("Erro ao criar log:", error);
-    throw new Error("Erro ao salvar interação do usuário");
+    console.error("Erro ao salvar log:", error);
+    throw new Error("Erro ao registrar interação");
   }
-}
-
-/**
- * ============================================================
- * 🔄 ATUALIZAR STATUS (AGORA = CRIAR LOG)
- * ============================================================
- *
- * Antes:
- * - Atualizava o reminder (status)
- *
- * Agora:
- * - Apenas registra a ação no histórico
- *
- * Isso garante:
- * ✔ Histórico completo
- * ✔ Reaparecimento automático no dia seguinte
- */
-export async function updateReminderStatus(
-  id: string,
-  status: Reminder["status"]
-): Promise<void> {
-  await createReminderLog(id, status);
 }
