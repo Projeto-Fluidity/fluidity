@@ -9,25 +9,28 @@ type ReminderLog = {
   created_at: string;
 };
 
-let logs: ReminderLog[] = [];
+const STORAGE_KEY = "mock_reminder_logs";
 
 /**
- * Retorna logs simulados
+ * Recupera logs do localStorage
  */
 export function getMockLogs(): ReminderLog[] {
-  return logs;
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : [];
 }
 
 /**
- * Adiciona log
+ * Adiciona log persistente
  */
 export function addMockLog(log: ReminderLog) {
+  const logs = getMockLogs();
   logs.push(log);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
 }
 
 /**
  * Reset QA
  */
 export function resetMockLogs() {
-  logs = [];
+  localStorage.removeItem(STORAGE_KEY);
 }

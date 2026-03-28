@@ -89,6 +89,8 @@ export async function getReminders(): Promise<Reminder[]> {
     console.error("Erro ao buscar logs:", logsError);
     return reminders ?? [];
   }
+  console.log("REMINDERS:", reminders);
+console.log("LOGS:", logs);
 
   const usedToday = new Set(
     (logs ?? [])
@@ -148,4 +150,41 @@ export async function updateReminderStatus(
     console.error("Erro ao salvar log:", error);
     throw new Error("Erro ao registrar interação");
   }
+}
+
+/**
+ * ============================================================
+ * RESET DE LOGS (QA)
+ * ============================================================
+ *
+ * Usado apenas em desenvolvimento para simular novo dia
+ */
+export async function resetReminderLogs(): Promise<void> {
+  /**
+   * ========================
+   * MODO MOCK
+   * ========================
+   */
+  if (USE_MOCK) {
+    const { resetMockLogs } = await import("../mocks/reminderLogMock");
+    resetMockLogs();
+    console.log("[QA] Logs resetados (mock)");
+    return;
+  }
+
+  /**
+   * ========================
+   * PRODUÇÃO (SUPABASE)
+   * ========================
+   */
+  const { error } = await supabase
+    .from("reminder_logs")
+    .delete()
+    .neq("id", "");
+
+  if (error) {
+    console.error("Erro ao resetar logs:", error);
+  }
+
+  console.log("[QA] Logs resetados (DB)");
 }

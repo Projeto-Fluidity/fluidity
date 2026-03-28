@@ -13,46 +13,44 @@ import {
  * - Registrar interação do usuário (histórico)
  * - Atualizar UI (remover item após ação)
  * - Exibir feedback (toast)
+ * - Permitir recarregar dados (QA / debug)
  *
- * Importante:
- * - NÃO existe mais controle por "status"
- * - O controle é baseado em histórico (reminder_logs)
+ * Arquitetura:
+ * - Service → dados (backend/mock)
+ * - Hook → estado (React)
+ * - UI → renderização
  */
 export function useReminders() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   /**
-   * Carrega os lembretes ao montar o componente
+   * Carrega os lembretes do dia
    */
-  useEffect(() => {
-    async function loadReminders() {
-      try {
-        const data = await getReminders();
-        setReminders(data);
-      } catch (error) {
-        console.error("Erro ao carregar lembretes:", error);
-      }
+  async function loadReminders() {
+    try {
+      const data = await getReminders();
+      setReminders(data);
+    } catch (error) {
+      console.error("Erro ao carregar lembretes:", error);
     }
+  }
 
-    loadReminders();
-  }, []);
+  /**
+   * Recarrega manualmente (QA / debug)
+   */
+  async function reloadReminders() {
+    await loadReminders();
+  }
 
   /**
    * Aceitar lembrete
-   *
-   * Fluxo:
-   * 1. Salva histórico no backend
-   * 2. Remove da UI
-   * 3. Mostra feedback
    */
   async function acceptReminder(id: string) {
     try {
       await updateReminderStatus(id, "accepted");
 
-      // Remove imediatamente da tela
       setReminders((prev) => prev.filter((r) => r.id !== id));
-
       setFeedback("Lembrete aceito");
     } catch (error) {
       console.error(error);
@@ -62,16 +60,12 @@ export function useReminders() {
 
   /**
    * Adiar lembrete
-   *
-   * Mesmo comportamento do accept
    */
   async function postponeReminder(id: string) {
     try {
       await updateReminderStatus(id, "postponed");
 
-      // Remove imediatamente da tela
       setReminders((prev) => prev.filter((r) => r.id !== id));
-
       setFeedback("Lembrete adiado");
     } catch (error) {
       console.error(error);
@@ -80,7 +74,18 @@ export function useReminders() {
   }
 
   /**
-   * Controle de exibição do toast
+   * Load inicial
+   */
+  useEffect(() => {
+    async function init() {
+      await loadReminders();
+    }
+
+    init();
+  }, []);
+
+  /**
+   * Controle do toast
    */
   useEffect(() => {
     if (!feedback) return;
@@ -97,5 +102,6 @@ export function useReminders() {
     feedback,
     acceptReminder,
     postponeReminder,
+    reloadReminders,
   };
 }
