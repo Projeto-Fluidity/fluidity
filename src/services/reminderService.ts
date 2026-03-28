@@ -1,137 +1,190 @@
+/**
+ * ============================================================
+ * REMINDER SERVICE
+ * ============================================================
+ *
+ * Responsável por:
+ * - Buscar lembretes disponíveis no dia
+ * - Registrar interações do usuário (histórico)
+ *
+ * Arquitetura:
+ * - reminders → dados estáticos (templates)
+ * - reminder_logs → histórico de uso
+ *
+ * Regra de negócio:
+ * - Um lembrete só pode aparecer 1x por dia
+ * - Após interação → não aparece novamente no mesmo dia
+ * - No dia seguinte → volta automaticamente
+ */
+
 import type { Reminder } from "../types/reminder";
 import { supabase } from "./supabaseClient";
 import { env } from "../config/env";
+import { getMockReminders } from "../mocks/reminderMock";
 import {
-  getMockReminders,
-  setMockReminders,
-} from "../mocks/reminderMock";
-import { getLocalDate } from "../lib/date";
+  getMockLogs,
+  addMockLog,
+} from "../mocks/reminderLogMock";
 
 const USE_MOCK = env.useMock;
-const LAST_RESET_KEY = "reminders_last_reset";
 
-if (import.meta.env.DEV) {
-  console.log("USE_MOCK (reminders):", USE_MOCK);
+/**
+ * Retorna a data atual no formato YYYY-MM-DD
+ */
+function getToday(): string {
+  return new Date().toISOString().split("T")[0];
 }
 
 /**
- * Recupera a lista de lembretes do usuário.
+ * ============================================================
+ * BUSCAR LEMBRETES DISPONÍVEIS
+ * ============================================================
  *
- * Os lembretes são retornados ordenados do mais recente
- * para o mais antigo com base no campo `created_at`.
- *
- * No modo mock, apenas lembretes com status "pending"
- * são retornados para manter consistência com a UI atual.
- *
- * @returns lista de lembretes
+ * Fluxo:
+ * 1. Buscar todos os reminders
+ * 2. Buscar logs de interação
+ * 3. Filtrar lembretes já utilizados hoje
  */
 export async function getReminders(): Promise<Reminder[]> {
+  const today = getToday();
+
+  /**
+   * ========================
+   * MODO MOCK
+   * ========================
+   */
   if (USE_MOCK) {
-    console.log("[MOCK] Buscando lembretes");
+    const reminders = getMockReminders();
+    const logs = getMockLogs();
 
-    return getMockReminders().filter((r) => r.status === "pending");
+    const usedToday = new Set(
+      logs
+        .filter((l) => l.created_at.startsWith(today))
+        .map((l) => l.reminder_id)
+    );
+
+    return reminders.filter((r) => !usedToday.has(r.id));
   }
 
-  const { data, error } = await supabase
+  /**
+   * ========================
+   * PRODUÇÃO (SUPABASE)
+   * ========================
+   */
+
+  const { data: reminders, error: remindersError } = await supabase
     .from("reminders")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .select("*");
 
-  if (import.meta.env.DEV) {
-    console.log("REMINDERS FROM DB:", data);
-  }
-
-  if (error) {
-    console.error("Erro ao buscar lembretes:", error);
+  if (remindersError) {
+    console.error("Erro ao buscar reminders:", remindersError);
     return [];
   }
 
-  return (data ?? []) as Reminder[];
+  const { data: logs, error: logsError } = await supabase
+    .from("reminder_logs")
+    .select("reminder_id, created_at");
+
+  if (logsError) {
+    console.error("Erro ao buscar logs:", logsError);
+    return reminders ?? [];
+  }
+  console.log("REMINDERS:", reminders);
+console.log("LOGS:", logs);
+
+  const usedToday = new Set(
+    (logs ?? [])
+      .filter((log) => log.created_at.startsWith(today))
+      .map((log) => log.reminder_id)
+  );
+
+  return (reminders ?? []).filter(
+    (reminder) => !usedToday.has(reminder.id)
+  );
 }
 
 /**
- * Atualiza o status de um lembrete existente.
+ * ============================================================
+ * REGISTRAR INTERAÇÃO DO USUÁRIO
+ * ============================================================
  *
- * Permite alterar o estado do lembrete para:
- * - "accepted"
- * - "postponed"
+ * Cria um registro na tabela reminder_logs.
  *
- * @param id identificador do lembrete
- * @param status novo status do lembrete
- * @throws Error caso ocorra falha na atualização
+ * Cada interação gera um evento:
+ * - accepted
+ * - postponed
  */
 export async function updateReminderStatus(
   id: string,
-  status: Reminder["status"]
+  action: "accepted" | "postponed"
 ): Promise<void> {
+  /**
+   * ========================
+   * MODO MOCK
+   * ========================
+   */
   if (USE_MOCK) {
-    console.log("[MOCK] Atualizando lembrete:", { id, status });
-
-    const data = getMockReminders();
-
-    const updated = data.map((r) =>
-      r.id === id ? { ...r, status } : r
-    );
-
-    setMockReminders(updated);
+    addMockLog({
+      id: crypto.randomUUID(),
+      reminder_id: id,
+      action,
+      created_at: new Date().toISOString(),
+    });
 
     return;
   }
 
+  /**
+   * ========================
+   * PRODUÇÃO (SUPABASE)
+   * ========================
+   */
   const { error } = await supabase
-    .from("reminders")
-    .update({ status })
-    .eq("id", id);
+    .from("reminder_logs")
+    .insert({
+      reminder_id: id,
+      action,
+    });
 
   if (error) {
-    console.error("Erro ao atualizar lembrete:", error);
-    throw new Error(
-      error.message || "Não foi possível atualizar o lembrete"
-    );
+    console.error("Erro ao salvar log:", error);
+    throw new Error("Erro ao registrar interação");
   }
-
-  console.log("Lembrete atualizado:", { id, status });
 }
 
- /**
-  * Reseta os lembretes para "pending".
-  *
-  * Deve ser executado uma vez por dia para garantir
-  * que os lembretes reapareçam para o usuário.
-  */
-export async function resetReminders(): Promise<void> {
+/**
+ * ============================================================
+ * RESET DE LOGS (QA)
+ * ============================================================
+ *
+ * Usado apenas em desenvolvimento para simular novo dia
+ */
+export async function resetReminderLogs(): Promise<void> {
+  /**
+   * ========================
+   * MODO MOCK
+   * ========================
+   */
   if (USE_MOCK) {
-    console.log("[MOCK] Resetando lembretes");
-
-    const today = getLocalDate();
-    const lastReset = localStorage.getItem(LAST_RESET_KEY);
-
-    // evita múltiplos resets no mesmo dia
-    if (lastReset === today) {
-      console.log("[MOCK] Reset já executado hoje");
-      return;
-    }
-
-    const data = getMockReminders();
-
-    const reset: Reminder[] = data.map((r) => ({
-      ...r,
-      status: "pending",
-    }));
-
-    setMockReminders(reset);
-
-    // salva controle do dia
-    localStorage.setItem(LAST_RESET_KEY, today);
-
+    const { resetMockLogs } = await import("../mocks/reminderLogMock");
+    resetMockLogs();
+    console.log("[QA] Logs resetados (mock)");
     return;
   }
-}
 
-if (import.meta.env.DEV) {
-  window.resetRemindersMock = async () => {
-    localStorage.removeItem("reminders_last_reset");
-    await resetReminders();
-    console.log("🧪 Mock de lembretes resetado manualmente");
-  };
+  /**
+   * ========================
+   * PRODUÇÃO (SUPABASE)
+   * ========================
+   */
+  const { error } = await supabase
+    .from("reminder_logs")
+    .delete()
+    .neq("id", "");
+
+  if (error) {
+    console.error("Erro ao resetar logs:", error);
+  }
+
+  console.log("[QA] Logs resetados (DB)");
 }

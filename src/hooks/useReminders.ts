@@ -3,57 +3,54 @@ import type { Reminder } from "../types/reminder";
 import {
   getReminders,
   updateReminderStatus,
-  resetReminders,
 } from "../services/reminderService";
-
 
 /**
  * Hook responsável por gerenciar os lembretes da aplicação.
  *
- * Centraliza:
- * - carregamento de dados
- * - atualização de status
- * - controle de feedback (toast)
+ * Responsabilidades:
+ * - Buscar lembretes disponíveis no dia
+ * - Registrar interação do usuário (histórico)
+ * - Atualizar UI (remover item após ação)
+ * - Exibir feedback (toast)
+ * - Permitir recarregar dados (QA / debug)
+ *
+ * Arquitetura:
+ * - Service → dados (backend/mock)
+ * - Hook → estado (React)
+ * - UI → renderização
  */
 export function useReminders() {
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
 
   /**
-   * Carrega os lembretes ao iniciar o hook
+   * Carrega os lembretes do dia
    */
-
-  useEffect(() => {
-     async function initializeReminders() {
-    const today = new Date().toDateString();
-    const lastReset = localStorage.getItem("lastReminderReset");
-
-    // Se ainda não resetou hoje → reseta
-    if (lastReset !== today) {
-      await resetReminders();
-      localStorage.setItem("lastReminderReset", today);
+  async function loadReminders() {
+    try {
+      const data = await getReminders();
+      setReminders(data);
+    } catch (error) {
+      console.error("Erro ao carregar lembretes:", error);
     }
-
-    // Carrega os lembretes
-    const data = await getReminders();
-    setReminders(data);
   }
 
-  initializeReminders();
-}, []);
   /**
-   * Marca um lembrete como aceito
+   * Recarrega manualmente (QA / debug)
+   */
+  async function reloadReminders() {
+    await loadReminders();
+  }
+
+  /**
+   * Aceitar lembrete
    */
   async function acceptReminder(id: string) {
     try {
       await updateReminderStatus(id, "accepted");
 
-      setReminders((prev) =>
-        prev.map((r) =>
-          r.id === id ? { ...r, status: "accepted" } : r
-        )
-      );
-
+      setReminders((prev) => prev.filter((r) => r.id !== id));
       setFeedback("Lembrete aceito");
     } catch (error) {
       console.error(error);
@@ -62,18 +59,13 @@ export function useReminders() {
   }
 
   /**
-   * Marca um lembrete como adiado
+   * Adiar lembrete
    */
   async function postponeReminder(id: string) {
     try {
       await updateReminderStatus(id, "postponed");
 
-      setReminders((prev) =>
-        prev.map((r) =>
-          r.id === id ? { ...r, status: "postponed" } : r
-        )
-      );
-
+      setReminders((prev) => prev.filter((r) => r.id !== id));
       setFeedback("Lembrete adiado");
     } catch (error) {
       console.error(error);
@@ -82,7 +74,18 @@ export function useReminders() {
   }
 
   /**
-   * Controla exibição do feedback temporário (toast)
+   * Load inicial
+   */
+  useEffect(() => {
+    async function init() {
+      await loadReminders();
+    }
+
+    init();
+  }, []);
+
+  /**
+   * Controle do toast
    */
   useEffect(() => {
     if (!feedback) return;
@@ -99,5 +102,6 @@ export function useReminders() {
     feedback,
     acceptReminder,
     postponeReminder,
+    reloadReminders,
   };
 }

@@ -7,6 +7,10 @@ type Variant = "info" | "warning" | "emotion" | "relax";
 
 /**
  * Props do ReminderItemCard.
+ *
+ * Importante:
+ * - NÃO usamos mais "status"
+ * - O controle de exibição é feito fora (hook/service)
  */
 type Props = {
   title: string;
@@ -15,7 +19,6 @@ type Props = {
   variant: Variant;
   onAccept: () => void;
   onPostpone: () => void;
-  status: "pending" | "accepted" | "postponed";
 };
 
 /**
@@ -31,20 +34,23 @@ const variantStyles = {
 /**
  * Card que representa uma sugestão de lembrete.
  *
- * Contém:
- * - título
- * - descrição
- * - horário sugerido
- * - ações (aceitar / adiar)
+ * Responsabilidades:
+ * - Exibir conteúdo do lembrete
+ * - Disparar ações (aceitar / adiar)
+ *
+ * NÃO controla:
+ * - estado (aceito / adiado)
+ * - visibilidade
+ *
+ * Isso é responsabilidade do hook/service.
  */
 export default function ReminderItemCard({
-  title, 
+  title,
   description,
   time,
   variant,
   onAccept,
   onPostpone,
-  status,
 }: Props) {
   return (
     <div
@@ -59,25 +65,20 @@ export default function ReminderItemCard({
 
       {/* Ações */}
       <div className="flex gap-3">
-      <button
-        onClick={onAccept}
-        disabled={status === "accepted"}
-        className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-white ${
-          status === "accepted"
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-[#008236]"
-        }`}
-      >
-        <Check size={16} />
-        {status === "accepted" ? "Aceito" : "Aceitar"}
-      </button>
+        <button
+          onClick={onAccept}
+          className="flex items-center gap-2 rounded-xl bg-[#008236] px-4 py-2 text-sm text-white"
+        >
+          <Check size={16} />
+          Aceitar
+        </button>
 
-      <button
-        onClick={onPostpone}
-        className="rounded-xl bg-gray-200 px-4 py-2 text-sm text-gray-700"
-      >
-        Mais tarde
-      </button>
+        <button
+          onClick={onPostpone}
+          className="rounded-xl bg-gray-200 px-4 py-2 text-sm text-gray-700"
+        >
+          Mais tarde
+        </button>
       </div>
     </div>
   );

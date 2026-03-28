@@ -1,11 +1,10 @@
 /**
- * Representa um lembrete do sistema.
+ * Reminder = apenas dados (template)
  */
 export type Reminder = {
   id: string;
   title: string;
   description: string;
   time: string;
-  variant: "info" | "warning" | "emotion" | "relax";
-  status: "pending" | "accepted" | "postponed";
+  variant: "emotion" | "warning" | "info" | "relax";
 };

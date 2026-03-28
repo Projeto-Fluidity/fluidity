@@ -3,7 +3,10 @@ import type { Reminder } from "../types/reminder";
 const STORAGE_KEY = "mock_reminders";
 
 /**
- * Dados iniciais (seed)
+ * Mock de lembretes (template)
+ *
+ * NÃO possui estado.
+ * NÃO possui last_interaction_date.
  */
 const initialData: Reminder[] = [
   {
@@ -12,7 +15,6 @@ const initialData: Reminder[] = [
     description: "Você não bebe água há 2 horas",
     time: "14:30",
     variant: "info",
-    status: "pending",
   },
   {
     id: "2",
@@ -20,7 +22,6 @@ const initialData: Reminder[] = [
     description: "Você está trabalhando há 3 horas seguidas",
     time: "15:00",
     variant: "warning",
-    status: "pending",
   },
   {
     id: "3",
@@ -28,7 +29,6 @@ const initialData: Reminder[] = [
     description: "Registre seu humor do momento",
     time: "16:00",
     variant: "emotion",
-    status: "pending",
   },
   {
     id: "4",
@@ -36,13 +36,9 @@ const initialData: Reminder[] = [
     description: "Pratique respiração guiada antes de dormir",
     time: "21:00",
     variant: "relax",
-    status: "pending",
   },
 ];
 
-/**
- * Recupera dados do "banco fake"
- */
 export function getMockReminders(): Reminder[] {
   const stored = localStorage.getItem(STORAGE_KEY);
 
@@ -54,9 +50,6 @@ export function getMockReminders(): Reminder[] {
   return JSON.parse(stored);
 }
 
-/**
- * Salva no "banco fake"
- */
 export function setMockReminders(data: Reminder[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
