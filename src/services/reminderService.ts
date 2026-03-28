@@ -1,137 +1,135 @@
 import type { Reminder } from "../types/reminder";
 import { supabase } from "./supabaseClient";
-import { env } from "../config/env";
-import {
-  getMockReminders,
-  setMockReminders,
-} from "../mocks/reminderMock";
-import { getLocalDate } from "../lib/date";
 
-const USE_MOCK = env.useMock;
-const LAST_RESET_KEY = "reminders_last_reset";
+/**
+ * ============================================================
+ * 🧠 CONCEITO GERAL
+ * ============================================================
+ *
+ * Este service trabalha com DUAS fontes de dados:
+ *
+ * 1. reminders → dados fixos (templates)
+ * 2. reminder_logs → histórico de interação do usuário
+ *
+ * Regra principal:
+ * 👉 Um lembrete NÃO deve aparecer se já foi utilizado HOJE
+ *
+ * Ou seja:
+ * - Se NÃO tem log hoje → aparece
+ * - Se tem log hoje → NÃO aparece
+ *
+ * Isso elimina a necessidade de controlar "status" no reminder.
+ */
 
-if (import.meta.env.DEV) {
-  console.log("USE_MOCK (reminders):", USE_MOCK);
+/**
+ * Retorna a data atual no formato YYYY-MM-DD
+ *
+ * Exemplo: "2026-03-28"
+ */
+function getToday(): string {
+  return new Date().toISOString().split("T")[0];
 }
 
 /**
- * Recupera a lista de lembretes do usuário.
+ * ============================================================
+ * 📥 BUSCAR LEMBRETES DISPONÍVEIS
+ * ============================================================
  *
- * Os lembretes são retornados ordenados do mais recente
- * para o mais antigo com base no campo `created_at`.
- *
- * No modo mock, apenas lembretes com status "pending"
- * são retornados para manter consistência com a UI atual.
- *
- * @returns lista de lembretes
+ * Fluxo:
+ * 1. Busca todos os lembretes (reminders)
+ * 2. Busca logs de interação
+ * 3. Filtra apenas os lembretes NÃO utilizados hoje
  */
 export async function getReminders(): Promise<Reminder[]> {
-  if (USE_MOCK) {
-    console.log("[MOCK] Buscando lembretes");
+  const today = getToday();
 
-    return getMockReminders().filter((r) => r.status === "pending");
-  }
-
-  const { data, error } = await supabase
+  /**
+   * 1. Buscar todos os lembretes (templates)
+   */
+  const { data: reminders, error: remindersError } = await supabase
     .from("reminders")
-    .select("*")
-    .order("created_at", { ascending: false });
+    .select("*");
 
-  if (import.meta.env.DEV) {
-    console.log("REMINDERS FROM DB:", data);
-  }
-
-  if (error) {
-    console.error("Erro ao buscar lembretes:", error);
+  if (remindersError) {
+    console.error("Erro ao buscar reminders:", remindersError);
     return [];
   }
 
-  return (data ?? []) as Reminder[];
+  /**
+   * 2. Buscar logs de interação
+   */
+  const { data: logs, error: logsError } = await supabase
+    .from("reminder_logs")
+    .select("reminder_id, created_at");
+
+  if (logsError) {
+    console.error("Erro ao buscar logs:", logsError);
+    return reminders ?? [];
+  }
+
+  /**
+   * 3. Identificar quais lembretes já foram usados HOJE
+   */
+  const usedToday = new Set(
+    (logs ?? [])
+      .filter((log) => log.created_at.startsWith(today))
+      .map((log) => log.reminder_id)
+  );
+
+  /**
+   * 4. Retornar apenas lembretes que NÃO foram usados hoje
+   */
+  return (reminders ?? []).filter(
+    (reminder) => !usedToday.has(reminder.id)
+  );
 }
 
 /**
- * Atualiza o status de um lembrete existente.
+ * ============================================================
+ * 📝 CRIAR LOG DE INTERAÇÃO
+ * ============================================================
  *
- * Permite alterar o estado do lembrete para:
- * - "accepted"
- * - "postponed"
+ * Cada ação do usuário gera um registro na tabela reminder_logs.
  *
- * @param id identificador do lembrete
- * @param status novo status do lembrete
- * @throws Error caso ocorra falha na atualização
+ * Exemplos:
+ * - accepted
+ * - postponed
+ */
+export async function createReminderLog(
+  reminderId: string,
+  action: "accepted" | "postponed"
+): Promise<void> {
+  const { error } = await supabase
+    .from("reminder_logs")
+    .insert({
+      reminder_id: reminderId,
+      action,
+    });
+
+  if (error) {
+    console.error("Erro ao criar log:", error);
+    throw new Error("Erro ao salvar interação do usuário");
+  }
+}
+
+/**
+ * ============================================================
+ * 🔄 ATUALIZAR STATUS (AGORA = CRIAR LOG)
+ * ============================================================
+ *
+ * Antes:
+ * - Atualizava o reminder (status)
+ *
+ * Agora:
+ * - Apenas registra a ação no histórico
+ *
+ * Isso garante:
+ * ✔ Histórico completo
+ * ✔ Reaparecimento automático no dia seguinte
  */
 export async function updateReminderStatus(
   id: string,
   status: Reminder["status"]
 ): Promise<void> {
-  if (USE_MOCK) {
-    console.log("[MOCK] Atualizando lembrete:", { id, status });
-
-    const data = getMockReminders();
-
-    const updated = data.map((r) =>
-      r.id === id ? { ...r, status } : r
-    );
-
-    setMockReminders(updated);
-
-    return;
-  }
-
-  const { error } = await supabase
-    .from("reminders")
-    .update({ status })
-    .eq("id", id);
-
-  if (error) {
-    console.error("Erro ao atualizar lembrete:", error);
-    throw new Error(
-      error.message || "Não foi possível atualizar o lembrete"
-    );
-  }
-
-  console.log("Lembrete atualizado:", { id, status });
-}
-
- /**
-  * Reseta os lembretes para "pending".
-  *
-  * Deve ser executado uma vez por dia para garantir
-  * que os lembretes reapareçam para o usuário.
-  */
-export async function resetReminders(): Promise<void> {
-  if (USE_MOCK) {
-    console.log("[MOCK] Resetando lembretes");
-
-    const today = getLocalDate();
-    const lastReset = localStorage.getItem(LAST_RESET_KEY);
-
-    // evita múltiplos resets no mesmo dia
-    if (lastReset === today) {
-      console.log("[MOCK] Reset já executado hoje");
-      return;
-    }
-
-    const data = getMockReminders();
-
-    const reset: Reminder[] = data.map((r) => ({
-      ...r,
-      status: "pending",
-    }));
-
-    setMockReminders(reset);
-
-    // salva controle do dia
-    localStorage.setItem(LAST_RESET_KEY, today);
-
-    return;
-  }
-}
-
-if (import.meta.env.DEV) {
-  window.resetRemindersMock = async () => {
-    localStorage.removeItem("reminders_last_reset");
-    await resetReminders();
-    console.log("🧪 Mock de lembretes resetado manualmente");
-  };
+  await createReminderLog(id, status);
 }

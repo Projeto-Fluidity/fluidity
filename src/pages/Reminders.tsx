@@ -3,8 +3,8 @@ import ReminderStatsCard from "../components/reminders/ReminderStatsCard";
 import ReminderItemCard from "../components/reminders/ReminderItemCard";
 import ReminderToggleCard from "../components/reminders/ReminderToggleCard";
 import { useReminders } from "../hooks/useReminders";
-import { resetReminders } from "../services/reminderService";
-import { useEffect } from "react";
+// import { resetReminders } from "../services/reminderService";
+// import { useEffect } from "react";
 
 /**
  * Tela responsável por exibir lembretes inteligentes
@@ -19,9 +19,9 @@ export default function Reminders() {
   } = useReminders();
 
   // RESET AQUI (dentro do componente)
-  useEffect(() => {
-    resetReminders();
-  }, []);
+  // useEffect(() => {
+  //   resetReminders();
+  // }, []);
 
   return (
     <AppLayout>
@@ -54,7 +54,6 @@ export default function Reminders() {
 
           {/* Renderização dinâmica */}
           {reminders
-            .filter((r) => r.status === "pending")
             .map((reminder) => (
               <ReminderItemCard
                 key={reminder.id}
