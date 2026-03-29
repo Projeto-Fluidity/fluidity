@@ -9,6 +9,7 @@ import Profile from "./pages/Profile";
 import BreathingGuide from "./pages/BreathingGuide";
 import QuickMeditation from "./pages/QuickMeditation";
 import Reminders from "./pages/Reminders";
+import Settings from "./pages/Settings";
 
 /**
  * Componente raiz da aplicação.
@@ -26,6 +27,7 @@ function App() {
       <Route path="/breathing" element={<BreathingGuide />} />
       <Route path="/meditation" element={<QuickMeditation />} />
       <Route path="/reminders" element={<Reminders />}/>
+      <Route path="/settings" element={<Settings />} />
     </Routes>
   );
 }
