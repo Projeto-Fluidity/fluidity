@@ -194,7 +194,9 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  <Toggle active={false} disabled onToggle={() => {}} />
+                  <Toggle active={generalToggles[setting.id]}
+                  disabled
+                  onToggle={() => {}} />
                 </div>
               ))}
             </div>
