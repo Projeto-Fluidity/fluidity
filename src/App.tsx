@@ -7,6 +7,8 @@ import MoodError from "./pages/MoodError";
 import Practices from "./pages/Practices";
 import Profile from "./pages/Profile";
 import BreathingGuide from "./pages/BreathingGuide";
+import WaterReminder from "./pages/WaterReminder";  
+import VisualRest from "./pages/VisualRest";  
 import QuickMeditation from "./pages/QuickMeditation";
 import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
@@ -27,6 +29,8 @@ function App() {
       <Route path="/practices" element={<Practices />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/breathing" element={<BreathingGuide />} />
+      <Route path="/water" element={<WaterReminder />} />
+      <Route path="/rest" element={<VisualRest />} />
       <Route path="/meditation" element={<QuickMeditation />} />
       <Route path="/reminders" element={<Reminders />}/>
       <Route path="/settings" element={<Settings />} />
