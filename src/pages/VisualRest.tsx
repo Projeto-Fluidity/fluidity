@@ -1,5 +1,11 @@
 import UnderDevelopment from "../components/ui/UnderDevelopment";
 
+/**
+ * Tela de Descanso Visual.
+ *
+ * Esta página futuramente oferecerá exercícios
+ * para reduzir o cansaço ocular durante o uso prolongado.
+ */
 export default function VisualRest() {
   return (
     <UnderDevelopment
