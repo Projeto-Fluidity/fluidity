@@ -10,6 +10,8 @@ import BreathingGuide from "./pages/BreathingGuide";
 import QuickMeditation from "./pages/QuickMeditation";
 import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
+import WaterReminder from "./pages/WaterReminder";
+import VisualRest from "./pages/VisualRest";
 
 /**
  * Componente raiz da aplicação.
@@ -28,6 +30,8 @@ function App() {
       <Route path="/meditation" element={<QuickMeditation />} />
       <Route path="/reminders" element={<Reminders />}/>
       <Route path="/settings" element={<Settings />} />
+      <Route path="/water" element={<WaterReminder />} />
+      <Route path="/rest" element={<VisualRest />} />
     </Routes>
   );
 }
