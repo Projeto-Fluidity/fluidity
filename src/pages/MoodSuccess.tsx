@@ -27,7 +27,7 @@ export default function MoodSuccess() {
         />
       }
       title="Humor registrado!"
-      descriptionPrimary="Que bom que você registrou 🙂"
+      descriptionPrimary="Seu humor foi registrado com sucesso."
       action={
         <Button variant="success" fullWidth onClick={handleNavigateHome}>
           Ir para Home
