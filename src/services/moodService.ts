@@ -11,11 +11,27 @@ import {
 
 /**
  * ============================================================
- * STORAGE (mock persistido)
+ * STORAGE (mock persistido) 
+ * STORAGE (seed persistido)
  * ============================================================
  */
 
 const STORAGE_KEY = "fluidity:mood_mock";
+const SEED_KEY = "fluidity:mood_seed";
+
+  function loadSeed(): MoodRecord[] {
+    const stored = localStorage.getItem(SEED_KEY);
+    if (!stored) return [...moodMock];
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return [...moodMock];
+    }
+  }
+
+  function saveSeed(data: MoodRecord[]) {
+    localStorage.setItem(SEED_KEY, JSON.stringify(data));
+  }
 
 function loadMock(): MoodRecord[] {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -50,10 +66,11 @@ export async function getMoodHistory(): Promise<MoodRecord[]> {
 
   // SEED → mock fixo
   if (source === "seed") {
-    const data = [...moodMock].sort(
+    const data = loadSeed().sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
+
     return Array.isArray(data) ? data : [];
   }
 
@@ -103,7 +120,30 @@ export async function saveMood(mood: MoodType): Promise<void> {
 
   // SEED não permite salvar
   if (source === "seed") {
-    console.warn("[MOCK] Seed mode não permite salvar");
+    console.log("[MOCK] Salvando em SEED:", mood);
+
+    if (Math.random() < 0.2) {
+      throw new Error("Erro simulado (seed)");
+    }
+
+    const mockData = loadSeed();
+    const today = getLocalDate();
+
+    const alreadyExists = mockData.some(
+      (item) => toLocalDate(item.created_at) === today
+    );
+
+    if (alreadyExists) {
+      throw new Error("Você já registrou seu humor hoje");
+    }
+
+    const newRecord: MoodRecord = {
+      id: String(Date.now()),
+      mood,
+      created_at: getCurrentTimestamp(),
+    };
+
+    saveSeed([newRecord, ...mockData]);
     return;
   }
 
