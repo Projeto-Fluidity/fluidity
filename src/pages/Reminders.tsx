@@ -3,7 +3,7 @@ import ReminderStatsCard from "../components/reminders/ReminderStatsCard";
 import ReminderItemCard from "../components/reminders/ReminderItemCard";
 import ReminderToggleCard from "../components/reminders/ReminderToggleCard";
 import { useReminders } from "../hooks/useReminders";
-import { resetReminderLogs } from "../services/reminderService";
+import { resetReminderLogs } from "../utils/debug/resetReminderLogs";
 
 /**
  * Tela responsável por exibir lembretes inteligentes

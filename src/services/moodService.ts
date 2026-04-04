@@ -9,6 +9,12 @@ import {
   toLocalDate,
 } from "../lib/date";
 
+/**
+ * ============================================================
+ * STORAGE (mock persistido)
+ * ============================================================
+ */
+
 const STORAGE_KEY = "fluidity:mood_mock";
 
 function loadMock(): MoodRecord[] {
@@ -27,18 +33,73 @@ function saveMock(data: MoodRecord[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-const USE_MOCK = env.useMock;
+/**
+ * ============================================================
+ * GET HISTORY
+ * ============================================================
+ */
 
-if (import.meta.env.DEV) {
-  console.log("USE_MOCK:", USE_MOCK);
+export async function getMoodHistory(): Promise<MoodRecord[]> {
+  const source = env.moodSource;
+
+  // 🟢 SEED → mock fixo
+  if (source === "seed") {
+    console.log("[MOCK] Using SEED mood");
+
+    const data = [...moodMock].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
+    );
+
+    return Array.isArray(data) ? data : [];
+  }
+
+  // 🔵 STORAGE → localStorage
+  if (source === "storage") {
+    console.log("[MOCK] Using STORAGE mood");
+
+    const data = loadMock().sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
+    );
+
+    return Array.isArray(data) ? data : [];
+  }
+
+  // 🟣 API → Supabase
+  const { data, error } = await supabase
+    .from("moods")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Erro ao buscar histórico:", error);
+    return [];
+  }
+
+  return Array.isArray(data) ? data : [];
 }
 
 /**
- * Persiste no banco de dados o humor selecionado pelo usuário.
+ * ============================================================
+ * SAVE MOOD
+ * ============================================================
  */
+
 export async function saveMood(mood: MoodType): Promise<void> {
-  if (USE_MOCK) {
-    console.log("[MOCK] Salvando humor:", mood);
+  const source = env.moodSource;
+
+  // ❌ SEED não permite salvar
+  if (source === "seed") {
+    console.warn("[MOCK] Seed mode não permite salvar");
+    return;
+  }
+
+  // 🔵 STORAGE
+  if (source === "storage") {
+    console.log("[MOCK] Salvando em STORAGE:", mood);
 
     const mockData = loadMock();
     const today = getLocalDate();
@@ -60,10 +121,10 @@ export async function saveMood(mood: MoodType): Promise<void> {
     const updated = [newRecord, ...mockData];
 
     saveMock(updated);
-
     return;
   }
 
+  // 🟣 API
   const today = getLocalDate();
 
   const { error } = await supabase.from("moods").insert({
@@ -78,48 +139,8 @@ export async function saveMood(mood: MoodType): Promise<void> {
       throw new Error("Você já registrou seu humor hoje");
     }
 
-    throw new Error(error.message || "Não foi possível salvar o humor");
+    throw new Error(error.message || "Erro ao salvar");
   }
 
   console.log("Humor salvo:", mood);
-}
-
-/**
- * Recupera o histórico de humores registrados.
- */
-export async function getMoodHistory(): Promise<MoodRecord[]> {
-  if (USE_MOCK) {
-    console.log("[MOCK] Buscando histórico");
-
-    const data = loadMock();
-
-    return data.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
-    );
-  }
-
-  const { data, error } = await supabase
-    .from("moods")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (import.meta.env.DEV) {
-    console.log("DATA FROM DB:", data);
-  }
-
-  if (error) {
-    console.error("Erro ao buscar histórico:", error);
-    return [];
-  }
-
-  return data ?? [];
-}
-
-if (import.meta.env.DEV) {
-  window.resetMoodMock = () => {
-    localStorage.removeItem("fluidity:mood_mock");
-    console.log("🧪 Mock de humor resetado");
-  };
 }

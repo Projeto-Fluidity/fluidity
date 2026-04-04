@@ -12,6 +12,7 @@ import VisualRest from "./pages/VisualRest";
 import QuickMeditation from "./pages/QuickMeditation";
 import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
+import DevTools from "./components/debug/DevTools";
 
 /**
  * Componente raiz da aplicação.
@@ -19,20 +20,23 @@ import Settings from "./pages/Settings";
  */
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Emotion />} />
-      <Route path="/history" element={<History />} />
-      <Route path="/success" element={<MoodSuccess />} />
-      <Route path="/error" element={<MoodError />} />
-      <Route path="/practices" element={<Practices />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/breathing" element={<BreathingGuide />} />
-      <Route path="/water" element={<WaterReminder />} />
-      <Route path="/rest" element={<VisualRest />} />
-      <Route path="/meditation" element={<QuickMeditation />} />
-      <Route path="/reminders" element={<Reminders />}/>
-      <Route path="/settings" element={<Settings />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<Emotion />} />
+        <Route path="/history" element={<History />} />
+        <Route path="/success" element={<MoodSuccess />} />
+        <Route path="/error" element={<MoodError />} />
+        <Route path="/practices" element={<Practices />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/breathing" element={<BreathingGuide />} />
+        <Route path="/water" element={<WaterReminder />} />
+        <Route path="/rest" element={<VisualRest />} />
+        <Route path="/meditation" element={<QuickMeditation />} />
+        <Route path="/reminders" element={<Reminders />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+      {import.meta.env.DEV && <DevTools />}
+    </>
   );
 }
 

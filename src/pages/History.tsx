@@ -4,6 +4,7 @@ import LastCheckinCard from "../components/history/LastCheckinCard";
 import MoodHistoryList from "../components/history/MoodHistoryList";
 import { useMood } from "../hooks/useMood";
 import ReminderNavigationCard from "../components/reminders/ReminderNavigationCard";
+import { resetMoodMock } from "../utils/debug/resetMoodMock";
 
 /**
  * Tela responsável por exibir o histórico
@@ -13,7 +14,8 @@ export default function History() {
   const { history, loading } = useMood();
 
   const lastCheckin = history[0];
-  const previousHistory = history.slice(1);
+  const previousHistory = 
+  history.length === 1 ? history : history.slice(1);
 
   return (
     <AppLayout>
@@ -58,6 +60,17 @@ export default function History() {
           <ReminderNavigationCard />
         </div>
       </div>
+      {import.meta.env.DEV && (
+        <button
+          onClick={() => {
+            resetMoodMock();
+            window.location.reload();
+          }}
+          className="mt-2 w-full rounded-lg border border-red-400 text-red-500 py-2 text-sm font-medium"
+        >
+          Resetar humor (QA)
+        </button>
+      )}
     </AppLayout>
   );
 }
