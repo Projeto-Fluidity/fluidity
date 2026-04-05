@@ -12,17 +12,20 @@ export function getCurrentTimestamp(): string {
   return new Date().toISOString();
 }
 
-export function toLocalDate(date: string): string {
+export function toLocalDate(date?: string): string {
+  if (!date) return "";
   return new Date(date).toLocaleDateString("en-CA");
 }
 
 /**
  * =========================
- * 🎨 FORMATAÇÃO (UI)
+ * FORMATAÇÃO (UI)
  * =========================
  */
 
-export function formatDate(date: string) {
+export function formatDate(date?: string) {
+  if (!date) return "";
+
   const d = new Date(date);
 
   return d.toLocaleDateString("pt-BR", {
@@ -32,7 +35,9 @@ export function formatDate(date: string) {
   });
 }
 
-export function formatTime(date: string) {
+export function formatTime(date?: string) {
+  if (!date) return "";
+
   const d = new Date(date);
 
   return d.toLocaleTimeString("pt-BR", {

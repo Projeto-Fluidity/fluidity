@@ -7,4 +7,5 @@ export type MoodRecord = {
   id: string;
   mood: MoodType;
   created_at: string;
+  checkin_date?: string; // presente no modo API (Supabase), ausente nos modos mock
 };

@@ -159,32 +159,32 @@ export async function updateReminderStatus(
  *
  * Usado apenas em desenvolvimento para simular novo dia
  */
-export async function resetReminderLogs(): Promise<void> {
-  /**
-   * ========================
-   * MODO MOCK
-   * ========================
-   */
-  if (USE_MOCK) {
-    const { resetMockLogs } = await import("../mocks/reminderLogMock");
-    resetMockLogs();
-    console.log("[QA] Logs resetados (mock)");
-    return;
-  }
+// export async function resetReminderLogs(): Promise<void> {
+//   /**
+//    * ========================
+//    * MODO MOCK
+//    * ========================
+//    */
+//   if (USE_MOCK) {
+//     const { resetMockLogs } = await import("../mocks/reminderLogMock");
+//     resetMockLogs();
+//     console.log("[QA] Logs resetados (mock)");
+//     return;
+//   }
 
-  /**
-   * ========================
-   * PRODUÇÃO (SUPABASE)
-   * ========================
-   */
-  const { error } = await supabase
-    .from("reminder_logs")
-    .delete()
-    .neq("id", "");
+//   /**
+//    * ========================
+//    * PRODUÇÃO (SUPABASE)
+//    * ========================
+//    */
+//   const { error } = await supabase
+//     .from("reminder_logs")
+//     .delete()
+//     .neq("id", "");
 
-  if (error) {
-    console.error("Erro ao resetar logs:", error);
-  }
+//   if (error) {
+//     console.error("Erro ao resetar logs:", error);
+//   }
 
-  console.log("[QA] Logs resetados (DB)");
-}
+//   console.log("[QA] Logs resetados (DB)");
+// }

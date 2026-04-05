@@ -1,4 +1,5 @@
 import type { Reminder } from "../types/reminder";
+import { env } from "../config/env";
 
 const STORAGE_KEY = "mock_reminders";
 
@@ -40,6 +41,13 @@ const initialData: Reminder[] = [
 ];
 
 export function getMockReminders(): Reminder[] {
+  // 🧠 DECISÃO DE FONTE PRIMEIRO
+  if (env.reminderSource === "seed") {
+    console.log("[MOCK] Using SEED data");
+    return initialData;
+  }
+
+  // modo storage
   const stored = localStorage.getItem(STORAGE_KEY);
 
   if (!stored) {
