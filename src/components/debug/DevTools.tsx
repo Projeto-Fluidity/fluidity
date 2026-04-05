@@ -2,16 +2,6 @@
  * ============================================================
  * DEV TOOLS (Painel de Debug)
  * ============================================================
- *
- * Permite alterar a fonte de dados da aplicação em tempo real.
- *
- * Funcionalidades:
- *
- * - Alternar fonte de dados (seed / storage / api)
- * - Resetar configuração (remover override)
- *
- * IMPORTANTE:
- * Só aparece em ambiente de desenvolvimento.
  */
 
 export default function DevTools() {
@@ -36,8 +26,20 @@ export default function DevTools() {
     window.location.reload();
   }
 
+  // ✅ Helper de estilo (botão ativo vs inativo)
+  function getButtonClass(active: boolean) {
+    return `
+      px-2 py-1 rounded border text-xs transition
+      ${
+        active
+          ? "bg-green-600 border-green-500 text-white"
+          : "bg-gray-800 border-gray-500 text-gray-300 hover:bg-gray-700"
+      }
+    `;
+  }
+
   return (
-    <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded-xl text-xs space-y-4 z-50 w-48 shadow-lg">
+    <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded-xl text-xs space-y-4 z-50 w-52 shadow-lg">
       <p className="font-bold text-sm">Dev Tools</p>
 
       {/* MOOD */}
@@ -50,21 +52,21 @@ export default function DevTools() {
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setMoodSource("seed")}
-            className="px-2 py-1 bg-gray-800 border border-gray-500 rounded hover:bg-gray-700"
+            className={getButtonClass(currentMood === "seed")}
           >
             Seed
           </button>
 
           <button
             onClick={() => setMoodSource("storage")}
-            className="px-2 py-1 bg-gray-800 border border-gray-500 rounded hover:bg-gray-700"
+            className={getButtonClass(currentMood === "storage")}
           >
             Storage
           </button>
 
           <button
             onClick={() => setMoodSource("api")}
-            className="px-2 py-1 bg-gray-800 border border-gray-500 rounded hover:bg-gray-700"
+            className={getButtonClass(currentMood === "api")}
           >
             API
           </button>
@@ -81,21 +83,21 @@ export default function DevTools() {
         <div className="flex gap-2">
           <button
             onClick={() => setReminderSource("seed")}
-            className="px-2 py-1 bg-gray-800 border border-gray-500 rounded hover:bg-gray-700"
+            className={getButtonClass(currentReminder === "seed")}
           >
             Seed
           </button>
 
           <button
             onClick={() => setReminderSource("storage")}
-            className="px-2 py-1 bg-gray-800 border border-gray-500 rounded hover:bg-gray-700"
+            className={getButtonClass(currentReminder === "storage")}
           >
             Storage
           </button>
         </div>
       </div>
 
-      {/* CLEAR CONFIG */}
+      {/* RESET */}
       <button
         onClick={clearOverrides}
         className="text-red-400 hover:text-red-300 text-xs"
