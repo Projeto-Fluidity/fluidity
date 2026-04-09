@@ -159,18 +159,18 @@ export async function updateReminderStatus(
  *
  * Usado apenas em desenvolvimento para simular novo dia
  */
-// export async function resetReminderLogs(): Promise<void> {
+export async function resetReminderLogs(): Promise<void> {
 //   /**
 //    * ========================
 //    * MODO MOCK
 //    * ========================
 //    */
-//   if (USE_MOCK) {
-//     const { resetMockLogs } = await import("../mocks/reminderLogMock");
-//     resetMockLogs();
-//     console.log("[QA] Logs resetados (mock)");
-//     return;
-//   }
+  if (USE_MOCK) {
+    const { resetMockLogs } = await import("../mocks/reminderLogMock");
+    resetMockLogs();
+    console.log("[QA] Logs resetados (mock)");
+    return;
+  }
 
 //   /**
 //    * ========================
@@ -187,4 +187,4 @@ export async function updateReminderStatus(
 //   }
 
 //   console.log("[QA] Logs resetados (DB)");
-// }
+}
