@@ -1,78 +1,121 @@
+/**
+ * ============================================================
+ * TIPOS
+ * ============================================================
+ */
+
+type DataMode = "seed" | "storage" | "api";
+
 type EnvConfig = {
+  dataMode: DataMode;
+
+  // legado (será removido no futuro)
   useMock: boolean;
   reminderSource: "seed" | "storage";
-  moodSource: "seed" | "storage" | "api";
+  moodSource: DataMode;
+
+  // debug / QA
+  forceError: boolean;
 };
 
 /**
  * ============================================================
- * ENV CONFIG (Fonte única de verdade)
+ * LEITURA DAS VARIÁVEIS DE AMBIENTE (.env)
  * ============================================================
- *
- * Este arquivo centraliza TODAS as decisões de configuração
- * da aplicação.
- *
- * Ele combina:
- *
- * 1. Variáveis de ambiente (.env)
- * 2. Overrides locais (localStorage - DevTools)
- *
- * Prioridade:
- * override (DevTools) > .env
- *
- * Isso permite alterar comportamento SEM reiniciar a aplicação.
  */
 
 const reminderSourceEnv = import.meta.env.VITE_REMINDER_SOURCE;
 const moodSourceEnv = import.meta.env.VITE_MOOD_SOURCE;
+const dataModeEnv = import.meta.env.VITE_DATA_MODE;
+const forceErrorEnv = import.meta.env.VITE_FORCE_ERROR;
 
 /**
- * Resolve a fonte de lembretes baseada no .env
+ * ============================================================
+ * FUNÇÕES DE RESOLUÇÃO (ENV)
+ * ============================================================
  */
+
+function resolveDataMode(): DataMode | null {
+  if (dataModeEnv === "seed") return "seed";
+  if (dataModeEnv === "storage") return "storage";
+  if (dataModeEnv === "api") return "api";
+  return null;
+}
+
 function resolveReminderSource(): "seed" | "storage" {
   if (reminderSourceEnv === "seed") return "seed";
   return "storage";
 }
 
-/**
- * Resolve a fonte de humor baseada no .env
- */
-function resolveMoodSource(): "seed" | "storage" | "api" {
+function resolveMoodSource(): DataMode {
   if (moodSourceEnv === "seed") return "seed";
   if (moodSourceEnv === "storage") return "storage";
   return "api";
 }
 
 /**
- * Busca override salvo no localStorage (usado pelo DevTools)
- *
- * Exemplo:
- * localStorage.setItem("debug:moodSource", "seed")
+ * ============================================================
+ * OVERRIDE VIA LOCALSTORAGE (DEVTOOLS)
+ * ============================================================
  */
+
 function getOverride<T>(key: string): T | null {
   const value = localStorage.getItem(key);
   return value ? (value as T) : null;
 }
 
-/**
- * Overrides (se existirem)
- */
-const moodOverride = getOverride<"seed" | "storage" | "api">(
-  "debug:moodSource"
-);
-
+const dataModeOverride = getOverride<DataMode>("debug:dataMode");
+const moodOverride = getOverride<DataMode>("debug:moodSource");
 const reminderOverride = getOverride<"seed" | "storage">(
   "debug:reminderSource"
 );
+const forceErrorOverride = getOverride<"true" | "false">(
+  "debug:forceError"
+);
 
 /**
- * Export final (usado no sistema inteiro)
+ * ============================================================
+ * RESOLUÇÃO FINAL
+ * ============================================================
  */
+
+/**
+ * DATA MODE (principal)
+ */
+const resolvedDataMode: DataMode =
+  dataModeOverride ??
+  resolveDataMode() ??
+  moodOverride ??
+  resolveMoodSource() ??
+  (import.meta.env.VITE_USE_MOCK === "true" ? "storage" : "api");
+
+/**
+ * FORCE ERROR (QA)
+ *
+ * Prioridade:
+ * 1. Override DevTools
+ * 2. .env
+ * 3. default false
+ */
+const resolvedForceError: boolean =
+  forceErrorOverride !== null
+    ? forceErrorOverride === "true"
+    : forceErrorEnv === "true";
+
+/**
+ * ============================================================
+ * EXPORT FINAL
+ * ============================================================
+ */
+
 export const env: EnvConfig = {
+  dataMode: resolvedDataMode,
+
+  // legado
   useMock: import.meta.env.VITE_USE_MOCK === "true",
-
-  // prioridade: override > env
   reminderSource: reminderOverride ?? resolveReminderSource(),
-
   moodSource: moodOverride ?? resolveMoodSource(),
+
+  // debug / QA
+  forceError: resolvedForceError,
 };

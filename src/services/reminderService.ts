@@ -2,19 +2,6 @@
  * ============================================================
  * REMINDER SERVICE
  * ============================================================
- *
- * Responsável por:
- * - Buscar lembretes disponíveis no dia
- * - Registrar interações do usuário (histórico)
- *
- * Arquitetura:
- * - reminders → dados estáticos (templates)
- * - reminder_logs → histórico de uso
- *
- * Regra de negócio:
- * - Um lembrete só pode aparecer 1x por dia
- * - Após interação → não aparece novamente no mesmo dia
- * - No dia seguinte → volta automaticamente
  */
 
 import type { Reminder } from "../types/reminder";
@@ -25,8 +12,6 @@ import {
   getMockLogs,
   addMockLog,
 } from "../mocks/reminderLogMock";
-
-const USE_MOCK = env.useMock;
 
 /**
  * Retorna a data atual no formato YYYY-MM-DD
@@ -39,21 +24,17 @@ function getToday(): string {
  * ============================================================
  * BUSCAR LEMBRETES DISPONÍVEIS
  * ============================================================
- *
- * Fluxo:
- * 1. Buscar todos os reminders
- * 2. Buscar logs de interação
- * 3. Filtrar lembretes já utilizados hoje
  */
 export async function getReminders(): Promise<Reminder[]> {
+  const source = env.dataMode ?? (env.useMock ? "storage" : "api");
   const today = getToday();
 
   /**
    * ========================
-   * MODO MOCK
+   * SEED / STORAGE (mock)
    * ========================
    */
-  if (USE_MOCK) {
+  if (source === "seed" || source === "storage") {
     const reminders = getMockReminders();
     const logs = getMockLogs();
 
@@ -68,62 +49,64 @@ export async function getReminders(): Promise<Reminder[]> {
 
   /**
    * ========================
-   * PRODUÇÃO (SUPABASE)
+   * API (Supabase)
    * ========================
    */
+  if (source === "api") {
+    if (!supabase) {
+      console.warn("Supabase não disponível neste ambiente");
+      return [];
+    }
 
-  const { data: reminders, error: remindersError } = await supabase
-    .from("reminders")
-    .select("*");
+    const { data: reminders, error: remindersError } = await supabase
+      .from("reminders")
+      .select("*");
 
-  if (remindersError) {
-    console.error("Erro ao buscar reminders:", remindersError);
-    return [];
+    if (remindersError) {
+      console.error("Erro ao buscar reminders:", remindersError);
+      return [];
+    }
+
+    const { data: logs, error: logsError } = await supabase
+      .from("reminder_logs")
+      .select("reminder_id, created_at");
+
+    if (logsError) {
+      console.error("Erro ao buscar logs:", logsError);
+      return reminders ?? [];
+    }
+
+    const usedToday = new Set(
+      (logs ?? [])
+        .filter((log) => log.created_at.startsWith(today))
+        .map((log) => log.reminder_id)
+    );
+
+    return (reminders ?? []).filter(
+      (reminder) => !usedToday.has(reminder.id)
+    );
   }
 
-  const { data: logs, error: logsError } = await supabase
-    .from("reminder_logs")
-    .select("reminder_id, created_at");
-
-  if (logsError) {
-    console.error("Erro ao buscar logs:", logsError);
-    return reminders ?? [];
-  }
-  console.log("REMINDERS:", reminders);
-console.log("LOGS:", logs);
-
-  const usedToday = new Set(
-    (logs ?? [])
-      .filter((log) => log.created_at.startsWith(today))
-      .map((log) => log.reminder_id)
-  );
-
-  return (reminders ?? []).filter(
-    (reminder) => !usedToday.has(reminder.id)
-  );
+  return [];
 }
 
 /**
  * ============================================================
  * REGISTRAR INTERAÇÃO DO USUÁRIO
  * ============================================================
- *
- * Cria um registro na tabela reminder_logs.
- *
- * Cada interação gera um evento:
- * - accepted
- * - postponed
  */
 export async function updateReminderStatus(
   id: string,
   action: "accepted" | "postponed"
 ): Promise<void> {
+  const source = env.dataMode ?? (env.useMock ? "storage" : "api");
+
   /**
    * ========================
-   * MODO MOCK
+   * SEED / STORAGE (mock)
    * ========================
    */
-  if (USE_MOCK) {
+  if (source === "seed" || source === "storage") {
     addMockLog({
       id: crypto.randomUUID(),
       reminder_id: id,
@@ -136,19 +119,27 @@ export async function updateReminderStatus(
 
   /**
    * ========================
-   * PRODUÇÃO (SUPABASE)
+   * API (Supabase)
    * ========================
    */
-  const { error } = await supabase
-    .from("reminder_logs")
-    .insert({
-      reminder_id: id,
-      action,
-    });
+  if (source === "api") {
+    if (!supabase) {
+      throw new Error("Supabase não disponível neste ambiente");
+    }
 
-  if (error) {
-    console.error("Erro ao salvar log:", error);
-    throw new Error("Erro ao registrar interação");
+    const { error } = await supabase
+      .from("reminder_logs")
+      .insert({
+        reminder_id: id,
+        action,
+      });
+
+    if (error) {
+      console.error("Erro ao salvar log:", error);
+      throw new Error("Erro ao registrar interação");
+    }
+
+    return;
   }
 }
 
@@ -156,35 +147,29 @@ export async function updateReminderStatus(
  * ============================================================
  * RESET DE LOGS (QA)
  * ============================================================
- *
- * Usado apenas em desenvolvimento para simular novo dia
  */
 export async function resetReminderLogs(): Promise<void> {
-//   /**
-//    * ========================
-//    * MODO MOCK
-//    * ========================
-//    */
-  if (USE_MOCK) {
+  const source = env.dataMode ?? (env.useMock ? "storage" : "api");
+
+  /**
+   * ========================
+   * SEED / STORAGE (mock)
+   * ========================
+   */
+  if (source === "seed" || source === "storage") {
     const { resetMockLogs } = await import("../mocks/reminderLogMock");
     resetMockLogs();
     console.log("[QA] Logs resetados (mock)");
     return;
   }
 
-//   /**
-//    * ========================
-//    * PRODUÇÃO (SUPABASE)
-//    * ========================
-//    */
-//   const { error } = await supabase
-//     .from("reminder_logs")
-//     .delete()
-//     .neq("id", "");
-
-//   if (error) {
-//     console.error("Erro ao resetar logs:", error);
-//   }
-
-//   console.log("[QA] Logs resetados (DB)");
+  /**
+   * ========================
+   * API (desabilitado por segurança)
+   * ========================
+   */
+  if (source === "api") {
+    console.warn("Reset de logs desabilitado em ambiente API");
+    return;
+  }
 }
