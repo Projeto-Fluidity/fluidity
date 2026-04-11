@@ -41,7 +41,6 @@
  * ============================================================
  */
 
-import AppLayout from "../components/layout/AppLayout";
 import MoodSelector from "../components/MoodSelector";
 import EmotionExerciseCard from "../components/EmotionExerciseCard";
 import { useMood } from "../hooks/useMood";
@@ -155,7 +154,7 @@ export default function Emotion() {
   }
 
   return (
-    <AppLayout>
+    <>
       {/* Background principal da tela */}
       <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
         <div className="space-y-6">
@@ -250,6 +249,6 @@ export default function Emotion() {
           onCancel={handleCancel}
         />
       )}
-    </AppLayout>
+    </>
   );
 }
