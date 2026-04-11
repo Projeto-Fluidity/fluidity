@@ -1,4 +1,3 @@
-import AppLayout from "../components/layout/AppLayout";
 import ExerciseCard from "../components/ExerciseCard";
 import LastCheckinCard from "../components/history/LastCheckinCard";
 import MoodHistoryList from "../components/history/MoodHistoryList";
@@ -34,7 +33,7 @@ export default function History() {
   const fullHistory = history;
 
   return (
-    <AppLayout>
+    <>
       <div className="bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4 pb-2 flex-1">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-gray-800">
@@ -85,6 +84,6 @@ export default function History() {
           Resetar humor (QA)
         </button>
       )}
-    </AppLayout>
+    </>
   );
 }

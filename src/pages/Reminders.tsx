@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import AppLayout from "../components/layout/AppLayout";
 import ReminderStatsCard from "../components/reminders/ReminderStatsCard";
 import ReminderItemCard from "../components/reminders/ReminderItemCard";
 import ReminderToggleCard from "../components/reminders/ReminderToggleCard";
@@ -84,7 +83,7 @@ export default function Reminders() {
   }
 
   return (
-    <AppLayout>
+    <>
       {/* Toast de feedback */}
       {feedback && (
         <div className="fixed bottom-20 left-1/2 -translate-x-1/2 rounded-xl bg-black px-4 py-2 text-sm text-white shadow-md">
@@ -154,6 +153,6 @@ export default function Reminders() {
           </div>
         )}
       </div>
-    </AppLayout>
+    </>
   );
 }
