@@ -1,22 +1,26 @@
+/**
+ * DevTools de desenvolvimento.
+ *
+ * Permite:
+ * - trocar fonte de dados
+ * - resetar estado
+ * - simular cenários de QA
+ */
+
 import { useState, useRef, useEffect } from "react";
 
 export default function DevTools() {
-  /**
-   * ⚠️ IMPORTANTE:
-   * Hooks devem SEMPRE vir antes de qualquer return condicional
-   */
-
   const [isOpen, setIsOpen] = useState(true);
   const [position, setPosition] = useState({ x: 20, y: 20 });
 
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
 
-  const currentMood = localStorage.getItem("debug:moodSource");
+  const currentMode = localStorage.getItem("debug:dataMode");
   const currentReminder = localStorage.getItem("debug:reminderSource");
 
   /**
-   * Eventos globais (drag)
+   * Drag
    */
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
@@ -41,9 +45,6 @@ export default function DevTools() {
     };
   }, []);
 
-  /**
-   * 👉 AGORA SIM pode fazer retorno condicional
-   */
   if (!import.meta.env.DEV) return null;
 
   function handleMouseDown(e: React.MouseEvent) {
@@ -55,19 +56,38 @@ export default function DevTools() {
     };
   }
 
-  function setMoodSource(value: "seed" | "storage" | "api") {
-    localStorage.setItem("debug:moodSource", value);
+  /**
+   * DATA MODE
+   */
+  function setDataMode(value: "seed" | "storage" | "api") {
+    localStorage.setItem("debug:dataMode", value);
     window.location.reload();
   }
 
+  /**
+   * REMINDER SOURCE
+   */
   function setReminderSource(value: "seed" | "storage") {
     localStorage.setItem("debug:reminderSource", value);
     window.location.reload();
   }
 
+  /**
+   *  RESET COMPLETO QA 
+   */
   function clearOverrides() {
-    localStorage.removeItem("debug:moodSource");
+    // Configurações
+    localStorage.removeItem("debug:dataMode");
     localStorage.removeItem("debug:reminderSource");
+
+    // Dados
+    localStorage.removeItem("fluidity:mood_mock");
+
+    // Flags QA
+    localStorage.removeItem("debug:forceError");
+
+    console.log("[QA] Reset completo aplicado");
+
     window.location.reload();
   }
 
@@ -109,36 +129,38 @@ export default function DevTools() {
         {/* CONTEÚDO */}
         {isOpen && (
           <div className="p-3 space-y-4">
+            {/* DATA MODE */}
             <div>
-              <p className="text-gray-400 mb-1">Mood Source</p>
+              <p className="text-gray-400 mb-1">Data Mode</p>
               <p className="text-[10px] text-gray-500 mb-2">
-                atual: {currentMood ?? "env"}
+                atual: {currentMode ?? "env"}
               </p>
 
               <div className="flex gap-2 flex-wrap">
                 <button
-                  onClick={() => setMoodSource("seed")}
-                  className={getButtonClass(currentMood === "seed")}
+                  onClick={() => setDataMode("seed")}
+                  className={getButtonClass(currentMode === "seed")}
                 >
                   Seed
                 </button>
 
                 <button
-                  onClick={() => setMoodSource("storage")}
-                  className={getButtonClass(currentMood === "storage")}
+                  onClick={() => setDataMode("storage")}
+                  className={getButtonClass(currentMode === "storage")}
                 >
                   Storage
                 </button>
 
                 <button
-                  onClick={() => setMoodSource("api")}
-                  className={getButtonClass(currentMood === "api")}
+                  onClick={() => setDataMode("api")}
+                  className={getButtonClass(currentMode === "api")}
                 >
                   API
                 </button>
               </div>
             </div>
 
+            {/* REMINDER */}
             <div>
               <p className="text-gray-400 mb-1">Reminder Source</p>
               <p className="text-[10px] text-gray-500 mb-2">
@@ -162,11 +184,12 @@ export default function DevTools() {
               </div>
             </div>
 
+            {/* RESET */}
             <button
               onClick={clearOverrides}
               className="text-red-400 hover:text-red-300 text-xs"
             >
-              Reset Config
+              Reset QA
             </button>
           </div>
         )}

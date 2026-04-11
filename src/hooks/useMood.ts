@@ -1,49 +1,28 @@
 import { useEffect, useState } from "react";
 import type { MoodType } from "../types/mood";
 import type { MoodRecord } from "../types/moodRecord";
-import {
-  getMoodHistory,
-  saveMood,
-} from "../services/moodService";
+import { getMoodHistory, saveMood } from "../services/moodService";
 
 /**
- * Hook responsável por centralizar o estado e as operações
- * relacionadas ao humor do usuário.
+ * Hook responsável por centralizar o estado de humor.
  *
- * Responsabilidades:
- * - carregar o histórico de humores
- * - registrar um novo humor
- * - controlar estados de loading e erro
- * - informar o status da operação de registro
- *
- * Toda comunicação com o banco de dados é delegada
- * ao service `moodService`.
+ * Ele controla:
+ * - histórico
+ * - loading
+ * - erro
+ * - status da operação
  */
 export function useMood() {
-  /**
-   * Histórico de registros de humor.
-   */
   const [history, setHistory] = useState<MoodRecord[]>([]);
-
-  /**
-   * Indica se os dados estão sendo carregados.
-   */
   const [loading, setLoading] = useState(true);
-
-  /**
-   * Armazena mensagens de erro.
-   */
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Status da operação de registro de humor.
-   */
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
 
   /**
-   * Carrega o histórico de humores do banco.
+   * Busca histórico no service
    */
   async function loadHistory() {
     try {
@@ -58,37 +37,40 @@ export function useMood() {
   }
 
   /**
-   * Registra um novo humor.
+   * Registra um novo humor
    *
-   * O controle de duplicidade é garantido pelo banco de dados.
-   * O frontend apenas reage ao erro retornado.
-   *
-   * @param mood Humor selecionado pelo usuário
+   * Importante:
+   * - Não usamos throw no service
+   * - O erro vem como retorno controlado
    */
   async function registerMood(mood: MoodType) {
+    setStatus("loading");
+    setError(null);
+
     try {
-      setStatus("loading");
-      setError(null);
+      const result = await saveMood(mood);
 
-      await saveMood(mood);
-
-      await loadHistory();
-
-      setStatus("success");
-    } catch (err: unknown) {
-      console.error("Erro ao registrar humor:", err);
-
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Erro ao registrar humor");
-      };
+      if (result?.error) {
+        setError(result.message || "Erro ao registrar humor");
         setStatus("error");
+      } else {
+        setStatus("success");
+      }
+
+      /**
+       * Sempre atualiza histórico,
+       * independentemente de sucesso ou erro.
+       */
+      await loadHistory();
+    } catch (err) {
+      console.error("Erro inesperado:", err);
+      setError("Erro inesperado");
+      setStatus("error");
     }
   }
 
   /**
-   * Carrega o histórico ao montar o componente.
+   * Carrega histórico ao iniciar
    */
   useEffect(() => {
     loadHistory();
