@@ -27,7 +27,7 @@ import {
   Heart,
   Moon,
 } from "lucide-react";
-import AppLayout from "../components/layout/AppLayout";
+
 import Toggle from "../components/ui/Toggle";
 import { useState } from "react";
 
@@ -141,7 +141,7 @@ export default function Settings() {
   }
 
   return (
-    <AppLayout>
+    <>
       <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
         <div className="space-y-6">
 
@@ -242,6 +242,6 @@ export default function Settings() {
 
         </div>
       </div>
-    </AppLayout>
+    </>
   );
 }
