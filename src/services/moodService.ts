@@ -1,3 +1,12 @@
+/**
+ * Serviço responsável por lidar com dados de humor.
+ *
+ * Ele abstrai três fontes:
+ * - seed (mock em memória)
+ * - storage (localStorage)
+ * - api (Supabase)
+ */
+
 import type { MoodType } from "../types/mood";
 import type { MoodRecord } from "../types/moodRecord";
 import { supabase } from "./supabaseClient";
@@ -10,35 +19,18 @@ import {
 } from "../lib/date";
 
 /**
- * ============================================================
- * STORAGE (mock persistido)
- * ============================================================
+ * STORAGE (persistência local)
  */
-
 const STORAGE_KEY = "fluidity:mood_mock";
-const SEED_KEY = "fluidity:mood_seed";
-
-function loadSeed(): MoodRecord[] {
-  const stored = localStorage.getItem(SEED_KEY);
-  if (!stored) return [...moodMock];
-  try {
-    return JSON.parse(stored);
-  } catch {
-    return [...moodMock];
-  }
-}
-
-function saveSeed(data: MoodRecord[]) {
-  localStorage.setItem(SEED_KEY, JSON.stringify(data));
-}
 
 function loadMock(): MoodRecord[] {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return [...moodMock];
+  if (!stored) return [];
+
   try {
     return JSON.parse(stored);
   } catch {
-    return [...moodMock];
+    return [];
   }
 }
 
@@ -47,125 +39,92 @@ function saveMock(data: MoodRecord[]) {
 }
 
 /**
- * Retorna a data de referência de um registro.
- * Prioriza checkin_date (API) e usa created_at (mock) como fallback.
+ * SEED (estado em memória)
+ *
+ * Não persiste após reload.
+ * Ideal para QA.
+ */
+let seedState: MoodRecord[] = [...moodMock];
+
+function loadSeed(): MoodRecord[] {
+  return [...seedState];
+}
+
+function resetSeedState() {
+  seedState = [...moodMock];
+}
+
+/**
+ * Utilitário de data
  */
 function getRecordDate(record: MoodRecord): string {
   return record.checkin_date ?? toLocalDate(record.created_at);
 }
 
 /**
- * ============================================================
  * GET HISTORY
- * ============================================================
  */
 export async function getMoodHistory(): Promise<MoodRecord[]> {
-  const source = env.dataMode ?? env.moodSource;
+  const source = env.dataMode;
 
-  /**
-   * ========================
-   * SEED (mock fixo)
-   * ========================
-   */
   if (source === "seed") {
-    const data = loadSeed().sort(
+    return loadSeed().sort(
       (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
     );
-
-    return Array.isArray(data) ? data : [];
   }
 
-  /**
-   * ========================
-   * STORAGE (localStorage)
-   * ========================
-   */
   if (source === "storage") {
-    const data = loadMock().sort(
+    return loadMock().sort(
       (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
     );
-
-    return Array.isArray(data) ? data : [];
   }
 
-  /**
-   * ========================
-   * API (Supabase)
-   * ========================
-   */
   if (source === "api") {
-    if (!supabase) {
-      console.warn("Supabase não disponível neste ambiente");
-      return [];
-    }
-
     const { data, error } = await supabase
       .from("moods")
       .select("*")
       .order("checkin_date", { ascending: false })
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Erro ao buscar histórico:", error);
-      return [];
-    }
+    if (error) return [];
 
-    if (!Array.isArray(data)) return [];
-
-    // Deduplicação por data
     const seen = new Set<string>();
-    const deduped = data.filter((record) => {
-      const dateKey = getRecordDate(record);
-      if (seen.has(dateKey)) return false;
-      seen.add(dateKey);
+
+    return (data ?? []).filter((record) => {
+      const key = getRecordDate(record);
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     });
-
-    return deduped;
   }
 
-  /**
-   * Fallback de segurança
-   */
   return [];
 }
 
 /**
- * ============================================================
  * SAVE MOOD
- * ============================================================
  */
-export async function saveMood(mood: MoodType): Promise<void> {
-  const source = env.dataMode ?? env.moodSource;
+export async function saveMood(
+  mood: MoodType
+): Promise<{ error?: boolean; message?: string } | void> {
+  const source = env.dataMode;
 
-    if (env.forceError) {
-    console.warn("[QA] Erro forçado (mood)");
-    throw new Error("Erro simulado (QA)");
-  }
   /**
-   * ========================
-   * SEED (mock controlado)
-   * ========================
+   * SEED
    */
   if (source === "seed") {
-    console.log("[MOCK] Salvando em SEED:", mood);
-
-    // simula erro ocasional
-    if (Math.random() < 0.2) {
-      throw new Error("Erro simulado (seed)");
-    }
-
-    const mockData = loadSeed();
     const today = getLocalDate();
 
-    const alreadyExists = mockData.some(
+    const alreadyExists = seedState.some(
       (item) => toLocalDate(item.created_at) === today
     );
 
     if (alreadyExists) {
-      throw new Error("Você já registrou seu humor hoje");
+      return { error: true, message: "Você já registrou seu humor hoje" };
     }
 
     const newRecord: MoodRecord = {
@@ -174,18 +133,19 @@ export async function saveMood(mood: MoodType): Promise<void> {
       created_at: getCurrentTimestamp(),
     };
 
-    saveSeed([newRecord, ...mockData]);
+    seedState = [newRecord, ...seedState];
+
+    if (env.forceError) {
+      return { error: true, message: "Erro simulado (QA)" };
+    }
+
     return;
   }
 
   /**
-   * ========================
-   * STORAGE (localStorage)
-   * ========================
+   * STORAGE
    */
   if (source === "storage") {
-    console.log("[MOCK] Salvando em STORAGE:", mood);
-
     const mockData = loadMock();
     const today = getLocalDate();
 
@@ -194,7 +154,7 @@ export async function saveMood(mood: MoodType): Promise<void> {
     );
 
     if (alreadyExists) {
-      throw new Error("Você já registrou seu humor hoje");
+      return { error: true, message: "Você já registrou seu humor hoje" };
     }
 
     const newRecord: MoodRecord = {
@@ -204,19 +164,18 @@ export async function saveMood(mood: MoodType): Promise<void> {
     };
 
     saveMock([newRecord, ...mockData]);
+
+    if (env.forceError) {
+      return { error: true, message: "Erro simulado (QA)" };
+    }
+
     return;
   }
 
   /**
-   * ========================
-   * API (Supabase)
-   * ========================
+   * API
    */
   if (source === "api") {
-    if (!supabase) {
-      throw new Error("Supabase não disponível neste ambiente");
-    }
-
     const today = getLocalDate();
 
     const { error } = await supabase.from("moods").insert({
@@ -225,16 +184,21 @@ export async function saveMood(mood: MoodType): Promise<void> {
     });
 
     if (error) {
-      console.error("Erro ao salvar humor:", error);
-
-      if (error.code === "23505") {
-        throw new Error("Você já registrou seu humor hoje");
-      }
-
-      throw new Error(error.message || "Erro ao salvar");
+      return { error: true, message: error.message };
     }
 
-    console.log("Humor salvo:", mood);
-    return;
+    if (env.forceError) {
+      return { error: true, message: "Erro simulado (QA)" };
+    }
   }
+}
+
+/**
+ * RESET (QA)
+ */
+export function resetMoodQA() {
+  localStorage.removeItem(STORAGE_KEY);
+  resetSeedState();
+
+  console.log("Reset completo aplicado");
 }
