@@ -7,16 +7,17 @@ import MoodError from "./pages/MoodError";
 import Practices from "./pages/Practices";
 import Profile from "./pages/Profile";
 import BreathingGuide from "./pages/BreathingGuide";
-import WaterReminder from "./pages/WaterReminder";  
-import VisualRest from "./pages/VisualRest";  
+import WaterReminder from "./pages/WaterReminder";
+import VisualRest from "./pages/VisualRest";
 import QuickMeditation from "./pages/QuickMeditation";
 import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
+import ReminderConfig from "./pages/ReminderConfig";
 import DevTools from "./components/debug/DevTools";
 
 /**
- * Componente raiz da aplicação.
- * Responsável por configurar o roteamento principal.
+ * Componente raiz da aplicacao.
+ * Responsavel por configurar o roteamento principal.
  */
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
         <Route path="/meditation" element={<QuickMeditation />} />
         <Route path="/reminders" element={<Reminders />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/reminder-config" element={<ReminderConfig />} />
       </Routes>
       {import.meta.env.DEV && <DevTools />}
     </>
