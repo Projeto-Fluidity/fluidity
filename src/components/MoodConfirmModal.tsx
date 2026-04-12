@@ -1,5 +1,7 @@
 import type { MoodType } from "../types/mood";
 import { getMoodDefinition } from "../lib/moods";
+import { Check } from "lucide-react";
+import StatusIcon from "../components/ui/StatusIcon";
 
 type Props = {
   mood: MoodType | null;
@@ -17,15 +19,12 @@ export function MoodConfirmModal({ mood, onConfirm, onCancel }: Props) {
       
       <div className="w-[330px] rounded-[32px] p-7 text-center bg-[#F9FAFB] border border-green-500 shadow-[0_20px_40px_rgba(0,0,0,0.08)]">
         
-        {/* Ícone */}
+        {/* ✅ Ícone padronizado */}
         <div className="flex justify-center">
-          <div className="w-28 h-28 rounded-full bg-green-100 flex items-center justify-center">
-            
-            <div className="w-16 h-16 rounded-full border-[6px] border-green-700 flex items-center justify-center">
-              <span className="text-green-700 text-3xl font-extrabold">✓</span>
-            </div>
-
-          </div>
+          <StatusIcon
+            variant="success"
+            icon={<Check size={20} strokeWidth={3} />}
+          />
         </div>
 
         {/* Texto */}
@@ -42,7 +41,7 @@ export function MoodConfirmModal({ mood, onConfirm, onCancel }: Props) {
           onClick={onConfirm}
           className="mt-6 w-full py-3 rounded-full bg-green-700 text-white font-medium flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(0,0,0,0.15)] hover:bg-green-800 transition"
         >
-          <span className="text-lg font-bold">✓</span>
+          <Check size={18} strokeWidth={3} />
           Sim, confirmar
         </button>
 
