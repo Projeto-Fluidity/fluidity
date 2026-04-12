@@ -8,33 +8,28 @@ interface StatusIconProps {
   variant: Variant;
 }
 
-/**
-
-* Ícone utilizado nas telas de feedback da aplicação.
-*
-* success → layout fiel ao Figma
-* error   → layout atual preservado para MoodError
-  */
 export default function StatusIcon({ icon, variant }: StatusIconProps) {
   /**
-
-  * Variante SUCCESS
-    */
+   * Variante SUCCESS (padrão único do app)
+   */
   if (variant === "success") {
     return (
-      <div className="flex h-[128px] w-[128px] items-center justify-center rounded-full bg-[#DCFCE7]">
-        <div className="flex h-[80px] w-[80px] items-center justify-center rounded-full border-[8px] border-[#008236] text-[#008236]">
-          {icon}
+      <div className="flex items-center justify-center">
+        <div
+          className="flex h-14 w-14 items-center justify-center rounded-full 
+          bg-gradient-to-br from-[#05DF72] to-[#00A63E] shadow-md"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-white">
+            <div className="text-white">{icon}</div>
+          </div>
         </div>
       </div>
     );
   }
 
   /**
-
-* Variante ERROR
-* Mantida para não alterar MoodError
-  */
+   * Variante ERROR (mantida)
+   */
   return (
     <div
       className={clsx(
