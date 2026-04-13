@@ -29,7 +29,7 @@ export default function MoodSuccess() {
           Humor registrado!
         </h1>
         <p className="text-sm text-[#4A5565]">
-          Que bom que você registrou 😊
+          Seu humor foi registrado com sucesso.
         </p>
       </div>
 
