@@ -5,6 +5,10 @@
  * - seed (mock em memória)
  * - storage (localStorage)
  * - api (Supabase)
+ *
+ * Observação importante:
+ * - O modo de erro (QA) é avaliado dinamicamente via localStorage
+ * - Isso permite simular erro sem recarregar a aplicação
  */
 
 import type { MoodType } from "../types/mood";
@@ -19,8 +23,11 @@ import {
 } from "../lib/date";
 
 /**
+ * ============================================================
  * STORAGE (persistência local)
+ * ============================================================
  */
+
 const STORAGE_KEY = "fluidity:mood_mock";
 
 function loadMock(): MoodRecord[] {
@@ -39,11 +46,11 @@ function saveMock(data: MoodRecord[]) {
 }
 
 /**
+ * ============================================================
  * SEED (estado em memória)
- *
- * Não persiste após reload.
- * Ideal para QA.
+ * ============================================================
  */
+
 let seedState: MoodRecord[] = [...moodMock];
 
 function loadSeed(): MoodRecord[] {
@@ -55,15 +62,38 @@ function resetSeedState() {
 }
 
 /**
- * Utilitário de data
+ * ============================================================
+ * UTILITÁRIOS
+ * ============================================================
+ */
+
+/**
+ * Obtém a data de referência do registro
  */
 function getRecordDate(record: MoodRecord): string {
   return record.checkin_date ?? toLocalDate(record.created_at);
 }
 
 /**
- * GET HISTORY
+ * Verifica se o modo de erro forçado está ativo
+ *
+ * Prioridade:
+ * 1. localStorage (QA)
+ * 2. env (.env)
  */
+function isForceErrorEnabled(): boolean {
+  return (
+    localStorage.getItem("debug:forceError") === "true" ||
+    env.forceError
+  );
+}
+
+/**
+ * ============================================================
+ * GET HISTORY
+ * ============================================================
+ */
+
 export async function getMoodHistory(): Promise<MoodRecord[]> {
   const source = env.dataMode;
 
@@ -106,15 +136,20 @@ export async function getMoodHistory(): Promise<MoodRecord[]> {
 }
 
 /**
+ * ============================================================
  * SAVE MOOD
+ * ============================================================
  */
+
 export async function saveMood(
   mood: MoodType
 ): Promise<{ error?: boolean; message?: string } | void> {
   const source = env.dataMode;
 
   /**
-   * SEED
+   * ========================================================
+   * SEED (memória)
+   * ========================================================
    */
   if (source === "seed") {
     const today = getLocalDate();
@@ -135,7 +170,11 @@ export async function saveMood(
 
     seedState = [newRecord, ...seedState];
 
-    if (env.forceError) {
+    /**
+     * Simulação de erro (QA)
+     * O erro é retornado, mas o dado já foi salvo
+     */
+    if (isForceErrorEnabled()) {
       return { error: true, message: "Erro simulado (QA)" };
     }
 
@@ -143,7 +182,9 @@ export async function saveMood(
   }
 
   /**
-   * STORAGE
+   * ========================================================
+   * STORAGE (persistente)
+   * ========================================================
    */
   if (source === "storage") {
     const mockData = loadMock();
@@ -165,7 +206,10 @@ export async function saveMood(
 
     saveMock([newRecord, ...mockData]);
 
-    if (env.forceError) {
+    /**
+     * Simulação de erro (QA)
+     */
+    if (isForceErrorEnabled()) {
       return { error: true, message: "Erro simulado (QA)" };
     }
 
@@ -173,7 +217,9 @@ export async function saveMood(
   }
 
   /**
-   * API
+   * ========================================================
+   * API (Supabase)
+   * ========================================================
    */
   if (source === "api") {
     const today = getLocalDate();
@@ -187,17 +233,25 @@ export async function saveMood(
       return { error: true, message: error.message };
     }
 
-    if (env.forceError) {
+    /**
+     * Simulação de erro (QA)
+     */
+    if (isForceErrorEnabled()) {
       return { error: true, message: "Erro simulado (QA)" };
     }
   }
 }
 
 /**
+ * ============================================================
  * RESET (QA)
+ * ============================================================
  */
+
 export function resetMoodQA() {
   localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem("debug:forceError");
+
   resetSeedState();
 
   console.log("Reset completo aplicado");
