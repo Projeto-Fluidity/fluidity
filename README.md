@@ -1,181 +1,193 @@
 # Fluidity
 
-![React](https://img.shields.io/badge/React-18-blue)
+![React](https://img.shields.io/badge/React-19-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Node](https://img.shields.io/badge/Node-22.13.0-green)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E)
 ![Status](https://img.shields.io/badge/status-MVP-yellow)
 
-Aplicação web para **registro e acompanhamento do humor diário do usuário**.
-
-O objetivo do projeto é permitir que o usuário registre como está se sentindo ao longo do tempo e acompanhe seu histórico emocional, incentivando práticas simples de bem-estar.
-
-O **Fluidity** está sendo desenvolvido inicialmente como um **MVP (Minimum Viable Product)** focado em validar a experiência de registro diário de humor.
+Aplicação web para **registro e acompanhamento do humor diário**, com foco em bem-estar emocional.
 
 ---
 
-# Interface do projeto
+# 🧠 Visão do Produto
 
-Algumas telas do **Fluidity** baseadas no design do UX.
+O **Fluidity** permite que usuários:
 
-> As imagens abaixo representam as principais telas do MVP.
+* Registrem seu humor diariamente
+* Acompanhem padrões emocionais ao longo do tempo
+* Visualizem histórico de registros
+* Acessem práticas simples de bem-estar
+
+O projeto está em fase de **MVP (Minimum Viable Product)**, com foco na validação da experiência de check-in emocional.
+
+---
+
+# 📱 Interface do projeto
 
 ![Tela de emoção](docs/screens/emotion.png)
-
 ![Tela de sucesso](docs/screens/success.png)
-
 ![Tela de erro](docs/screens/error.png)
-
 ![Tela de histórico](docs/screens/history.png)
 
 ---
 
-# Objetivo do projeto
+# 🏗 Arquitetura (Visão Geral)
 
-O Fluidity busca oferecer uma experiência simples e acessível para que usuários possam:
+```mermaid
+flowchart TD
 
-* registrar seu humor diariamente
-* acompanhar padrões emocionais ao longo do tempo
-* visualizar seu histórico de registros
-* acessar exercícios simples de bem-estar
+A[Pages] --> B[Components]
+B --> C[Hooks]
+C --> D[Services]
+D --> E[(Supabase)]
+D --> F[(Mock Data)]
 
----
-
-# Funcionalidades do MVP
-
-### Check-in diário de humor
-
-O usuário pode registrar como está se sentindo no dia através de uma seleção de emoções representadas por emojis.
-
-### Histórico de humor
-
-Visualização do histórico de registros de humor, ordenados do mais recente para o mais antigo.
-
-### Exercícios de bem-estar
-
-Recomendações de exercícios simples voltados ao equilíbrio emocional.
-
----
-
-# Funcionalidades já implementadas
-
-Atualmente o projeto já possui:
-
-* Registro diário de humor
-* Persistência de dados utilizando **Supabase**
-* Histórico de registros de humor
-* Ordenação automática do histórico
-* Atualização reativa da interface após registro
-* Prevenção de múltiplos registros no mesmo dia
-* Gerenciamento de estado com hook customizado
-* Arquitetura organizada em camadas
-* Modo QA com dados mockados
-
----
-
-# Stack do projeto
-
-| Camada         | Tecnologia         |
-| -------------- | ------------------ |
-| Frontend       | React + TypeScript |
-| Build Tool     | Vite               |
-| Estilização    | Tailwind CSS       |
-| Backend        | Supabase           |
-| Banco de dados | PostgreSQL         |
-| Ícones         | Lucide React       |
-
----
-
-# Versão do Node
-
-O projeto foi desenvolvido utilizando:
-
-```id="nodever"
-Node.js 22.13.0
-```
-
-Recomenda-se utilizar a mesma versão para evitar incompatibilidades.
-
----
-
-# Arquitetura do projeto
-
-A aplicação segue uma arquitetura baseada em **separação de responsabilidades em camadas**.
-
-```id="archtree"
-src
- ├ components
- ├ hooks
- ├ services
- ├ mocks
- ├ config
- ├ lib
- ├ types
- ├ pages
+style A fill:#1e293b,color:#fff
+style B fill:#0f172a,color:#fff
+style C fill:#334155,color:#fff
+style D fill:#475569,color:#fff
+style E fill:#065f46,color:#fff
+style F fill:#7c2d12,color:#fff
 ```
 
 ---
 
-# Fluxo da aplicação
+# 🔄 Fluxo de Dados
 
-```id="flowapp"
-components
-     ↓
-hooks
-     ↓
-services
-     ↓
-Supabase / Mock
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant P as Page
+    participant H as Hook
+    participant S as Service
+    participant DB as Supabase/Mock
+
+    U->>P: Interação
+    P->>H: Chama hook (useMood)
+    H->>S: Requisição
+    S->>DB: Persistência
+
+    DB-->>S: Resposta
+    S-->>H: Dados
+    H-->>P: Atualiza estado
+    P-->>U: UI atualizada
 ```
-
-Essa abordagem permite:
-
-* melhor organização do código
-* maior facilidade de manutenção
-* escalabilidade da aplicação
-* separação clara entre interface e regras de negócio
 
 ---
 
-# Como executar o projeto
+# 🧩 Arquitetura de Pastas
 
-Clone o repositório:
+```mermaid
+graph TD
+    src --> components
+    src --> pages
+    src --> hooks
+    src --> services
+    src --> mocks
+    src --> config
+    src --> lib
+    src --> types
+```
 
-```id="clone"
+### Estrutura
+
+| Pasta      | Responsabilidade   |
+| ---------- | ------------------ |
+| components | UI reutilizável    |
+| pages      | Páginas            |
+| hooks      | Lógica e estado    |
+| services   | Integração com API |
+| mocks      | Dados simulados    |
+| config     | Configuração       |
+| lib        | Utilitários        |
+| types      | Tipagens           |
+
+---
+
+# 🔄 Estratégia de Dados
+
+```mermaid
+flowchart LR
+
+A[App] --> B{Modo de dados}
+B -->|Mock| C[Mocks locais]
+B -->|API| D[Supabase]
+
+C --> E[Simulação]
+D --> F[Persistência real]
+```
+
+---
+
+# ⚙️ Stack Tecnológica
+
+| Camada       | Tecnologia       | Versão  |
+| ------------ | ---------------- | ------- |
+| Frontend     | React            | 19.2.x  |
+| DOM Renderer | React DOM        | 19.2.x  |
+| Linguagem    | TypeScript       | 5.9.x   |
+| Roteamento   | React Router DOM | 7.13.x  |
+| Build Tool   | Vite             | 7.3.x   |
+| Estilização  | Tailwind CSS     | 3.4.x   |
+| Backend      | Supabase JS      | 2.98.x  |
+| Ícones       | Lucide React     | 0.577.x |
+
+---
+
+# 🧩 Ambiente de desenvolvimento
+
+* Node.js: **22.13.0**
+* NPM: **10+**
+
+> Consulte o `package.json` para versões exatas.
+
+---
+
+# 🚀 Funcionalidades
+
+## ✔ Implementadas
+
+* Check-in diário de humor
+* Histórico de registros
+* Regra de 1 registro por dia
+* Persistência com Supabase
+* Atualização reativa da UI
+* Hooks customizados
+* Modo QA com mock
+
+## 🔜 Planejadas
+
+* Autenticação de usuários
+* Notificações (reminders)
+* Dashboard analítico
+* Evolução para PWA
+* Biblioteca de práticas
+
+---
+
+# ▶️ Como executar o projeto
+
+```bash
 git clone https://github.com/pipocaagil-hash/projeto-fluidity.git
-```
-
-Entre na pasta do projeto:
-
-```id="cd"
 cd projeto-fluidity
-```
-
-Instale as dependências:
-
-```id="install"
 npm install
-```
-
-Execute o projeto:
-
-```id="run"
 npm run dev
 ```
 
-A aplicação ficará disponível em:
+Acesse:
 
-```id="url"
+```
 http://localhost:5173
 ```
 
 ---
 
-# Variáveis de ambiente
+# 🔐 Variáveis de ambiente
 
-Crie um arquivo `.env` na raiz do projeto:
+Crie um `.env`:
 
-```id="env"
+```env
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 VITE_USE_MOCK=false
@@ -183,65 +195,43 @@ VITE_USE_MOCK=false
 
 ---
 
-# 🧪 Modo QA (Mock de dados)
+# 🧪 Modo QA (Mock)
 
-O projeto possui um modo de execução com dados mockados, permitindo testes da aplicação sem dependência do Supabase.
+Ativar:
 
-## Como ativar
-
-No arquivo `.env`:
-
-```id="mockon"
+```env
 VITE_USE_MOCK=true
 ```
 
-## O que é simulado
+### Comportamento
 
-Quando o modo mock está ativo:
+* Dados simulados
+* Sem chamadas ao backend
+* Fluxo completo funcional
+* Regra de 1 registro por dia mantida
 
-* O histórico de humor é carregado a partir de dados locais
-* O registro de humor é simulado
-* A regra de 1 registro por dia é mantida
-* A ordenação por data continua funcionando
-* Não há comunicação com o Supabase
+### Uso ideal
 
-## Quando usar
-
-* Testes locais sem backend
-* Validação de fluxo pelo QA
-* Demonstrações do sistema
+* QA
+* Demonstrações
 * Desenvolvimento offline
-
-## Como desativar
-
-```id="mockoff"
-VITE_USE_MOCK=false
-```
-
-ou remover a variável do `.env`.
-
-## Importante
-
-Em ambiente de produção, o modo mock deve estar desativado.
 
 ---
 
-# Roadmap
+# 🧭 Roadmap
 
-Próximas funcionalidades planejadas:
-
-* Integração completa com layout oficial do UX
-* Biblioteca de exercícios de bem-estar
-* Melhorias visuais no dashboard de humor
-* Autenticação de usuários
+* Integração completa com UX
+* Sistema de autenticação
+* Notificações inteligentes
+* Insights emocionais
 * Evolução para PWA
 
 ---
 
-# Autores
+# 👨‍💻 Autores
 
-Jair Sousa
+**Jair Sousa**
 https://github.com/jair-sousa
 
-Carlos Eduardo
+**Carlos Eduardo**
 https://github.com/Carlosedukj
