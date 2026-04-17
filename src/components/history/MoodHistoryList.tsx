@@ -34,45 +34,47 @@ export default function MoodHistoryList({ history, loading }: Props) {
       </h2>
 
       <div>
-        {history.map((record, index) => {
-          const moodInfo = getMoodDefinition(record.mood);
+        {history.length === 0 ? (
+          <p className="text-sm text-gray-400">
+            Não há registros
+          </p>
+        ) : (
+          history.map((record, index) => {
+            const moodInfo = getMoodDefinition(record.mood);
 
-          const time = new Date(record.created_at).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          });
+            const time = new Date(record.created_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
 
-          return (
-            <div
-              key={record.id}
-              className={`flex items-center justify-between py-3 ${
-                index !== history.length - 1 ? "border-b border-gray-200" : ""
-              }`}
-            >
-              {/* Lado esquerdo */}
-              <div className="flex items-center gap-3">
-                {/* Emoji */}
-                <div className="flex h-10 w-10 items-center justify-center text-2xl">
-                  {moodInfo?.emoji}
+            return (
+              <div
+                key={record.id}
+                className={`flex items-center justify-between py-3 ${
+                  index !== history.length - 1 ? "border-b border-gray-200" : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center text-2xl">
+                    {moodInfo?.emoji}
+                  </div>
+
+                  <div>
+                    <p className="text-[16px] font-semibold text-[#1E2939]">
+                      {moodInfo?.label}
+                    </p>
+
+                    <p className="text-sm text-gray-500">
+                      {formatDate(record.created_at)}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Texto */}
-                <div>
-                  <p className="text-[16px] font-semibold text-[#1E2939]">
-                    {moodInfo?.label}
-                  </p>
-
-                  <p className="text-sm text-gray-500">
-                    {formatDate(record.created_at)}
-                  </p>
-                </div>
+                <span className="text-sm text-gray-500">{time}</span>
               </div>
-
-              {/* Hora */}
-              <span className="text-sm text-gray-500">{time}</span>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
       </div>
     </div>
   );

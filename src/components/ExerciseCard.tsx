@@ -53,7 +53,7 @@ export default function ExerciseCard({
 
         <div>
           <p className="font-medium">{title}</p>
-          <p className="text-sm opacity-70">{duration}</p>
+          <p className="text-sm opacity-92">{duration}</p>
         </div>
       </div>
 
