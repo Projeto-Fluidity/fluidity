@@ -8,13 +8,52 @@ import App from "./App.tsx";
 
 import { resetMoodMock } from "./utils/debug/resetMoodMock";
 import { resetReminderLogs } from "./utils/debug/resetReminderLogs";
+import { registerPush } from "./services/pushService";
+
+declare global {
+  interface Window {
+    testPush?: () => Promise<void>;
+    resetMoodMock?: () => void;
+    resetReminderLogs?: () => void;
+  }
+}
+
+if (import.meta.env.DEV) {
+  window.testPush = async () => {
+    const subscription = await registerPush();
+    console.log("SUBSCRIPTION:", subscription);
+  };
+
+  window.resetMoodMock = resetMoodMock;
+  window.resetReminderLogs = resetReminderLogs;
+}
 
 /**
- * Registra o Service Worker (PWA)
- *
- * - Responsável por tornar o app instalável
- * - Gerencia cache e funcionamento offline (parcial)
- * - Usa autoUpdate (configurado no vite.config)
+ * ============================================================
+ * DEBUG (APENAS EM DESENVOLVIMENTO)
+ * ============================================================
+ */
+if (import.meta.env.DEV) {
+  
+  /**
+   * Teste manual de push notification via console:
+   * window.testPush()
+   */
+    window.testPush = async () => {
+    const subscription = await registerPush();
+    console.log("SUBSCRIPTION:", subscription);
+  };
+  /**
+   * Funções auxiliares de debug
+   */
+  window.resetMoodMock = resetMoodMock;
+  window.resetReminderLogs = resetReminderLogs;
+}
+
+/**
+ * ============================================================
+ * SERVICE WORKER (PWA)
+ * ============================================================
  */
 registerSW({
   onNeedRefresh() {
@@ -26,24 +65,9 @@ registerSW({
 });
 
 /**
- * Exposição de funções de debug no ambiente de desenvolvimento
- *
- * Permite executar no console do navegador:
- * - window.resetMoodMock()
- * - window.resetReminderLogs()
- *
- * NÃO é executado em produção
- */
-if (import.meta.env.DEV) {
-  window.resetMoodMock = resetMoodMock;
-  window.resetReminderLogs = resetReminderLogs;
-}
-
-/**
- * Inicialização da aplicação React
- *
- * - StrictMode: ajuda a identificar problemas no desenvolvimento
- * - BrowserRouter: habilita navegação entre páginas
+ * ============================================================
+ * INICIALIZAÇÃO REACT
+ * ============================================================
  */
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

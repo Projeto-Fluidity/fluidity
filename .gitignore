@@ -26,3 +26,4 @@ dist-ssr
 # secrets
 supabase-credentials.txt
 .env
+.env.*
