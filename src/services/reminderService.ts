@@ -1,24 +1,7 @@
-/**
- * ============================================================
- * REMINDER SERVICE
- * ============================================================
- */
-
-import type { Reminder } from "../types/reminder";
 import { supabase } from "./supabaseClient";
-import { env } from "../config/env";
-import { getMockReminders } from "../mocks/reminderMock";
-import {
-  getMockLogs,
-  addMockLog,
-} from "../mocks/reminderLogMock";
-
-/**
- * Retorna a data atual no formato YYYY-MM-DD
- */
-function getToday(): string {
-  return new Date().toISOString().split("T")[0];
-}
+import { getDeviceId } from "../lib/deviceId";
+import type { Reminder } from "../types/reminder";
+import { ensureFixedReminder } from "./scheduledReminderService";
 
 /**
  * ============================================================
@@ -26,150 +9,144 @@ function getToday(): string {
  * ============================================================
  */
 export async function getReminders(): Promise<Reminder[]> {
-  const source = env.dataMode ?? (env.useMock ? "storage" : "api");
-  const today = getToday();
+  console.log("🚀 getReminders CALLED");
+console.log("SUPABASE:", supabase);
+  if (!supabase) {
+    console.warn("Supabase não disponível");
+    return [];
+  }
+
+  const deviceId = getDeviceId();
+
+  // garante 1 lembrete fixo
+  await ensureFixedReminder();
+
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+
+  console.log("DEVICE ID:", deviceId);
+  console.log("NOW:", currentHour, currentMinute);
 
   /**
-   * ========================
-   * SEED / STORAGE (mock)
-   * ========================
+   * 1. Buscar horários configurados
    */
-  if (source === "seed" || source === "storage") {
-    const reminders = getMockReminders();
-    const logs = getMockLogs();
+  const { data: scheduled, error } = await supabase
+    .from("scheduled_reminders")
+    .select("*")
+    .eq("device_id", deviceId)
+    .eq("enabled", true);
 
-    const usedToday = new Set(
-      logs
-        .filter((l) => l.created_at.startsWith(today))
-        .map((l) => l.reminder_id)
-    );
-
-    return reminders.filter((r) => !usedToday.has(r.id));
+  if (error) {
+    console.error("Erro ao buscar scheduled_reminders:", error);
+    return [];
   }
 
   /**
-   * ========================
-   * API (Supabase)
-   * ========================
+   * 2. Buscar logs do dia (evitar repetição)
    */
-  if (source === "api") {
-    if (!supabase) {
-      console.warn("Supabase não disponível neste ambiente");
-      return [];
-    }
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
 
-    const { data: reminders, error: remindersError } = await supabase
-      .from("reminders")
-      .select("*");
+  // const { data: logsToday } = await supabase
+  //   .from("reminder_logs")
+  //   .select("reminder_id")
+  //   .eq("device_id", deviceId)
+  //   .gte("created_at", startOfDay.toISOString());
 
-    if (remindersError) {
-      console.error("Erro ao buscar reminders:", remindersError);
-      return [];
-    }
+  // const alreadyTriggeredIds = new Set(
+  //   (logsToday ?? []).map((l) => l.reminder_id)
+  // );
 
-    const { data: logs, error: logsError } = await supabase
-      .from("reminder_logs")
-      .select("reminder_id, created_at");
+  // console.log("ALREADY TRIGGERED:", alreadyTriggeredIds);
 
-    if (logsError) {
-      console.error("Erro ao buscar logs:", logsError);
-      return reminders ?? [];
-    }
+  /**
+   * 3. Filtrar por janela de tempo
+   */
+  const validReminders =
+    scheduled?.filter((r) => {
+      const nowMinutes = currentHour * 60 + currentMinute;
+      const reminderMinutes = r.hour * 60 + r.minute;
 
-    const usedToday = new Set(
-      (logs ?? [])
-        .filter((log) => log.created_at.startsWith(today))
-        .map((log) => log.reminder_id)
-    );
+      const isTimePassed = nowMinutes >= reminderMinutes;
 
-    return (reminders ?? []).filter(
-      (reminder) => !usedToday.has(reminder.id)
-    );
+      console.log("CHECKING:", {
+        id: r.id,
+        nowMinutes,
+        reminderMinutes,
+        isTimePassed,
+      });
+
+      return isTimePassed;
+    }) ?? [];
+
+  if (validReminders.length === 0) {
+    console.log("Nenhum lembrete válido para este horário");
+    return [];
   }
 
-  return [];
+  /**
+   * 4. Mapear para UI
+   */
+  return validReminders.map((r) => ({
+    id: r.id,
+    title: "Hora do check-in",
+    description: "Como você está se sentindo agora?",
+    time: `${String(r.hour).padStart(2, "0")}:${String(r.minute).padStart(2, "0")}`,
+    variant: "info",
+  }));
 }
 
 /**
  * ============================================================
- * REGISTRAR INTERAÇÃO DO USUÁRIO
+ * ATUALIZAR STATUS DO LEMBRETE
  * ============================================================
  */
 export async function updateReminderStatus(
-  id: string,
+  reminderId: string,
   action: "accepted" | "postponed"
 ): Promise<void> {
-  const source = env.dataMode ?? (env.useMock ? "storage" : "api");
-
-  /**
-   * ========================
-   * SEED / STORAGE (mock)
-   * ========================
-   */
-  if (source === "seed" || source === "storage") {
-    addMockLog({
-      id: crypto.randomUUID(),
-      reminder_id: id,
-      action,
-      created_at: new Date().toISOString(),
-    });
-
+  if (!supabase) {
+    console.warn("Supabase não disponível");
     return;
   }
 
-  /**
-   * ========================
-   * API (Supabase)
-   * ========================
-   */
-  if (source === "api") {
-    if (!supabase) {
-      throw new Error("Supabase não disponível neste ambiente");
-    }
+  const deviceId = getDeviceId();
 
-    const { error } = await supabase
-      .from("reminder_logs")
-      .insert({
-        reminder_id: id,
-        action,
-      });
+  const { error } = await supabase.from("reminder_logs").insert({
+    reminder_id: reminderId,
+    action,
+    device_id: deviceId,
+  });
 
-    if (error) {
-      console.error("Erro ao salvar log:", error);
-      throw new Error("Erro ao registrar interação");
-    }
-
-    return;
+  if (error) {
+    console.error("Erro ao atualizar status:", error);
+  } else {
+    console.log("Status registrado:", { reminderId, action });
   }
 }
 
 /**
  * ============================================================
- * RESET DE LOGS (QA)
+ * RESETAR LOGS (QA)
  * ============================================================
  */
 export async function resetReminderLogs(): Promise<void> {
-  const source = env.dataMode ?? (env.useMock ? "storage" : "api");
-
-  /**
-   * ========================
-   * SEED / STORAGE (mock)
-   * ========================
-   */
-  if (source === "seed" || source === "storage") {
-    const { resetMockLogs } = await import("../mocks/reminderLogMock");
-    resetMockLogs();
-    console.log("[QA] Logs resetados (mock)");
+  if (!supabase) {
+    console.warn("Supabase não disponível");
     return;
   }
 
-  /**
-   * ========================
-   * API (desabilitado por segurança)
-   * ========================
-   */
-  if (source === "api") {
-    console.warn("Reset de logs desabilitado em ambiente API");
-    return;
+  const deviceId = getDeviceId();
+
+  const { error } = await supabase
+    .from("reminder_logs")
+    .delete()
+    .eq("device_id", deviceId);
+
+  if (error) {
+    console.error("Erro ao resetar logs:", error);
+  } else {
+    console.log("Logs resetados com sucesso");
   }
 }
