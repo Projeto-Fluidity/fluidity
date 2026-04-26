@@ -14,32 +14,32 @@ type GeneralSetting = {
 };
 
 /**
- * Configuracoes gerais (MVP - desabilitadas)
+ * Configuracoes gerais com toggles funcionais.
  */
 const generalSettings: GeneralSetting[] = [
   {
     id: "notifications",
     icon: <Bell size={18} />,
     title: "Notificacoes",
-    subtitle: "Em breve disponivel",
-    iconColor: "text-gray-400",
-    iconBg: "bg-gray-100",
+    subtitle: "Receber alertas",
+    iconColor: "text-[#008236]",
+    iconBg: "bg-green-100",
   },
   {
     id: "sound",
     icon: <Volume2 size={18} />,
     title: "Som",
-    subtitle: "Em breve disponivel",
-    iconColor: "text-gray-400",
-    iconBg: "bg-gray-100",
+    subtitle: "Tocar som nos alertas",
+    iconColor: "text-[#008236]",
+    iconBg: "bg-green-100",
   },
   {
     id: "vibration",
     icon: <Vibrate size={18} />,
     title: "Vibracao",
-    subtitle: "Em breve disponivel",
-    iconColor: "text-gray-400",
-    iconBg: "bg-gray-100",
+    subtitle: "Vibrar ao notificar",
+    iconColor: "text-purple-500",
+    iconBg: "bg-purple-100",
   },
 ];
 
@@ -51,16 +51,20 @@ const generalSettings: GeneralSetting[] = [
  * Tela de configuracoes da aplicacao.
  *
  * Responsavel por:
- * - Exibir preferencias gerais (em breve disponivel)
+ * - Permitir ativar/desativar preferencias gerais
  * - Redirecionar para configuracao de lembretes
  * ============================================================
  */
 export default function Settings() {
   const navigate = useNavigate();
 
-  const [generalToggles] = useState<Record<string, boolean>>(
-    Object.fromEntries(generalSettings.map((s) => [s.id, false]))
+  const [generalToggles, setGeneralToggles] = useState<Record<string, boolean>>(
+    Object.fromEntries(generalSettings.map((s) => [s.id, true]))
   );
+
+  function toggleGeneral(id: string) {
+    setGeneralToggles((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
 
   return (
     <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
@@ -81,8 +85,8 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Geral (desabilitado) */}
-        <div className="space-y-2 opacity-70">
+        {/* Geral */}
+        <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
             Geral
           </p>
@@ -97,14 +101,13 @@ export default function Settings() {
                     {setting.icon}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">{setting.title}</p>
+                    <p className="text-sm font-medium text-gray-800">{setting.title}</p>
                     <p className="text-xs text-gray-400">{setting.subtitle}</p>
                   </div>
                 </div>
                 <Toggle
                   active={generalToggles[setting.id]}
-                  disabled
-                  onToggle={() => {}}
+                  onToggle={() => toggleGeneral(setting.id)}
                 />
               </div>
             ))}

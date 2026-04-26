@@ -33,6 +33,7 @@ type Reminder = {
  *
  * Exibe os lembretes configurados pelo usuario.
  * Permite editar, adicionar (limite 10), excluir e ativar/desativar.
+ * Novos lembretes tem nome fixo "Novo lembrete".
  * Exibe popup de confirmacao ao salvar.
  * ============================================================
  */
@@ -45,32 +46,27 @@ export default function ReminderConfig() {
   ]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editLabel, setEditLabel] = useState("");
   const [editTime, setEditTime] = useState("08:00");
   const [editDays, setEditDays] = useState<string[]>([]);
-  const [labelError, setLabelError] = useState("");
   const [showActivated, setShowActivated] = useState(false);
 
   const activeCount = reminders.filter((r) => r.active).length;
   const isNew = editingId === "new";
   const editingReminder = reminders.find((r) => r.id === editingId);
+  const modalTitle = isNew ? "Hora de se hidratar" : (editingReminder?.label ?? "");
 
   function handleEdit(id: string) {
     const r = reminders.find((r) => r.id === id);
     if (!r) return;
     setEditingId(id);
-    setEditLabel(r.label);
     setEditTime(r.time);
     setEditDays(r.customDays);
-    setLabelError("");
   }
 
   function handleNew() {
     setEditingId("new");
-    setEditLabel("");
     setEditTime("08:00");
     setEditDays(ALL_DAYS);
-    setLabelError("");
   }
 
   function handleToggle(id: string) {
@@ -92,15 +88,10 @@ export default function ReminderConfig() {
   }
 
   function handleSave() {
-    if (!editLabel.trim()) {
-      setLabelError("O nome do lembrete é obrigatório.");
-      return;
-    }
-
     if (isNew) {
       const newReminder: Reminder = {
         id: Date.now().toString(),
-        label: editLabel.trim(),
+        label: "Hora de se hidratar",
         time: editTime,
         customDays: editDays,
         active: true,
@@ -110,7 +101,7 @@ export default function ReminderConfig() {
       setReminders((prev) =>
         prev.map((r) =>
           r.id === editingId
-            ? { ...r, label: editLabel, time: editTime, customDays: editDays }
+            ? { ...r, time: editTime, customDays: editDays }
             : r
         )
       );
@@ -122,10 +113,7 @@ export default function ReminderConfig() {
 
   function handleClose() {
     setEditingId(null);
-    setLabelError("");
   }
-
-  const modalTitle = isNew ? "Novo lembrete" : (editingReminder?.label ?? "");
 
   return (
     <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
@@ -147,36 +135,6 @@ export default function ReminderConfig() {
             </button>
 
             <p className="text-base font-semibold text-gray-800">{modalTitle}</p>
-
-            {/* Nome — apenas para novo lembrete */}
-            {isNew && (
-              <div className="space-y-1">
-                <label className="block text-xs text-gray-500">Nome</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Beber agua"
-                  value={editLabel}
-                  onChange={(e) => {
-                    setEditLabel(e.target.value);
-                    if (e.target.value.trim()) setLabelError("");
-                  }}
-                  style={{
-                    border: `1.5px solid ${labelError ? "#F87171" : "#008236"}`,
-                    borderRadius: 12,
-                    padding: "10px 14px",
-                    fontSize: 14,
-                    color: "#374151",
-                    backgroundColor: "white",
-                    outline: "none",
-                    display: "block",
-                    width: "100%",
-                  }}
-                />
-                {labelError && (
-                  <p className="text-xs text-red-500">{labelError}</p>
-                )}
-              </div>
-            )}
 
             {/* Horario */}
             <div className="space-y-2">
@@ -273,10 +231,10 @@ export default function ReminderConfig() {
 
       <div className="space-y-5">
 
-        {/* Header */}
+        {/* Header — navigate(-1) para sempre voltar para a tela anterior */}
         <div className="flex items-center gap-3">
           <button
-            onClick={() => navigate("/settings")}
+            onClick={() => navigate(-1)}
             aria-label="Voltar"
             className="flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-600 shadow-sm backdrop-blur transition hover:bg-white"
           >
