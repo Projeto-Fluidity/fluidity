@@ -14,7 +14,6 @@ import QuickMeditation from "./pages/QuickMeditation";
 import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
 import DevTools from "./components/debug/DevTools";
-import ReminderConfig from "./pages/ReminderConfig";
 
 /**
  * Componente raiz da aplicação.
@@ -40,7 +39,6 @@ function App() {
         <Route path="/meditation" element={<AppLayout><QuickMeditation /></AppLayout>} />
         <Route path="/reminders" element={<AppLayout><Reminders /></AppLayout>} />
         <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
-        <Route path="/reminder-config" element={<AppLayout><ReminderConfig /></AppLayout>} />
       </Routes>
 
       {/* DevTools só aparece em desenvolvimento */}
