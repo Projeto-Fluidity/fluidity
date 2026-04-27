@@ -1,5 +1,17 @@
 import { Clock, Pencil, Trash2 } from "lucide-react";
 
+const DAY_LABELS: Record<string, string> = {
+  seg: "Seg",
+  ter: "Ter",
+  qua: "Qua",
+  qui: "Qui",
+  sex: "Sex",
+  sab: "Sab",
+  dom: "Dom",
+};
+
+const WEEK_DAYS_ORDER = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"];
+
 type Props = {
   label: string;
   time: string;
@@ -11,15 +23,28 @@ type Props = {
 };
 
 /**
+ * Retorna o texto dos dias formatado.
+ * Se todos os 7 dias estao selecionados exibe "Todos os dias".
+ * Caso contrario exibe os dias abreviados na ordem da semana.
+ */
+function formatDays(customDays: string[]): string {
+  if (customDays.length === 7) return "Todos os dias";
+  return WEEK_DAYS_ORDER
+    .filter((d) => customDays.includes(d))
+    .map((d) => DAY_LABELS[d])
+    .join(", ");
+}
+
+/**
  * Card individual de lembrete configurado.
  *
- * Exibe nome e horario.
+ * Exibe nome, horario e dias da semana.
  * Permite editar via lapis, excluir via lixeira e ativar/desativar via toggle.
  */
 export default function ReminderConfigItem({
   label,
   time,
-  customDays: _customDays,
+  customDays,
   active,
   onToggle,
   onEdit,
@@ -41,10 +66,10 @@ export default function ReminderConfigItem({
             <Clock size={12} className="text-gray-500" />
             <span className="text-xs font-medium text-gray-600">{time}</span>
           </div>
+          <p className="text-xs text-gray-400 mt-0.5">{formatDays(customDays)}</p>
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Lapis */}
           <button
             onClick={onEdit}
             aria-label="Editar lembrete"
@@ -53,7 +78,6 @@ export default function ReminderConfigItem({
             <Pencil size={15} className="text-gray-600" />
           </button>
 
-          {/* Lixeira */}
           <button
             onClick={onDelete}
             aria-label="Excluir lembrete"
@@ -62,7 +86,6 @@ export default function ReminderConfigItem({
             <Trash2 size={15} className="text-red-400" />
           </button>
 
-          {/* Toggle */}
           <button
             onClick={onToggle}
             aria-pressed={active}

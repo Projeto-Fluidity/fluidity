@@ -1,11 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { registerSW } from "virtual:pwa-register";
-
 import "./index.css";
 import App from "./App.tsx";
-
 import { resetMoodMock } from "./utils/debug/resetMoodMock";
 import { resetReminderLogs } from "./utils/debug/resetReminderLogs";
 import { registerPush } from "./services/pushService";
@@ -18,6 +15,9 @@ declare global {
   }
 }
 
+/**
+ * DEBUG (DEV ONLY)
+ */
 if (import.meta.env.DEV) {
   window.testPush = async () => {
     const subscription = await registerPush();
@@ -29,50 +29,12 @@ if (import.meta.env.DEV) {
 }
 
 /**
- * ============================================================
- * DEBUG (APENAS EM DESENVOLVIMENTO)
- * ============================================================
- */
-if (import.meta.env.DEV) {
-  
-  /**
-   * Teste manual de push notification via console:
-   * window.testPush()
-   */
-    window.testPush = async () => {
-    const subscription = await registerPush();
-    console.log("SUBSCRIPTION:", subscription);
-  };
-  /**
-   * Funções auxiliares de debug
-   */
-  window.resetMoodMock = resetMoodMock;
-  window.resetReminderLogs = resetReminderLogs;
-}
-
-/**
- * ============================================================
- * SERVICE WORKER (PWA)
- * ============================================================
- */
-registerSW({
-  onNeedRefresh() {
-    console.log("Nova versão disponível");
-  },
-  onOfflineReady() {
-    console.log("App pronto para uso offline");
-  },
-});
-
-/**
- * ============================================================
- * INICIALIZAÇÃO REACT
- * ============================================================
+ * Ponto de entrada da aplicação React
  */
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
-  </StrictMode>
+  </StrictMode>,
 );
