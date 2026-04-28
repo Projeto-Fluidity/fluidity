@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, X, Check, Plus } from "lucide-react";
+import { ChevronLeft, X, Plus } from "lucide-react";
 
 import ReminderConfigSummary from "../components/reminders/ReminderConfigSummary";
 import ReminderConfigItem from "../components/reminders/ReminderConfigItem";
+
+import { supabase } from "../services/supabaseClient";
+import { getDeviceId } from "../lib/deviceId";
+
+import {
+  createReminder,
+  updateReminder,
+  deleteReminder,
+  toggleReminder,
+} from "../services/reminderConfigService";
+import { ensureFixedReminders } from "../services/scheduledReminderService";
 
 const WEEK_DAYS = [
   { id: "seg", label: "Seg" },
@@ -24,40 +35,64 @@ type Reminder = {
   time: string;
   customDays: string[];
   active: boolean;
+  type?: string; // 👈 importante
 };
 
-/**
- * ============================================================
- * Page: ReminderConfig
- * ============================================================
- *
- * Exibe os lembretes configurados pelo usuario.
- * Permite editar, adicionar (limite 10), excluir e ativar/desativar.
- * Novos lembretes tem nome fixo "Novo lembrete".
- * Exibe popup de confirmacao ao salvar.
- * ============================================================
- */
 export default function ReminderConfig() {
   const navigate = useNavigate();
 
-  const [reminders, setReminders] = useState<Reminder[]>([
-    { id: "1", label: "Hora de se hidratar", time: "14:30", customDays: ALL_DAYS, active: true },
-    { id: "2", label: "Como esta seu humor?", time: "16:00", customDays: ALL_DAYS, active: true },
-  ]);
-
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTime, setEditTime] = useState("08:00");
   const [editDays, setEditDays] = useState<string[]>([]);
-  const [showActivated, setShowActivated] = useState(false);
+
+  /**
+   * ============================================================
+   * LOAD REAL DO BANCO
+   * ============================================================
+   */
+    useEffect(() => {
+    async function init() {
+      await ensureFixedReminders(); // 👈 garante dados
+
+      const { data, error } = await supabase
+        .from("scheduled_reminders")
+        .select("*")
+        .eq("device_id", getDeviceId());
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const mapped = (data ?? []).map((r) => ({
+        id: r.id,
+        label: r.label ?? "Hora do check-in",
+        time:
+          r.time ??
+          `${String(r.hour).padStart(2, "0")}:${String(r.minute).padStart(2, "0")}`,
+        customDays: r.days ?? ALL_DAYS,
+        active: r.active ?? r.enabled ?? true,
+        type: r.type,
+      }));
+
+      setReminders(mapped);
+    }
+
+    init();
+  }, []);
 
   const activeCount = reminders.filter((r) => r.active).length;
   const isNew = editingId === "new";
   const editingReminder = reminders.find((r) => r.id === editingId);
-  const modalTitle = isNew ? "Hora de se hidratar" : (editingReminder?.label ?? "");
+  const modalTitle = isNew
+    ? "Novo lembrete"
+    : editingReminder?.label ?? "";
 
   function handleEdit(id: string) {
     const r = reminders.find((r) => r.id === id);
     if (!r) return;
+
     setEditingId(id);
     setEditTime(r.time);
     setEditDays(r.customDays);
@@ -69,13 +104,43 @@ export default function ReminderConfig() {
     setEditDays(ALL_DAYS);
   }
 
-  function handleToggle(id: string) {
+  /**
+   * ============================================================
+   * TOGGLE (com backend)
+   * ============================================================
+   */
+  async function handleToggle(id: string) {
+    const r = reminders.find((r) => r.id === id);
+    if (!r) return;
+
+    await toggleReminder(id, !r.active);
+
     setReminders((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, active: !r.active } : r))
+      prev.map((r) =>
+        r.id === id ? { ...r, active: !r.active } : r
+      )
     );
   }
 
-  function handleDelete(id: string) {
+  /**
+   * ============================================================
+   * DELETE (com proteção de FIXED)
+   * ============================================================
+   */
+  async function handleDelete(id: string) {
+    const r = reminders.find((r) => r.id === id);
+
+    const isFixed =
+      r?.type === "fixed_checkin" ||
+      r?.type === "fixed_hydration";
+
+    if (isFixed) {
+      alert("Esse lembrete padrão não pode ser removido");
+      return;
+    }
+
+    await deleteReminder(id);
+
     setReminders((prev) => prev.filter((r) => r.id !== id));
   }
 
@@ -87,17 +152,37 @@ export default function ReminderConfig() {
     );
   }
 
-  function handleSave() {
+  /**
+   * ============================================================
+   * SAVE (create + update)
+   * ============================================================
+   */
+  async function handleSave() {
     if (isNew) {
-      const newReminder: Reminder = {
-        id: Date.now().toString(),
+      const created = await createReminder({
         label: "Hora de se hidratar",
         time: editTime,
-        customDays: editDays,
+        days: editDays,
         active: true,
-      };
-      setReminders((prev) => [...prev, newReminder]);
+      });
+
+      setReminders((prev) => [
+        ...prev,
+        {
+          id: created.id,
+          label: created.label,
+          time: created.time,
+          customDays: created.days ?? ALL_DAYS,
+          active: created.active ?? true,
+          type: created.type,
+        },
+      ]);
     } else {
+      await updateReminder(editingId!, {
+        time: editTime,
+        days: editDays,
+      });
+
       setReminders((prev) =>
         prev.map((r) =>
           r.id === editingId
@@ -108,7 +193,6 @@ export default function ReminderConfig() {
     }
 
     setEditingId(null);
-    setShowActivated(true);
   }
 
   function handleClose() {
@@ -118,7 +202,7 @@ export default function ReminderConfig() {
   return (
     <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
 
-      {/* Modal de edicao / adicao */}
+      {/* Modal */}
       {editingId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -136,63 +220,35 @@ export default function ReminderConfig() {
 
             <p className="text-base font-semibold text-gray-800">{modalTitle}</p>
 
-            {/* Horario */}
-            <div className="space-y-2">
-              <label className="block text-xs text-gray-500">Horario</label>
-              <input
-                type="time"
-                value={editTime}
-                onChange={(e) => setEditTime(e.target.value)}
-                style={{
-                  border: "1.5px solid #008236",
-                  borderRadius: 12,
-                  padding: "10px 14px",
-                  fontSize: 14,
-                  color: "#374151",
-                  backgroundColor: "white",
-                  outline: "none",
-                  display: "block",
-                }}
-              />
+            <input
+              type="time"
+              value={editTime}
+              onChange={(e) => setEditTime(e.target.value)}
+              className="border rounded-xl p-2 w-full"
+            />
+
+            <div className="flex gap-2 flex-wrap">
+              {WEEK_DAYS.map((day) => {
+                const selected = editDays.includes(day.id);
+                return (
+                  <button
+                    key={day.id}
+                    onClick={() => handleDayToggle(day.id)}
+                    className={`px-3 py-2 rounded-full text-xs ${
+                      selected ? "bg-green-600 text-white" : "bg-gray-100"
+                    }`}
+                  >
+                    {day.label}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Dias da semana */}
-            <div className="space-y-2">
-              <label className="block text-xs text-gray-500">Dias da semana</label>
-              <div className="flex gap-2 flex-wrap">
-                {WEEK_DAYS.map((day) => {
-                  const selected = editDays.includes(day.id);
-                  return (
-                    <button
-                      key={day.id}
-                      onClick={() => handleDayToggle(day.id)}
-                      className="rounded-full text-xs font-semibold transition px-3 py-2"
-                      style={{
-                        backgroundColor: selected ? "#008236" : "#F3F4F6",
-                        color: selected ? "#fff" : "#374151",
-                        border: `1px solid ${selected ? "#008236" : "#E5E7EB"}`,
-                      }}
-                    >
-                      {day.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Acoes */}
-            <div className="flex gap-2 pt-1">
-              <button
-                onClick={handleClose}
-                className="flex-1 rounded-xl border border-gray-200 py-2 text-sm text-gray-500 hover:bg-gray-50 transition"
-              >
+            <div className="flex gap-2">
+              <button onClick={handleClose} className="flex-1 border rounded-xl py-2">
                 Cancelar
               </button>
-              <button
-                onClick={handleSave}
-                className="flex-1 rounded-xl py-2 text-sm font-semibold text-white transition"
-                style={{ background: "linear-gradient(to bottom, #00A63E, #008236)" }}
-              >
+              <button onClick={handleSave} className="flex-1 bg-green-600 text-white rounded-xl py-2">
                 Salvar
               </button>
             </div>
@@ -200,92 +256,48 @@ export default function ReminderConfig() {
         </div>
       )}
 
-      {/* Popup lembrete ativado */}
-      {showActivated && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-            onClick={() => setShowActivated(false)}
-          />
-          <div className="relative z-10 w-full max-w-xs rounded-3xl bg-white px-6 py-8 shadow-xl text-center space-y-4">
-            <div className="flex justify-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#05DF72] to-[#00A63E] shadow-md">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-white">
-                  <div className="text-white">
-                    <Check size={20} strokeWidth={3} />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <p className="text-lg font-bold text-gray-800">Lembrete ativado</p>
-            <button
-              onClick={() => setShowActivated(false)}
-              className="w-full rounded-2xl py-3 text-sm font-semibold text-white transition"
-              style={{ background: "linear-gradient(to bottom, #00A63E, #008236)" }}
-            >
-              Entendi
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className="space-y-5">
-
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate(-1)}
-            aria-label="Voltar"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-white/80 text-gray-600 shadow-sm backdrop-blur transition hover:bg-white"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Configurar Lembretes</h1>
-            <p className="text-sm text-gray-500">Personalize seus alertas</p>
-          </div>
-        </div>
-
-        {/* Resumo */}
-        <ReminderConfigSummary activeCount={activeCount} />
-
-        {/* Lista */}
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-            Seus lembretes
-          </p>
-          <div className="space-y-3">
-            {reminders.map((reminder) => (
-              <ReminderConfigItem
-                key={reminder.id}
-                label={reminder.label}
-                time={reminder.time}
-                customDays={reminder.customDays}
-                active={reminder.active}
-                onToggle={() => handleToggle(reminder.id)}
-                onEdit={() => handleEdit(reminder.id)}
-                onDelete={() => handleDelete(reminder.id)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Botao adicionar — oculto ao atingir limite */}
-        {reminders.length < MAX_REMINDERS && (
-          <button
-            onClick={handleNew}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white transition"
-            style={{
-              background: "linear-gradient(to bottom, #00A63E, #008236)",
-              boxShadow: "0px 4px 14px rgba(0,0,0,0.10)",
-            }}
-          >
-            <Plus size={18} />
-            Adicionar lembrete
-          </button>
-        )}
-
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4">
+        <button onClick={() => navigate(-1)}>
+          <ChevronLeft />
+        </button>
+        <h1 className="text-xl font-bold">Configurar Lembretes</h1>
       </div>
+
+      <ReminderConfigSummary activeCount={activeCount} />
+
+      <div className="space-y-3 mt-4">
+        {reminders.map((reminder) => (
+          <ReminderConfigItem
+            key={reminder.id}
+            label={reminder.label}
+            time={reminder.time}
+            customDays={reminder.customDays}
+            active={reminder.active}
+            onToggle={() => handleToggle(reminder.id)}
+            onEdit={() => handleEdit(reminder.id)}
+           onDelete={() => {
+            if (
+              reminder.type === "fixed_checkin" ||
+              reminder.type === "fixed_hydration"
+            ) {
+              return; // bloqueia
+            }
+
+            handleDelete(reminder.id);
+          }}
+          />
+        ))}
+      </div>
+
+      {reminders.length < MAX_REMINDERS && (
+        <button
+          onClick={handleNew}
+          className="w-full mt-4 bg-green-600 text-white py-3 rounded-xl flex justify-center gap-2"
+        >
+          <Plus /> Adicionar lembrete
+        </button>
+      )}
     </div>
   );
 }

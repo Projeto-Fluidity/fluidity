@@ -1,16 +1,31 @@
 import { supabase } from "./supabaseClient";
 import { getDeviceId } from "../lib/deviceId";
 import type { Reminder } from "../types/reminder";
-import { ensureFixedReminder } from "./scheduledReminderService";
+import { ensureFixedReminders } from "./scheduledReminderService";
+
+// 🔥 NOVO: adapter
+import {
+  toUiReminder,
+  shouldTriggerReminder,
+} from "../lib/reminderAdapter";
 
 /**
  * ============================================================
  * BUSCAR LEMBRETES DISPONÍVEIS
  * ============================================================
+ *
+ * Responsável por:
+ * - Buscar dados do banco
+ * - Aplicar regra de disparo (adapter)
+ * - Converter para UI
+ *
+ * NÃO deve:
+ * - conter regra duplicada
+ * - conhecer estrutura antiga/novo diretamente
  */
 export async function getReminders(): Promise<Reminder[]> {
   console.log("🚀 getReminders CALLED");
-console.log("SUPABASE:", supabase);
+
   if (!supabase) {
     console.warn("Supabase não disponível");
     return [];
@@ -18,24 +33,21 @@ console.log("SUPABASE:", supabase);
 
   const deviceId = getDeviceId();
 
-  // garante 1 lembrete fixo
-  await ensureFixedReminder();
-
-  const now = new Date();
-  const currentHour = now.getHours();
-  const currentMinute = now.getMinutes();
-
-  console.log("DEVICE ID:", deviceId);
-  console.log("NOW:", currentHour, currentMinute);
+  /**
+   * ⚠️ TEMPORÁRIO (legado)
+   * Ideal: mover para bootstrap (App.tsx)
+   */
+  await ensureFixedReminders();
 
   /**
-   * 1. Buscar horários configurados
+   * ============================================================
+   * 1. Buscar lembretes ativos (compatível)
+   * ============================================================
    */
   const { data: scheduled, error } = await supabase
     .from("scheduled_reminders")
     .select("*")
-    .eq("device_id", deviceId)
-    .eq("enabled", true);
+    .eq("device_id", deviceId);
 
   if (error) {
     console.error("Erro ao buscar scheduled_reminders:", error);
@@ -43,42 +55,38 @@ console.log("SUPABASE:", supabase);
   }
 
   /**
+   * ============================================================
    * 2. Buscar logs do dia (evitar repetição)
+   * ============================================================
    */
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
 
-  // const { data: logsToday } = await supabase
-  //   .from("reminder_logs")
-  //   .select("reminder_id")
-  //   .eq("device_id", deviceId)
-  //   .gte("created_at", startOfDay.toISOString());
+  const { data: logsToday } = await supabase
+    .from("reminder_logs")
+    .select("reminder_id")
+    .eq("device_id", deviceId)
+    .gte("created_at", startOfDay.toISOString());
 
-  // const alreadyTriggeredIds = new Set(
-  //   (logsToday ?? []).map((l) => l.reminder_id)
-  // );
-
-  // console.log("ALREADY TRIGGERED:", alreadyTriggeredIds);
+  const alreadyTriggeredIds = new Set(
+    (logsToday ?? []).map((l) => l.reminder_id)
+  );
 
   /**
-   * 3. Filtrar por janela de tempo
+   * ============================================================
+   * 3. Aplicar regra de disparo (adapter)
+   * ============================================================
    */
+  const now = new Date();
+
   const validReminders =
-    scheduled?.filter((r) => {
-      const nowMinutes = currentHour * 60 + currentMinute;
-      const reminderMinutes = r.hour * 60 + r.minute;
-
-      const isTimePassed = nowMinutes >= reminderMinutes;
-
-      console.log("CHECKING:", {
-        id: r.id,
-        nowMinutes,
-        reminderMinutes,
-        isTimePassed,
-      });
-
-      return isTimePassed;
-    }) ?? [];
+    scheduled?.filter((r) =>
+      shouldTriggerReminder(
+        r,
+        now,
+        alreadyTriggeredIds.has(r.id)
+      )
+    ) ?? [];
 
   if (validReminders.length === 0) {
     console.log("Nenhum lembrete válido para este horário");
@@ -86,15 +94,15 @@ console.log("SUPABASE:", supabase);
   }
 
   /**
-   * 4. Mapear para UI
+   * ============================================================
+   * 4. Converter para UI (adapter)
+   * ============================================================
    */
-  return validReminders.map((r) => ({
-    id: r.id,
-    title: "Hora do check-in",
-    description: "Como você está se sentindo agora?",
-    time: `${String(r.hour).padStart(2, "0")}:${String(r.minute).padStart(2, "0")}`,
-    variant: "info",
-  }));
+  const uiReminders = validReminders
+    .map(toUiReminder)
+    .filter(Boolean) as Reminder[];
+
+  return uiReminders;
 }
 
 /**
