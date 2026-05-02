@@ -2,14 +2,22 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+console.log("PWA CONFIG ATIVA");
+
 export default defineConfig({
+  
   plugins: [
     react(),
-
     VitePWA({
+      
       strategies: "injectManifest",
-      srcDir: "src",
-      filename: "sw.ts",
+
+      injectManifest: {
+        swSrc: "src/sw.js",
+        swDest: "dist/sw.js",
+        rollupFormat: "iife",
+      },
+
       registerType: "autoUpdate",
 
       manifest: {
@@ -31,23 +39,9 @@ export default defineConfig({
             sizes: "512x512",
             type: "image/png",
           },
-          {
-            src: "/icons/512-maskable.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
         ],
       },
-
-      workbox: {
-        navigateFallback: "index.html",
-      },
-
-      devOptions: {
-        enabled: true,
-        type: "module",
-      },
     }),
+    
   ],
 });

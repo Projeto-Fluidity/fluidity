@@ -5,30 +5,32 @@
  *
  * Responsável por:
  * - Traduzir modelo do banco → modelo da UI
- * - Garantir compatibilidade com modelo antigo (hour/minute)
- * - Preparar base para novo modelo (time, days, active)
- *
- * REGRA:
- * - Aqui é o ÚNICO lugar que conhece ambos os modelos
+ * - Centralizar regras de disparo
+ */
+
+/**
+ * ============================================================
+ * TIPOS
  * ============================================================
  */
 
-type DbReminder = {
+  declare global {
+    var __triggerCache: Set<string> | undefined;
+  }
+export type DbReminder = {
   id: string;
 
-  // modelo antigo
   hour: number | null;
   minute: number | null;
   enabled: boolean | null;
 
-  // modelo novo
   time: string | null;
   label: string | null;
   days: string[] | null;
   active: boolean | null;
 };
 
-type UiReminder = {
+export type UiReminder = {
   id: string;
   title: string;
   description: string;
@@ -38,47 +40,32 @@ type UiReminder = {
 
 /**
  * ============================================================
- * UTIL: extrair hora/minuto (dual mode)
- * ============================================================
- */
-function parseTime(r: DbReminder) {
-  const hour =
-    r.hour ?? (r.time ? Number(r.time.split(":")[0]) : null);
-
-  const minute =
-    r.minute ?? (r.time ? Number(r.time.split(":")[1]) : null);
-
-  return { hour, minute };
-}
-
-/**
- * ============================================================
- * UTIL: status ativo (compatível)
- * ============================================================
- */
-function isActive(r: DbReminder) {
-  return r.active ?? r.enabled ?? false;
-}
-
-/**
- * ============================================================
  * DB → UI
  * ============================================================
  */
-export function toUiReminder(r: DbReminder): UiReminder | null {
-  const { hour, minute } = parseTime(r);
-
-  /**
-   * Segurança: ignora dados inválidos
-   */
-  if (hour == null || minute == null) return null;
+export function toUiReminder(r: DbReminder): UiReminder {
+  const isCheckin = r.label === "Check-in";
+  const isHydration =
+    r.label === "Hidratação" || r.label === "Hora de se hidratar";
 
   return {
     id: r.id,
-    title: r.label ?? "Hora do check-in",
-    description: "Como você está se sentindo agora?",
-    time: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
-    variant: "info",
+
+    title: "Momento de cuidar de você",
+
+    description: isCheckin
+      ? "Registre seu humor e acompanhe seu bem-estar"
+      : isHydration
+      ? "Hora de se hidratar e cuidar do seu corpo"
+      : "Cuide de você por um instante",
+
+    time: r.time ?? "00:00",
+
+    variant: isCheckin
+      ? "emotion"
+      : isHydration
+      ? "info"
+      : "relax",
   };
 }
 
@@ -92,24 +79,41 @@ export function shouldTriggerReminder(
   now: Date,
   alreadyTriggered: boolean
 ): boolean {
-  const { hour, minute } = parseTime(r);
+  const hour =
+    r.hour ?? (r.time ? Number(r.time.split(":")[0]) : null);
+
+  const minute =
+    r.minute ?? (r.time ? Number(r.time.split(":")[1]) : null);
 
   if (hour == null || minute == null) return false;
 
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const reminderMinutes = hour * 60 + minute;
 
-  const today = now
-    .toLocaleDateString("pt-BR", { weekday: "short" })
-    .toLowerCase()
-    .slice(0, 3);
+  /**
+   * Mapeamento seguro de dias
+   */
+  const WEEK_MAP = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
+  const today = WEEK_MAP[now.getDay()];
 
   const matchesDay = !r.days || r.days.includes(today);
 
+  /**
+   * Janela de disparo (1 minuto)
+   */
+  const diff = nowMinutes - reminderMinutes;
+
+// janela real: 0 até 1 minuto
+  const isInWindow = diff >= 0 && diff <= 1;
+
+  // evita múltiplos disparos no mesmo minuto
+  const minuteKey = `${r.id}-${now.getHours()}-${now.getMinutes()}`;
+
   return (
-    isActive(r) &&
+    (r.active ?? r.enabled ?? false) &&
     matchesDay &&
-    nowMinutes >= reminderMinutes &&
-    !alreadyTriggered
+    isInWindow &&
+    !alreadyTriggered &&
+    !globalThis.__triggerCache?.has(minuteKey)
   );
 }
