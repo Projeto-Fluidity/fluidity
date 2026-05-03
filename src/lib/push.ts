@@ -2,30 +2,29 @@
  * ============================================================
  * PUSH SERVICE (FRONTEND)
  * ============================================================
- *
- * Responsável por:
- * - Registrar o Service Worker
- * - Solicitar permissão de notificação ao usuário
- * - Criar subscription de push
- * - Persistir subscription no banco (Supabase)
- *
- * Observações:
- * - Executar apenas em ambiente com suporte a Service Worker
- * - Requer chave pública VAPID
- * ============================================================
  */
 
 import { supabase } from "../services/supabaseClient";
 import { getDeviceId } from "./deviceId";
+import { registerSW } from "virtual:pwa-register";
 
 /**
- * Chave pública VAPID (gerada via web-push)
+ * Chave pública VAPID
  */
-const PUBLIC_VAPID_KEY = "COLE_SUA_PUBLIC_KEY_AQUI";
+const PUBLIC_VAPID_KEY = "BPEn32mXPKq94YXJ0vH-7Xud8rCfGCN6txV04maCcSIy8KIckTCkohWn4m7ieORWbMx68xz8ZVtkzreuv32IgQ8";
 
 /**
  * ============================================================
- * UTIL: converter base64 → Uint8Array
+ * REGISTRO DO SERVICE WORKER (via VitePWA)
+ * ============================================================
+ */
+registerSW({
+  immediate: true,
+});
+
+/**
+ * ============================================================
+ * UTIL: base64 → Uint8Array
  * ============================================================
  */
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
@@ -48,39 +47,38 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
  * ============================================================
  */
 export async function registerPush(): Promise<void> {
-  /**
-   * Verifica suporte do navegador
-   */
   if (!("serviceWorker" in navigator)) {
     console.warn("Service Worker não suportado");
     return;
   }
 
-  /**
-   * Solicita permissão de notificação
-   */
   const permission = await Notification.requestPermission();
 
   if (permission !== "granted") {
-    console.warn("Permissão de notificação negada");
+    console.warn("Permissão negada");
     return;
   }
 
   /**
-   * Registra o Service Worker
+   * Pega o SW já registrado pelo plugin
    */
-  const registration = await navigator.serviceWorker.register("/sw.js");
+  const registration = await navigator.serviceWorker.getRegistration();
+
+  if (!registration) {
+    throw new Error("Service Worker não registrado");
+  }
 
   /**
-   * Cria subscription de push
+   * Subscription
    */
   const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(PUBLIC_VAPID_KEY),
-    } as PushSubscriptionOptionsInit);
+    userVisibleOnly: true,
+    applicationServerKey:
+      urlBase64ToUint8Array(PUBLIC_VAPID_KEY) as BufferSource,
+  });
 
   /**
-   * Persiste no banco
+   * Persistência
    */
   const deviceId = getDeviceId();
 

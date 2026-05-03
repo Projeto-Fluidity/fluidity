@@ -46,7 +46,7 @@ export default function Dashboard() {
         }),
       });
 
-      console.log("Push enviado 🚀");
+      console.log("Push enviado");
     } catch (err) {
       console.error("Erro ao enviar push:", err);
     }

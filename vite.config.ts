@@ -10,15 +10,11 @@ export default defineConfig({
     react(),
     VitePWA({
       
-      strategies: "injectManifest",
-
-      injectManifest: {
-        swSrc: "src/sw.js",
-        swDest: "dist/sw.js",
-        rollupFormat: "iife",
-      },
-
       registerType: "autoUpdate",
+      
+      devOptions: {
+        enabled: true, // ESSENCIAL
+      },
 
       manifest: {
         name: "Fluidity",

@@ -3,6 +3,7 @@ import { ChevronLeft, Bell, Volume2, Vibrate } from "lucide-react";
 import Toggle from "../components/ui/Toggle";
 import ReminderNavigationCard from "../components/reminders/ReminderNavigationCard";
 import { useState } from "react";
+import { registerPush } from "../services/pushService";
 
 type GeneralSetting = {
   id: string;
@@ -59,8 +60,24 @@ export default function Settings() {
     Object.fromEntries(generalSettings.map((s) => [s.id, true]))
   );
 
-  function toggleGeneral(id: string) {
-    setGeneralToggles((prev) => ({ ...prev, [id]: !prev[id] }));
+  async function toggleGeneral(id: string) {
+    const nextValue = !generalToggles[id];
+
+    setGeneralToggles((prev) => ({
+      ...prev,
+      [id]: nextValue,
+    }));
+
+    /**
+     * Se ativar notificações, registra push
+     */
+    if (id === "notifications" && nextValue) {
+      const permission = Notification.permission;
+
+      if (permission !== "granted") {
+        await registerPush();
+      }
+    }
   }
 
   return (

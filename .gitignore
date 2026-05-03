@@ -27,3 +27,6 @@ dist-ssr
 supabase-credentials.txt
 .env
 .env.*
+
+dist/
+dev-dist/

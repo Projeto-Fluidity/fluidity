@@ -19,7 +19,7 @@ import ReminderConfig from "./pages/ReminderConfig";
 
 function App() {
   /**
-   * 🔥 ATIVA O MOTOR DE LEMBRETES
+   * ATIVA O MOTOR DE LEMBRETES
    */
   useReminderTrigger();
 
