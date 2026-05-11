@@ -47,54 +47,49 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
  * 4. Salva a subscription no banco
  */
 export async function registerPush(): Promise<PushSubscription> {
-  /**
-   * 1. Solicita permissão para notificações
-   */
+  console.log("1. solicitando permissão");
+
   const permission = await Notification.requestPermission();
+
+  console.log("2. permission:", permission);
 
   if (permission !== "granted") {
     throw new Error("Permissão para notificações não concedida");
   }
 
-  /**
-   * 2. Aguarda o Service Worker estar pronto
-   */
+  console.log("3. aguardando service worker ready");
+
   const registration = await navigator.serviceWorker.ready;
 
-  /**
-   * 3. Recupera a chave pública VAPID do .env
-   */
+  console.log("4. service worker ready:", registration);
+
   const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
-  /**
-   * Validação importante:
-   * garante que a chave existe antes de usar
-   */
+  console.log("5. publicKey:", publicKey);
+
   if (!publicKey) {
     throw new Error("VAPID public key não definida no .env");
   }
 
-  /**
-   * Converte a chave para o formato exigido pelo browser
-   */
-  const applicationServerKey = urlBase64ToUint8Array(publicKey);
+  const applicationServerKey =
+    urlBase64ToUint8Array(publicKey);
 
-  /**
-   * Cria a subscription
-   *
-   * Observação:
-   * O cast para Uint8Array é necessário pois o TypeScript
-   * nem sempre consegue inferir corretamente o tipo retornado.
-   */
-    const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: applicationServerKey as unknown as BufferSource,
+  console.log("6. criando subscription");
+
+  const subscription =
+    await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey:
+        applicationServerKey as unknown as BufferSource,
     });
 
-  /**
-   * 4. Salva no banco de dados
-   */
+  console.log("7. subscription criada:", subscription);
+
+  console.log("8. salvando subscription");
+
   await saveSubscription(subscription);
+
+  console.log("9. subscription salva");
 
   return subscription;
 }

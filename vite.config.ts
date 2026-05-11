@@ -2,18 +2,18 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-console.log("PWA CONFIG ATIVA");
-
 export default defineConfig({
-  
   plugins: [
     react(),
+
     VitePWA({
-      
-      registerType: "autoUpdate",
-      
+      strategies: "injectManifest",
+
+      srcDir: "src",
+      filename: "sw.ts",
+
       devOptions: {
-        enabled: true, // ESSENCIAL
+        enabled: true,
       },
 
       manifest: {
@@ -24,6 +24,7 @@ export default defineConfig({
         background_color: "#0f172a",
         display: "standalone",
         start_url: "/",
+
         icons: [
           {
             src: "/icons/192.png",
@@ -38,6 +39,5 @@ export default defineConfig({
         ],
       },
     }),
-    
   ],
 });

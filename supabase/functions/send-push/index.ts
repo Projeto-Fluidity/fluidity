@@ -1,110 +1,181 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
+// ============================================================
+// SEND PUSH FUNCTION (SUPABASE EDGE)
+// TESTE DE RUNTIME (SEM WEB-PUSH)
+// ============================================================
 
-// Setup type definitions for built-in Supabase Runtime APIs
 import { serve } from "https://deno.land/std/http/server.ts";
-import webpush from "npm:web-push@3.6.6";
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
-// ============================
+// ============================================================
 // ENV
-// ============================
+// ============================================================
+
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY")!;
-const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY")!;
 
-// ============================
-// WEB PUSH CONFIG
-// ============================
-webpush.setVapidDetails(
-  "mailto:seu@email.com",
-  VAPID_PUBLIC_KEY,
-  VAPID_PRIVATE_KEY
+// ============================================================
+// SUPABASE CLIENT
+// ============================================================
+
+const supabase = createClient(
+  SUPABASE_URL,
+  SERVICE_ROLE_KEY
 );
 
-// ============================
-// SUPABASE CLIENT (SERVER)
-// ============================
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+// ============================================================
+// SERVER
+// ============================================================
 
 serve(async (req) => {
-  // ============================
-  // CORS HEADERS
-  // ============================
+  // ==========================================================
+  // CORS
+  // ==========================================================
+
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
 
-  // ============================
+  // ==========================================================
   // PREFLIGHT
-  // ============================
+  // ==========================================================
+
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+    return new Response("ok", {
+      headers: corsHeaders,
+    });
   }
 
-  let device_id: string | undefined;
-
   try {
-    // ============================
+    console.log("==================================");
+    console.log("SEND-PUSH INICIADA");
+    console.log("==================================");
+
+    // ==========================================================
     // BODY
-    // ============================
+    // ==========================================================
+
     const body = await req.json();
-    device_id = body.device_id;
+
+    console.log("BODY RECEBIDO:", body);
+
+    const device_id = body.device_id;
+    const title = body.title;
+    const message = body.body;
+    const url = body.url;
+
+    // ==========================================================
+    // VALIDAÇÃO
+    // ==========================================================
 
     if (!device_id) {
+      console.error("device_id ausente");
+
       return new Response(
-        JSON.stringify({ error: "device_id é obrigatório" }),
-        { status: 400, headers: corsHeaders }
+        JSON.stringify({
+          success: false,
+          error: "device_id é obrigatório",
+        }),
+        {
+          status: 400,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
-    // ============================
-    // BUSCAR SUBSCRIPTION
-    // ============================
-    const { data, error } = await supabase
+    console.log("device_id:", device_id);
+
+    // ==========================================================
+    // BUSCAR SUBSCRIPTIONS
+    // ==========================================================
+
+    const { data: subs, error } = await supabase
       .from("push_subscriptions")
       .select("*")
-      .eq("device_id", device_id)
-      .single();
+      .eq("device_id", device_id);
 
-    if (error || !data) {
+    // ==========================================================
+    // LOGS
+    // ==========================================================
+
+    console.log("Subscriptions encontradas:", subs?.length);
+
+    if (error) {
+      console.error("Erro Supabase:", error);
+
       return new Response(
-        JSON.stringify({ error: "Subscription não encontrada" }),
-        { status: 404, headers: corsHeaders }
+        JSON.stringify({
+          success: false,
+          error: "Erro ao buscar subscriptions",
+          details: error.message,
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
-    // ============================
-    // SUBSCRIPTION
-    // ============================
-    const subscription = {
-      endpoint: data.endpoint,
-      keys: {
-        p256dh: data.p256dh,
-        auth: data.auth,
-      },
-    };
+    if (!subs || subs.length === 0) {
+      console.warn("Nenhuma subscription encontrada");
 
-    // ============================
-    // PAYLOAD
-    // ============================
-    const payload = JSON.stringify({
-      title: "💧 Hora do seu check-in",
-      body: "Que tal registrar como você está se sentindo?",
-    });
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Subscription não encontrada",
+        }),
+        {
+          status: 404,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
 
-    // ============================
-    // ENVIAR PUSH
-    // ============================
-    await webpush.sendNotification(subscription, payload);
+    // ==========================================================
+    // MOCK PUSH
+    // ==========================================================
+
+    console.log("==================================");
+    console.log("MOCK PUSH EXECUTADO");
+    console.log("==================================");
+
+    for (const sub of subs) {
+      console.log("SUBSCRIPTION:");
+      console.log({
+        endpoint: sub.endpoint,
+        p256dh: sub.p256dh,
+        auth: sub.auth,
+      });
+    }
+
+    // ==========================================================
+    // RESPONSE
+    // ==========================================================
 
     return new Response(
-      JSON.stringify({ success: true }),
+      JSON.stringify({
+        success: true,
+        message: "Mock funcionando",
+        data: {
+          device_id,
+          title,
+          message,
+          url,
+          subscriptions: subs.length,
+        },
+      }),
       {
+        status: 200,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/json",
@@ -113,55 +184,29 @@ serve(async (req) => {
     );
 
   } catch (err: unknown) {
-  console.error("Erro ao enviar push:", err);
+    console.error("==================================");
+    console.error("ERRO GERAL:");
+    console.error(err);
+    console.error("==================================");
 
-  if (
-    typeof err === "object" &&
-    err !== null &&
-    "statusCode" in err
-    ) {
-      const statusCode = (err as { statusCode?: number }).statusCode;
+    const errorMessage =
+      err instanceof Error
+        ? err.message
+        : "Erro desconhecido";
 
-        if (statusCode === 410 || statusCode === 404) {
-          try {
-            if (device_id) {
-              await supabase
-                .from("push_subscriptions")
-                .delete()
-                .eq("device_id", device_id);
-            }
-          } catch (cleanupErr) {
-            console.error("Erro ao limpar subscription:", cleanupErr);
-          }
-        }
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: "Erro interno",
+        details: errorMessage,
+      }),
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/json",
+        },
       }
-
-      return new Response(
-        JSON.stringify({ error: "Erro interno" }),
-        {
-          status: 500,
-          headers: corsHeaders,
-        }
-  );
-}
-
-  return new Response(
-    JSON.stringify({ error: "Erro interno" }),
-    {
-      status: 500,
-      headers: corsHeaders,
-    }
-  ); 
+    );
+  }
 });
-
-/* To invoke locally:
-
-  1. Run `supabase start` (see: https://supabase.com/docs/reference/cli/supabase-start)
-  2. Make an HTTP request:
-
-  curl -i --location --request POST 'http://127.0.0.1:54321/functions/v1/send-push' \
-    --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-    --header 'Content-Type: application/json' \
-    --data '{"name":"Functions"}'
-
-*/
