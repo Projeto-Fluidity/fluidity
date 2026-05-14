@@ -2,6 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
+import { registerSW } from "virtual:pwa-register";
+
 import "./index.css";
 
 import App from "./App.tsx";
@@ -22,23 +24,17 @@ console.log(
  * ============================================================
  */
 
-  // if ("serviceWorker" in navigator) {
-  //   window.addEventListener("load", async () => {
-  //     try {
-  //       const registration =
-  //       await navigator.serviceWorker.register(
-  //         "/sw.js",
-  //         {
-  //           type: "module",
-  //         }
-  //       );
+  registerSW({
+    immediate: true,
 
-  //       console.log("SW REGISTRADO:", registration);
-  //     } catch (error) {
-  //       console.error("ERRO AO REGISTRAR SW:", error);
-  //     }
-  //   });
-  // }
+    onRegistered(registration: ServiceWorkerRegistration | undefined) {
+      console.log("SW REGISTRADO:", registration);
+    },
+
+    onRegisterError(error: unknown) {
+      console.error("ERRO AO REGISTRAR SW:", error);
+    },
+  });
 
 /**
  * ============================================================
@@ -52,25 +48,6 @@ declare global {
     resetMoodMock?: () => void;
     resetReminderLogs?: () => void;
   }
-}
-
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      const registration =
-        await navigator.serviceWorker.register(
-          "/dev-sw.js?dev-sw",
-          {
-            type: "module",
-          }
-        );
-
-      console.log("SW REGISTRADO:", registration);
-
-    } catch (error) {
-      console.error("ERRO AO REGISTRAR SW:", error);
-    }
-  });
 }
 
 if (import.meta.env.DEV) {
