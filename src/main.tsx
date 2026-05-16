@@ -2,8 +2,6 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
-import { registerSW } from "virtual:pwa-register";
-
 import "./index.css";
 
 import App from "./App.tsx";
@@ -24,17 +22,24 @@ console.log(
  * ============================================================
  */
 
-  registerSW({
-    immediate: true,
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", async () => {
+      try {
+        const registration =
+          await navigator.serviceWorker.register(
+            "/sw.js",
+            {
+              type: "module",
+            }
+          );
 
-    onRegistered(registration: ServiceWorkerRegistration | undefined) {
-      console.log("SW REGISTRADO:", registration);
-    },
+        console.log("SW REGISTRADO:", registration);
 
-    onRegisterError(error: unknown) {
-      console.error("ERRO AO REGISTRAR SW:", error);
-    },
-  });
+      } catch (error) {
+        console.error("ERRO AO REGISTRAR SW:", error);
+      }
+    });
+  }
 
 /**
  * ============================================================
