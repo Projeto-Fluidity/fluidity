@@ -76,10 +76,6 @@ export function useReminderTrigger() {
      */
     if (window.__REMINDER_TRIGGER_STARTED__) {
 
-      console.log(
-        "Trigger já iniciado — ignorando nova instância"
-      );
-
       return;
     }
 
@@ -87,8 +83,6 @@ export function useReminderTrigger() {
      * Marca scheduler como iniciado
      */
     window.__REMINDER_TRIGGER_STARTED__ = true;
-
-    console.log("Trigger iniciado");
 
     /**
      * ============================================================
@@ -114,10 +108,6 @@ export function useReminderTrigger() {
       if (
         lastResetDateRef.current !== todayKey
       ) {
-
-        console.log(
-          "Reset diário de disparos"
-        );
 
         triggeredRef.current.clear();
 
@@ -150,24 +140,6 @@ export function useReminderTrigger() {
             alreadyTriggered
           );
 
-        console.log(
-          "CHECK TRIGGER",
-          JSON.stringify(
-            {
-              label: r.label,
-              time: r.time,
-              now: now
-                .toTimeString()
-                .slice(0, 5),
-
-              shouldTrigger,
-              alreadyTriggered,
-            },
-            null,
-            2
-          )
-        );
-
         /**
          * Não deve disparar
          */
@@ -180,11 +152,6 @@ export function useReminderTrigger() {
          */
         const ui =
           toUiReminder(r);
-
-        console.log(
-          "DISPARANDO LEMBRETE:",
-          ui.title
-        );
 
         /**
          * ============================================================
@@ -235,10 +202,6 @@ export function useReminderTrigger() {
      * Remove interval ao desmontar.
      */
     return () => {
-
-      console.log(
-        "Trigger finalizado"
-      );
 
       clearInterval(interval);
 

@@ -14,20 +14,11 @@ precacheAndRoute(self.__WB_MANIFEST);
 
 /**
  * ============================================================
- * START
- * ============================================================
- */
-
-console.log("SW CUSTOM INICIADO");
-
-/**
- * ============================================================
  * INSTALL
  * ============================================================
  */
 
 self.addEventListener("install", () => {
-  console.log("SW INSTALADO");
 
   self.skipWaiting();
 });
@@ -39,7 +30,6 @@ self.addEventListener("install", () => {
  */
 
 self.addEventListener("activate", (event) => {
-  console.log("SW ATIVADO");
 
   event.waitUntil(self.clients.claim());
 });
@@ -51,7 +41,6 @@ self.addEventListener("activate", (event) => {
  */
 
 self.addEventListener("push", (event) => {
-  console.log("PUSH RECEBIDO");
 
   let data = {
     title: "Fluidity 💧",

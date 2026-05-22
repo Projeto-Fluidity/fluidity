@@ -65,11 +65,6 @@ export async function createOrGetSubscription():
   const currentPermission =
     Notification.permission;
 
-  console.log(
-    "1. notification permission:",
-    currentPermission
-  );
-
   /**
    * ============================================================
    * PERMISSÃO NEGADA
@@ -96,11 +91,6 @@ export async function createOrGetSubscription():
     const permission =
       await Notification.requestPermission();
 
-    console.log(
-      "2. nova permission:",
-      permission
-    );
-
     if (permission !== "granted") {
 
       throw new Error(
@@ -114,17 +104,9 @@ export async function createOrGetSubscription():
    * SERVICE WORKER READY
    * ============================================================
    */
-  console.log(
-    "3. aguardando service worker ready"
-  );
 
   const registration =
     await navigator.serviceWorker.ready;
-
-  console.log(
-    "4. service worker ready:",
-    registration
-  );
 
   /**
    * ============================================================
@@ -155,11 +137,6 @@ export async function createOrGetSubscription():
    */
   if (existingSubscription) {
 
-    console.log(
-      "5. subscription existente encontrada:",
-      existingSubscription
-    );
-
     return existingSubscription;
   }
 
@@ -171,11 +148,6 @@ export async function createOrGetSubscription():
   const publicKey =
     import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
-  console.log(
-    "6. publicKey:",
-    publicKey
-  );
-
   if (!publicKey) {
 
     throw new Error(
@@ -186,10 +158,6 @@ export async function createOrGetSubscription():
   const applicationServerKey =
     urlBase64ToUint8Array(publicKey);
 
-  console.log(
-    "7. criando subscription"
-  );
-
   const subscription =
     await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -198,11 +166,6 @@ export async function createOrGetSubscription():
         applicationServerKey as BufferSource,
     });
 
-  console.log(
-    "8. subscription criada:",
-    subscription
-  );
-
   /**
    * ============================================================
    * SALVAR NO SUPABASE
@@ -210,15 +173,7 @@ export async function createOrGetSubscription():
    *
    * Apenas novas subscriptions são persistidas.
    */
-  console.log(
-    "9. salvando subscription"
-  );
-
   await saveSubscription(subscription);
-
-  console.log(
-    "10. subscription salva"
-  );
 
   /**
    * ============================================================
@@ -309,11 +264,6 @@ export async function unsubscribePush():
    * ============================================================
    */
   if (!subscription) {
-
-    console.log(
-      "Nenhuma subscription encontrada"
-    );
-
     return;
   }
 
@@ -322,11 +272,5 @@ export async function unsubscribePush():
    * REMOVE SUBSCRIPTION
    * ============================================================
    */
-  const success =
     await subscription.unsubscribe();
-
-  console.log(
-    "Subscription removida:",
-    success
-  );
 }

@@ -88,7 +88,5 @@ app.post("/send-push", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log("=================================");
   console.log(`Push Server running on ${PORT}`);
-  console.log("=================================");
 });

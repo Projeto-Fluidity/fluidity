@@ -9,11 +9,6 @@ import App from "./App.tsx";
 import { resetMoodMock } from "./utils/debug/resetMoodMock";
 import { resetReminderLogs } from "./utils/debug/resetReminderLogs";
 
-console.log(
-  "ENV PUBLIC KEY:",
-  import.meta.env.VITE_VAPID_PUBLIC_KEY
-);
-
 /**
  * ============================================================
  * REGISTRO DO SERVICE WORKER (PWA)
