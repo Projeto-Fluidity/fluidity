@@ -5,91 +5,328 @@ import { saveSubscription } from "./pushSubscriptionService";
  * UTIL: CONVERTER VAPID KEY (base64 → Uint8Array)
  * ============================================================
  *
- * A chave pública VAPID vem como string (base64),
- * mas a API de Push do navegador exige um Uint8Array.
+ * A Push API do navegador exige Uint8Array,
+ * mas a VAPID key vem como string base64.
  *
- * Essa função faz essa conversão.
+ * Essa função faz a conversão.
  */
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  /**
-   * Ajusta o padding da base64 (necessário para decodificação correta)
-   */
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+function urlBase64ToUint8Array(
+  base64String: string
+): Uint8Array {
 
-  /**
-   * Normaliza a string base64
-   */
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  const padding =
+    "=".repeat((4 - (base64String.length % 4)) % 4);
 
-  /**
-   * Decodifica base64 para string binária
-   */
+  const base64 =
+    (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
   const rawData = window.atob(base64);
 
-  /**
-   * Converte string binária para Uint8Array
-   */
-  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+  return Uint8Array.from(
+    [...rawData].map((char) =>
+      char.charCodeAt(0)
+    )
+  );
 }
 
 /**
  * ============================================================
- * REGISTRAR PUSH NOTIFICATION
+ * CREATE OR GET SUBSCRIPTION
  * ============================================================
  *
- * Fluxo completo:
+ * Responsável por:
  *
- * 1. Solicita permissão ao usuário
- * 2. Aguarda o Service Worker estar pronto
- * 3. Cria a subscription com VAPID
- * 4. Salva a subscription no banco
+ * - solicitar permissão;
+ * - recuperar subscription existente;
+ * - criar nova subscription quando necessário;
+ * - salvar no banco.
+ *
+ * ============================================================
+ * FLUXO:
+ * ============================================================
+ *
+ * 1. Verifica status da permissão
+ * 2. Aguarda Service Worker
+ * 3. Verifica subscription existente
+ * 4. Se existir → reutiliza
+ * 5. Se não existir → cria nova
+ * 6. Salva no Supabase
  */
-export async function registerPush(): Promise<PushSubscription> {
-  console.log("1. solicitando permissão");
+export async function createOrGetSubscription():
+  Promise<PushSubscription> {
 
-  const permission = await Notification.requestPermission();
+  /**
+   * ============================================================
+   * STATUS DA PERMISSÃO
+   * ============================================================
+   */
+  const currentPermission =
+    Notification.permission;
 
-  console.log("2. permission:", permission);
+  console.log(
+    "1. notification permission:",
+    currentPermission
+  );
 
-  if (permission !== "granted") {
-    throw new Error("Permissão para notificações não concedida");
+  /**
+   * ============================================================
+   * PERMISSÃO NEGADA
+   * ============================================================
+   *
+   * O navegador bloqueará notificações.
+   */
+  if (currentPermission === "denied") {
+
+    throw new Error(
+      "Notificações bloqueadas pelo usuário"
+    );
   }
 
-  console.log("3. aguardando service worker ready");
+  /**
+   * ============================================================
+   * PERMISSÃO AINDA NÃO DEFINIDA
+   * ============================================================
+   *
+   * O navegador exibirá o popup de autorização.
+   */
+  if (currentPermission === "default") {
 
-  const registration = await navigator.serviceWorker.ready;
+    const permission =
+      await Notification.requestPermission();
 
-  console.log("4. service worker ready:", registration);
+    console.log(
+      "2. nova permission:",
+      permission
+    );
 
-  const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+    if (permission !== "granted") {
 
-  console.log("5. publicKey:", publicKey);
+      throw new Error(
+        "Permissão para notificações não concedida"
+      );
+    }
+  }
+
+  /**
+   * ============================================================
+   * SERVICE WORKER READY
+   * ============================================================
+   */
+  console.log(
+    "3. aguardando service worker ready"
+  );
+
+  const registration =
+    await navigator.serviceWorker.ready;
+
+  console.log(
+    "4. service worker ready:",
+    registration
+  );
+
+  /**
+   * ============================================================
+   * VERIFICAR SUBSCRIPTION EXISTENTE
+   * ============================================================
+   *
+   * Isso evita:
+   *
+   * - subscriptions duplicadas;
+   * - múltiplos registros no banco;
+   * - requests desnecessários;
+   * - conflitos de VAPID.
+   */
+  const existingSubscription =
+    await registration.pushManager.getSubscription();
+
+  /**
+   * ============================================================
+   * SUBSCRIPTION JÁ EXISTE
+   * ============================================================
+   *
+   * IMPORTANTE:
+   *
+   * Não recriamos a subscription.
+   * Não salvamos novamente no banco.
+   *
+   * Apenas reutilizamos a existente.
+   */
+  if (existingSubscription) {
+
+    console.log(
+      "5. subscription existente encontrada:",
+      existingSubscription
+    );
+
+    return existingSubscription;
+  }
+
+  /**
+   * ============================================================
+   * CRIAR NOVA SUBSCRIPTION
+   * ============================================================
+   */
+  const publicKey =
+    import.meta.env.VITE_VAPID_PUBLIC_KEY;
+
+  console.log(
+    "6. publicKey:",
+    publicKey
+  );
 
   if (!publicKey) {
-    throw new Error("VAPID public key não definida no .env");
+
+    throw new Error(
+      "VAPID public key não definida no .env"
+    );
   }
 
   const applicationServerKey =
     urlBase64ToUint8Array(publicKey);
 
-  console.log("6. criando subscription");
+  console.log(
+    "7. criando subscription"
+  );
 
   const subscription =
     await registration.pushManager.subscribe({
       userVisibleOnly: true,
+
       applicationServerKey:
-        applicationServerKey as unknown as BufferSource,
+        applicationServerKey as BufferSource,
     });
 
-  console.log("7. subscription criada:", subscription);
+  console.log(
+    "8. subscription criada:",
+    subscription
+  );
 
-  console.log("8. salvando subscription");
+  /**
+   * ============================================================
+   * SALVAR NO SUPABASE
+   * ============================================================
+   *
+   * Apenas novas subscriptions são persistidas.
+   */
+  console.log(
+    "9. salvando subscription"
+  );
 
   await saveSubscription(subscription);
 
-  console.log("9. subscription salva");
+  console.log(
+    "10. subscription salva"
+  );
 
+  /**
+   * ============================================================
+   * RETORNA NOVA SUBSCRIPTION
+   * ============================================================
+   */
   return subscription;
+  
+}
+
+/**
+ * ============================================================
+ * HAS PUSH SUBSCRIPTION
+ * ============================================================
+ *
+ * Verifica se o navegador já possui
+ * uma subscription ativa.
+ *
+ * Isso permite sincronizar a UI
+ * com o estado real do Push API.
+ */
+export async function hasPushSubscription():
+  Promise<boolean> {
+
+  /**
+   * ============================================================
+   * SERVICE WORKER READY
+   * ============================================================
+   */
+  const registration =
+    await navigator.serviceWorker.ready;
+
+  /**
+   * ============================================================
+   * BUSCA SUBSCRIPTION
+   * ============================================================
+   */
+  const subscription =
+    await registration
+      .pushManager
+      .getSubscription();
+
+  /**
+   * ============================================================
+   * RETORNA BOOLEAN
+   * ============================================================
+   */
+  return !!subscription;
+}
+
+/**
+ * ============================================================
+ * UNSUBSCRIBE PUSH
+ * ============================================================
+ *
+ * Remove a subscription ativa do navegador.
+ *
+ * Fluxo:
+ *
+ * 1. Obtém Service Worker
+ * 2. Busca subscription atual
+ * 3. Remove subscription
+ */
+export async function unsubscribePush():
+  Promise<void> {
+
+  /**
+   * ============================================================
+   * SERVICE WORKER READY
+   * ============================================================
+   */
+  const registration =
+    await navigator.serviceWorker.ready;
+
+  /**
+   * ============================================================
+   * BUSCA SUBSCRIPTION ATUAL
+   * ============================================================
+   */
+  const subscription =
+    await registration
+      .pushManager
+      .getSubscription();
+
+  /**
+   * ============================================================
+   * NÃO EXISTE SUBSCRIPTION
+   * ============================================================
+   */
+  if (!subscription) {
+
+    console.log(
+      "Nenhuma subscription encontrada"
+    );
+
+    return;
+  }
+
+  /**
+   * ============================================================
+   * REMOVE SUBSCRIPTION
+   * ============================================================
+   */
+  const success =
+    await subscription.unsubscribe();
+
+  console.log(
+    "Subscription removida:",
+    success
+  );
 }

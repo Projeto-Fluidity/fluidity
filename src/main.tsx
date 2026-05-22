@@ -9,8 +9,6 @@ import App from "./App.tsx";
 import { resetMoodMock } from "./utils/debug/resetMoodMock";
 import { resetReminderLogs } from "./utils/debug/resetReminderLogs";
 
-import { registerPush } from "./services/pushService";
-
 console.log(
   "ENV PUBLIC KEY:",
   import.meta.env.VITE_VAPID_PUBLIC_KEY
@@ -56,15 +54,6 @@ declare global {
 }
 
 if (import.meta.env.DEV) {
-  /**
-   * TESTAR PUSH MANUALMENTE
-   */
-  window.testPush = async () => {
-    const subscription = await registerPush();
-
-    console.log("SUBSCRIPTION:");
-    console.log(subscription);
-  };
 
   /**
    * RESETS
