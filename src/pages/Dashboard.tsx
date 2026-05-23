@@ -18,34 +18,42 @@ import { LayoutDashboard, Smile, History } from "lucide-react";
  * O hook `useMood` é instanciado apenas nesta página,
  * tornando o Dashboard a **fonte única de verdade (Single Source of Truth)**
  * para o estado relacionado ao humor do usuário.
- *
- * Dessa forma:
- * - O histórico é carregado e mantido neste componente
- * - A função `registerMood` é passada como prop para o MoodSelector
- * - O MoodHistory recebe os registros atualizados automaticamente
- *
- * Isso garante que qualquer alteração no estado
- * reflita imediatamente na interface sem necessidade de reload.
- *
- * Estilização:
- * - Utiliza Tailwind CSS para layout responsivo e organização visual
- * - Utiliza ícones da biblioteca Lucide para melhorar a leitura visual
- *
- * @returns Interface principal do dashboard da aplicação
  */
 export default function Dashboard() {
   /**
    * Hook responsável por gerenciar o estado de humor da aplicação.
-   *
-   * history      → lista de registros de humor
-   * loading      → estado de carregamento do histórico
-   * registerMood → função responsável por registrar um novo humor
    */
   const { history, loading, registerMood } = useMood();
 
   /**
-   * Renderização condicional exibida enquanto os dados
-   * do histórico de humor estão sendo carregados.
+   * ============================================================
+   * TESTE DE PUSH (APENAS DEV)
+   * ============================================================
+   *
+   * NÃO interfere no fluxo de check-in
+   * NÃO altera regras de negócio
+   * Apenas dispara a Edge Function manualmente
+   */
+  const handleTestPush = async () => {
+    try {
+      await fetch("/functions/v1/send-push", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          device_id: "684f8619-74e0-43cb-bb47-413aba5fc7aa", // 🔁 seu device_id
+        }),
+      });
+
+      console.log("Push enviado");
+    } catch (err) {
+      console.error("Erro ao enviar push:", err);
+    }
+  };
+
+  /**
+   * Loading state
    */
   if (loading) {
     return (
@@ -57,19 +65,32 @@ export default function Dashboard() {
 
   return (
     <main className="flex min-h-screen justify-center bg-slate-100 px-4 py-10">
-      {/* Container principal da aplicação */}
       <div className="w-full max-w-3xl space-y-10">
-        {/* Cabeçalho da página */}
+        {/* Header */}
         <header className="space-y-2 text-center">
           <div className="flex items-center justify-center gap-2">
             <LayoutDashboard className="h-7 w-7 text-slate-700" />
-            <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
+            <h1 className="text-3xl font-bold text-slate-800">
+              Dashboard
+            </h1>
           </div>
 
           <p className="text-slate-600">Registro diário de humor</p>
         </header>
 
-        {/* Seção de registro de humor */}
+        {/* 🔥 BOTÃO DEV (não impacta produção) */}
+        {import.meta.env.DEV && (
+          <div className="flex justify-center">
+            <button
+              onClick={handleTestPush}
+              className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Testar Push (DEV)
+            </button>
+          </div>
+        )}
+
+        {/* Registro de humor */}
         <section className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <Smile className="h-5 w-5 text-slate-600" />
@@ -79,11 +100,10 @@ export default function Dashboard() {
             </h2>
           </div>
 
-          {/* Componente responsável por registrar um novo humor */}
           <MoodSelector onSelect={registerMood} />
         </section>
 
-        {/* Seção de histórico de humor */}
+        {/* Histórico */}
         <section className="rounded-xl bg-white p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <History className="h-5 w-5 text-slate-600" />
@@ -93,7 +113,6 @@ export default function Dashboard() {
             </h2>
           </div>
 
-          {/* Lista de registros já realizados pelo usuário */}
           <MoodHistory records={history} />
         </section>
       </div>
