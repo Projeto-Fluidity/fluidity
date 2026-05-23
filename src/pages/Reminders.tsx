@@ -29,7 +29,9 @@ type PostponeStep = "idle" | "selecting" | "confirmed";
  * 4. Modal de confirmacao e exibido (PostponeConfirmModal)
  * 5. Usuario clica em "Entendi" ou "Voltar" para encerrar
  */
+
 export default function Reminders() {
+  
   const {
     reminders,
     feedback,
@@ -37,6 +39,8 @@ export default function Reminders() {
     postponeReminder,
     reloadReminders,
   } = useReminders();
+console.log("REMINDERS:", reminders); // ✅ aqui sim
+console.log("NOW:", new Date());
 
   /**
    * Etapa atual do fluxo de adiamento.

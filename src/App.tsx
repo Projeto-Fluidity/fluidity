@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import { useReminderTrigger } from "./hooks/useReminderTrigger"; // 👈 ADD
 
 import AppLayout from "./components/layout/AppLayout";
 import Emotion from "./pages/Emotion";
@@ -14,16 +15,14 @@ import QuickMeditation from "./pages/QuickMeditation";
 import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
 import DevTools from "./components/debug/DevTools";
+import ReminderConfig from "./pages/ReminderConfig";
 
-/**
- * Componente raiz da aplicação.
- *
- * Responsável por:
- * - Definir as rotas
- * - Aplicar layout padrão
- * - Exibir DevTools em ambiente de desenvolvimento
- */
 function App() {
+  /**
+   * ATIVA O MOTOR DE LEMBRETES
+   */
+  useReminderTrigger();
+
   return (
     <>
       <Routes>
@@ -39,9 +38,9 @@ function App() {
         <Route path="/meditation" element={<AppLayout><QuickMeditation /></AppLayout>} />
         <Route path="/reminders" element={<AppLayout><Reminders /></AppLayout>} />
         <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
+        <Route path="/reminder-config" element={<AppLayout><ReminderConfig /></AppLayout>} />
       </Routes>
 
-      {/* DevTools só aparece em desenvolvimento */}
       {import.meta.env.DEV && <DevTools />}
     </>
   );

@@ -21,6 +21,7 @@ import {
  * - UI → renderização
  */
 export function useReminders() {
+  console.log("🔥 useReminders EXECUTOU");
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [feedback, setFeedback] = useState<string | null>(null);
 
