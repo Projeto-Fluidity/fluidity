@@ -57,8 +57,6 @@ self.addEventListener("push", (event) => {
     console.error("ERRO AO LER PAYLOAD:", error);
   }
 
-  console.log("PAYLOAD:", data);
-
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,

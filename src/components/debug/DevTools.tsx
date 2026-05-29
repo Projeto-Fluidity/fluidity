@@ -9,6 +9,12 @@
 
 import { useState, useRef, useEffect } from "react";
 
+import { sendPushNotification }
+  from "../../services/notificationService";
+
+import { getOrCreateDeviceId }
+  from "../../services/deviceService";
+
 export default function DevTools() {
   const [isOpen, setIsOpen] = useState(true);
   const [position, setPosition] = useState({ x: 20, y: 20 });
@@ -89,6 +95,36 @@ export default function DevTools() {
     console.log("[QA] Reset completo aplicado");
 
     window.location.reload();
+  }
+
+    /**
+   * ============================================================
+   * TESTE DE PUSH
+   * ============================================================
+   */
+  async function handleTestPush() {
+
+    try {
+
+      await sendPushNotification({
+        device_id:
+          getOrCreateDeviceId(),
+
+        title: "Fluidity",
+
+        body:
+          "Push enviado via Railway com sucesso!",
+
+        url: "/",
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao enviar push:",
+        error
+      );
+    }
   }
 
   function getButtonClass(active: boolean) {
@@ -182,6 +218,24 @@ export default function DevTools() {
                   Storage
                 </button>
               </div>
+            </div>
+
+            {/* PUSH */}
+            <div>
+              <p className="text-gray-400 mb-1">
+                Push Notifications
+              </p>
+
+              <button
+                onClick={handleTestPush}
+                className="
+                  px-2 py-1 rounded border text-xs transition
+                  bg-blue-600 border-blue-500 text-white
+                  hover:bg-blue-700
+                "
+              >
+                Testar Push
+              </button>
             </div>
 
             {/* RESET */}

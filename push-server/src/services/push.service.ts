@@ -143,88 +143,39 @@ export async function sendPushToDevice(
 
     try {
 
-      console.log(
-        "================================="
-      );
-
-      console.log(
-        "ENVIANDO PUSH..."
-      );
-
-      console.log(
-        "DEVICE ID:",
-        deviceId
-      );
-
-      console.log(
-        "ENDPOINT:",
-        sub.endpoint
-      );
-
-      console.log("PAYLOAD:");
-
-      console.log(payload);
-
       /**
        * ======================================================
        * WEB PUSH SEND
        * ======================================================
        */
 
-      const response =
-        await webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
 
-            keys: {
-              p256dh: sub.p256dh,
-              auth: sub.auth,
-            },
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
           },
+        },
 
-          payload
-        );
-
-      /**
-       * ======================================================
-       * SUCCESS LOG
-       * ======================================================
-       */
-
-      console.log(
-        "================================="
-      );
-
-      console.log(
-        "PUSH ENVIADO COM SUCESSO"
-      );
-
-      console.log(
-        "STATUS:",
-        response.statusCode
-      );
-
-      console.log(
-        "HEADERS:",
-        response.headers
+        payload
       );
 
     } catch (err: unknown) {
 
       console.error(
-        "================================="
+        "Erro ao enviar push notification:",
+        err
       );
 
-      console.error(
-        "ERRO AO ENVIAR PUSH"
-      );
-
-      console.error(err);
-
-      const error = err as {
+      type WebPushError = {
         statusCode?: number;
         body?: string;
       };
+
+      const error =
+        err as WebPushError;
 
       console.error(
         "STATUS:",
@@ -251,14 +202,20 @@ export async function sendPushToDevice(
         error.statusCode === 410
       ) {
 
-        await supabase
-          .from("push_subscriptions")
-          .delete()
-          .eq("endpoint", sub.endpoint);
+        const { error: deleteError } =
+          await supabase
+            .from("push_subscriptions")
+            .delete()
+            .eq("endpoint", sub.endpoint);
 
-        console.log(
-          "Subscription removida"
-        );
+        if (deleteError) {
+
+          console.error(
+            "Erro ao remover subscription inválida:",
+            deleteError
+          );
+        }
+
       }
     }
   }
