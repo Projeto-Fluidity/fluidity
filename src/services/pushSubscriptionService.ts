@@ -1,106 +1,123 @@
-import { getDeviceId } from "../lib/deviceId";
+import { saveSubscription }
+  from "./subscriptionService";
 
 /**
  * ============================================================
- * SALVAR SUBSCRIPTION NO BANCO (SEM HEADER CUSTOM)
+ * VAPID PUBLIC KEY
+ * ============================================================
+ */
+
+const VAPID_PUBLIC_KEY =
+  import.meta.env.VITE_VAPID_PUBLIC_KEY;
+
+/**
+ * ============================================================
+ * CONVERTE BASE64 → UINT8ARRAY
  * ============================================================
  *
- * Estratégia atual:
- * - Não usamos headers customizados (x-device-id)
- * - RLS valida apenas via dados da linha (device_id)
- * - Utilizamos UPSERT para evitar duplicação
- *
- * Fluxo:
- * 1. Gera/recupera device_id
- * 2. Extrai dados da subscription
- * 3. Envia para o Supabase via REST
- * 4. Usa "merge-duplicates" para atualizar se já existir
+ * A Push API exige a chave VAPID
+ * em formato Uint8Array.
  */
-export async function saveSubscription(
-  subscription: PushSubscription
-): Promise<void> {
+
+function urlBase64ToUint8Array(
+  base64String: string
+) {
+  const padding =
+    "=".repeat(
+      (4 - (base64String.length % 4)) % 4
+    );
+
+  const base64 =
+    (base64String + padding)
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
+  const rawData =
+    window.atob(base64);
+
+  const outputArray =
+    new Uint8Array(rawData.length);
+
+  for (
+    let i = 0;
+    i < rawData.length;
+    ++i
+  ) {
+    outputArray[i] =
+      rawData.charCodeAt(i);
+  }
+
+  return outputArray;
+}
+
+/**
+ * ============================================================
+ * REGISTRA PUSH SUBSCRIPTION
+ * ============================================================
+ */
+
+export async function registerPushNotifications() {
 
   /**
-   * ============================================================
-   * 1. IDENTIFICAÇÃO DO DISPOSITIVO
-   * ============================================================
+   * Verifica suporte
    */
-  const deviceId = getDeviceId();
+  if (
+    !("serviceWorker" in navigator) ||
+    !("PushManager" in window)
+  ) {
+    console.warn(
+      "Push não suportado"
+    );
 
-  /**
-   * ============================================================
-   * 2. EXTRAÇÃO DOS DADOS DA SUBSCRIPTION
-   * ============================================================
-   */
-  const json = subscription.toJSON();
-
-  const endpoint = json.endpoint;
-  const keys = json.keys;
-
-  /**
-   * Validação básica
-   */
-  if (!endpoint || !keys?.p256dh || !keys?.auth) {
-    throw new Error("Subscription inválida");
+    return;
   }
 
   /**
-   * ============================================================
-   * 3. VARIÁVEIS DE AMBIENTE
-   * ============================================================
+   * Permissão
    */
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const permission =
+    await Notification.requestPermission();
 
-  /**
-   * ============================================================
-   * 4. REQUEST PARA O SUPABASE (UPSERT)
-   * ============================================================
-   *
-   * IMPORTANTE:
-   * - NÃO usamos mais headers customizados
-   * - "Prefer: resolution=merge-duplicates" faz UPSERT
-   */
-  const response = await fetch(`${url}/rest/v1/push_subscriptions?on_conflict=device_id`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  if (permission !== "granted") {
+    console.warn(
+      "Permissão negada"
+    );
 
-      // Headers obrigatórios do Supabase
-      apikey: key,
-      Authorization: `Bearer ${key}`,
-
-      /**
-       * UPSERT:
-       * Se já existir device_id → atualiza
-       * Se não existir → insere
-       */
-      Prefer: "resolution=merge-duplicates",
-    },
-    body: JSON.stringify({
-      device_id: deviceId,
-      endpoint: endpoint,
-      p256dh: keys.p256dh,
-      auth: keys.auth,
-    }),
-  });
-
-  /**
-   * ============================================================
-   * 5. TRATAMENTO DE ERRO
-   * ============================================================
-   */
-  if (!response.ok) {
-    const error = await response.json();
-
-    console.error("Erro ao salvar subscription:", error);
-
-    throw new Error("Erro ao salvar subscription");
+    return;
   }
 
   /**
-   * ============================================================
-   * SUCESSO
-   * ============================================================
+   * Aguarda SW
    */
+  const registration =
+    await navigator.serviceWorker.ready;
+
+  /**
+   * Verifica subscription existente
+   */
+  let subscription =
+    await registration.pushManager.getSubscription();
+
+  /**
+   * Cria nova subscription
+   */
+  if (!subscription) {
+
+    subscription =
+      await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+
+        applicationServerKey:
+          urlBase64ToUint8Array(
+            VAPID_PUBLIC_KEY
+          ),
+      });
+  }
+
+  /**
+   * Salva no banco
+   */
+  await saveSubscription(
+    subscription
+  );
 }

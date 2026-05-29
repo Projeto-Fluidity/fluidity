@@ -15,269 +15,280 @@ import ReminderNavigationCard
 
 import {
   createOrGetSubscription,
-  hasPushSubscription,
   unsubscribePush,
 } from "../services/pushService";
 
+import { getSWReady }
+  from "../services/swService";
 /**
  * ============================================================
  * TYPES
  * ============================================================
  */
+
 type GeneralSetting = {
   id: string;
+  label: string;
+  description: string;
   icon: React.ReactNode;
-  title: string;
-  subtitle: string;
-  iconColor: string;
-  iconBg: string;
+  enabled: boolean;
 };
 
 /**
  * ============================================================
- * SETTINGS CONFIG
+ * SETTINGS PAGE
  * ============================================================
  */
-const generalSettings: GeneralSetting[] = [
-  {
-    id: "notifications",
 
-    icon: <Bell size={18} />,
-
-    title: "Notificações",
-
-    subtitle: "Receber alertas",
-
-    iconColor: "text-[#008236]",
-
-    iconBg: "bg-green-100",
-  },
-
-  {
-    id: "sound",
-
-    icon: <Volume2 size={18} />,
-
-    title: "Som",
-
-    subtitle: "Tocar som nos alertas",
-
-    iconColor: "text-[#008236]",
-
-    iconBg: "bg-green-100",
-  },
-
-  {
-    id: "vibration",
-
-    icon: <Vibrate size={18} />,
-
-    title: "Vibração",
-
-    subtitle: "Vibrar ao notificar",
-
-    iconColor: "text-purple-500",
-
-    iconBg: "bg-purple-100",
-  },
-];
-
-/**
- * ============================================================
- * PAGE: SETTINGS
- * ============================================================
- *
- * Responsável por:
- * - configurações gerais;
- * - ativar/desativar push;
- * - sincronizar UI com Push API.
- */
 export default function Settings() {
 
   const navigate = useNavigate();
 
   /**
-   * ============================================================
-   * ESTADO DOS TOGGLES
-   * ============================================================
-   *
-   * IMPORTANTE:
-   * Não iniciamos notifications como true.
-   *
-   * O valor real virá da Push API.
+   * ==========================================================
+   * STATE
+   * ==========================================================
    */
-  const [
-    generalToggles,
-    setGeneralToggles,
-  ] = useState<Record<string, boolean>>({
-    notifications: false,
-    sound: true,
-    vibration: true,
-  });
+
+  const [generalToggles, setGeneralToggles] =
+    useState<GeneralSetting[]>([
+      {
+        id: "notifications",
+        label: "Notificações",
+        description: "Receber alertas",
+        icon: <Bell size={16} />,
+        enabled: false,
+      },
+
+      {
+        id: "sound",
+        label: "Som",
+        description: "Tocar som nos alertas",
+        icon: <Volume2 size={16} />,
+        enabled: true,
+      },
+
+      {
+        id: "vibration",
+        label: "Vibração",
+        description: "Vibrar ao notificar",
+        icon: <Vibrate size={16} />,
+        enabled: true,
+      },
+    ]);
 
   /**
-   * ============================================================
-   * SYNC COM PUSH API
-   * ============================================================
+   * ==========================================================
+   * SYNC PUSH STATE
+   * ==========================================================
    *
    * Ao abrir a tela:
-   * - verifica se já existe subscription;
-   * - sincroniza o toggle com estado real.
+   *
+   * - verifica se existe subscription;
+   * - sincroniza toggle com estado real.
    */
-  useEffect(() => {
 
-    async function syncPushState() {
+  async function syncPushState() {
 
-      try {
+    try {
 
-        const hasSubscription =
-          await hasPushSubscription();
+      /**
+       * Aguarda SW
+       */
+      const registration =
+        await getSWReady()
 
-        console.log(
-          "Push subscription ativa:",
-          hasSubscription
-        );
+      /**
+       * Busca subscription atual
+       */
+      const subscription =
+        await registration
+          .pushManager
+          .getSubscription();
 
-        setGeneralToggles((prev) => ({
-          ...prev,
-          notifications: hasSubscription,
-        }));
+      /**
+       * Existe subscription?
+       */
+      const hasSubscription =
+        !!subscription;
 
-      } catch (error) {
+      /**
+       * Sincroniza toggle
+       */
+      setGeneralToggles((prev) =>
+        prev.map((item) => {
 
-        console.error(
-          "Erro ao sincronizar push:",
-          error
-        );
-      }
-    }
+          if (item.id === "notifications") {
 
-    syncPushState();
+            return {
+              ...item,
+              enabled: hasSubscription,
+            };
+          }
 
-  }, []);
+          return item;
+        })
+      );
 
-  /**
-   * ============================================================
-   * TOGGLE GERAL
-   * ============================================================
-   */
-  async function toggleGeneral(
-    id: string
-  ) {
+    } catch (error) {
 
-    const nextValue =
-      !generalToggles[id];
-
-    /**
-     * Atualiza UI imediatamente
-     */
-    setGeneralToggles((prev) => ({
-      ...prev,
-      [id]: nextValue,
-    }));
-
-    /**
-     * ============================================================
-     * PUSH NOTIFICATIONS
-     * ============================================================
-     */
-    if (id === "notifications") {
-
-      try {
-
-        /**
-         * ============================================================
-         * ATIVAR PUSH
-         * ============================================================
-         */
-        if (nextValue) {
-
-          await createOrGetSubscription();
-
-          console.log(
-            "Push notifications ativadas"
-          );
-        }
-
-        /**
-         * ============================================================
-         * DESATIVAR PUSH
-         * ============================================================
-         */
-        else {
-
-          await unsubscribePush();
-
-          console.log(
-            "Push notifications desativadas"
-          );
-        }
-
-      } catch (error) {
-
-        console.error(
-          "Erro ao alterar push:",
-          error
-        );
-
-        /**
-         * Reverte UI em caso de erro
-         */
-        setGeneralToggles((prev) => ({
-          ...prev,
-          [id]: !nextValue,
-        }));
-      }
+      console.error(
+        "ERRO SYNC PUSH:",
+        error
+      );
     }
   }
 
+  /**
+   * ==========================================================
+   * EFFECT
+   * ==========================================================
+   */
+
+    useEffect(() => {
+
+      const load = async () => {
+
+        await syncPushState();
+      };
+
+      void load();
+
+    }, []);
+
+  /**
+   * ==========================================================
+   * TOGGLE GERAL
+   * ==========================================================
+   */
+  
+    async function toggleGeneral(
+    id: string
+  ) {
+
+    /**
+     * PUSH NOTIFICATIONS
+     */
+    if (id === "notifications") {
+
+      const current =
+        generalToggles.find(
+          (item) => item.id === id
+        );
+
+      const enabled =
+        current?.enabled ?? false;
+
+      try {
+
+        /**
+         * DESABILITAR
+         */
+        if (enabled) {
+
+          await unsubscribePush();
+
+          setGeneralToggles((prev) =>
+            prev.map((item) => {
+
+              if (item.id === id) {
+
+                return {
+                  ...item,
+                  enabled: false,
+                };
+              }
+
+              return item;
+            })
+          );
+
+          return;
+        }
+
+        /**
+         * HABILITAR
+         */
+
+        await createOrGetSubscription();
+
+        setGeneralToggles((prev) =>
+          prev.map((item) => {
+
+            if (item.id === id) {
+
+              return {
+                ...item,
+                enabled: true,
+              };
+            }
+
+            return item;
+          })
+        );
+
+      } catch (error) {
+
+        console.error(
+          "ERRO TOGGLE PUSH:",
+          error
+        );
+      }
+
+      return;
+    }
+
+    /**
+     * OUTROS TOGGLES
+     */
+    setGeneralToggles((prev) =>
+      prev.map((item) => {
+
+        if (item.id === id) {
+
+          return {
+            ...item,
+            enabled: !item.enabled,
+          };
+        }
+
+        return item;
+      })
+    );
+  }
+
+  /**
+   * ==========================================================
+   * RENDER
+   * ==========================================================
+   */
+
   return (
+    <div className="min-h-screen bg-[#DCFCE7] pb-24">
 
-    <div
-      className="
-        min-h-full
-        bg-gradient-to-b
-        from-[#DCFCE7]
-        to-[#F0FDF4]
-        p-4
-      "
-    >
+      <div className="px-4 pt-6">
 
-      <div className="space-y-6">
-
-        {/* ============================================================
-            HEADER
-        ============================================================ */}
-        <div className="flex items-center gap-3">
+        {/**
+         * HEADER
+         */}
+        <div className="mb-6 flex items-center gap-3">
 
           <button
             onClick={() => navigate(-1)}
-
-            aria-label="Voltar"
-
             className="
-              flex
-              h-9
-              w-9
-              items-center
-              justify-center
-              rounded-full
-              bg-white/80
-              text-gray-600
-              shadow-sm
-              backdrop-blur
-              hover:bg-white
+              flex h-8 w-8 items-center
+              justify-center rounded-full
+              bg-white
             "
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </button>
 
           <div>
             <h1
               className="
-                text-2xl
-                font-bold
-                text-gray-800
+                text-lg font-semibold
+                text-[#0F172A]
               "
             >
               Configurações
@@ -285,8 +296,7 @@ export default function Settings() {
 
             <p
               className="
-                text-sm
-                text-gray-500
+                text-xs text-[#64748B]
               "
             >
               Personalize seus lembretes
@@ -294,97 +304,72 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ============================================================
-            GERAL
-        ============================================================ */}
-        <div className="space-y-2">
-
-          <p
+        {/**
+         * CARD SETTINGS
+         */}
+        <div
+          className="
+            rounded-2xl bg-white
+            p-4 shadow-sm
+          "
+        >
+          <span
             className="
-              text-xs
-              font-semibold
-              uppercase
-              tracking-widest
-              text-gray-400
+              mb-3 block text-[10px]
+              font-semibold uppercase
+              tracking-wide text-[#94A3B8]
             "
           >
             Geral
-          </p>
+          </span>
 
-          <div
-            className="
-              rounded-2xl
-              bg-white
-              divide-y
-              divide-gray-100
-              border
-              border-gray-200
-              shadow-sm
-            "
-          >
+          <div className="space-y-4">
 
-            {generalSettings.map((setting) => (
+            {generalToggles.map((item) => (
 
               <div
-                key={setting.id}
-
+                key={item.id}
                 className="
-                  flex
-                  items-center
+                  flex items-center
                   justify-between
-                  px-4
-                  py-3
                 "
               >
-
                 <div className="flex items-center gap-3">
 
                   <div
-                    className={`
-                      flex
-                      h-9
-                      w-9
-                      items-center
-                      justify-center
-                      rounded-full
-                      ${setting.iconBg}
-                      ${setting.iconColor}
-                    `}
+                    className="
+                      flex h-8 w-8 items-center
+                      justify-center rounded-full
+                      bg-[#DCFCE7] text-[#16A34A]
+                    "
                   >
-                    {setting.icon}
+                    {item.icon}
                   </div>
 
                   <div>
                     <p
                       className="
-                        text-sm
-                        font-medium
-                        text-gray-800
+                        text-sm font-medium
+                        text-[#0F172A]
                       "
                     >
-                      {setting.title}
+                      {item.label}
                     </p>
 
                     <p
                       className="
-                        text-xs
-                        text-gray-400
+                        text-xs text-[#94A3B8]
                       "
                     >
-                      {setting.subtitle}
+                      {item.description}
                     </p>
                   </div>
                 </div>
 
                 <Toggle
-                  active={
-                    generalToggles[
-                      setting.id
-                    ]
-                  }
-
+                  active={item.enabled}
                   onToggle={() =>
-                    toggleGeneral(setting.id)
+                    toggleGeneral(item.id)
                   }
                 />
               </div>
@@ -392,11 +377,12 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* ============================================================
-            CARD LEMBRETES
-        ============================================================ */}
-        <ReminderNavigationCard />
-
+        {/**
+         * REMINDER CARD
+         */}
+        <div className="mt-5">
+          <ReminderNavigationCard />
+        </div>
       </div>
     </div>
   );

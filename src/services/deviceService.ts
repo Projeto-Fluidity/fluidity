@@ -67,11 +67,6 @@ export function getOrCreateDeviceId(): string {
    */
   if (existingDeviceId) {
 
-    console.log(
-      "DEVICE ID existente encontrado:",
-      existingDeviceId
-    );
-
     return existingDeviceId;
   }
 
@@ -90,11 +85,6 @@ export function getOrCreateDeviceId(): string {
    */
   const newDeviceId =
     crypto.randomUUID();
-
-  console.log(
-    "Novo DEVICE ID criado:",
-    newDeviceId
-  );
 
   /**
    * ============================================================
