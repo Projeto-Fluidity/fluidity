@@ -9,6 +9,9 @@ type DataMode = "seed" | "storage" | "api";
 type EnvConfig = {
   dataMode: DataMode;
 
+  // push
+  pushApiUrl: string;
+
   // legado (será removido no futuro)
   useMock: boolean;
   reminderSource: "seed" | "storage";
@@ -24,10 +27,20 @@ type EnvConfig = {
  * ============================================================
  */
 
-const reminderSourceEnv = import.meta.env.VITE_REMINDER_SOURCE;
-const moodSourceEnv = import.meta.env.VITE_MOOD_SOURCE;
-const dataModeEnv = import.meta.env.VITE_DATA_MODE;
-const forceErrorEnv = import.meta.env.VITE_FORCE_ERROR;
+const reminderSourceEnv =
+  import.meta.env.VITE_REMINDER_SOURCE;
+
+const moodSourceEnv =
+  import.meta.env.VITE_MOOD_SOURCE;
+
+const dataModeEnv =
+  import.meta.env.VITE_DATA_MODE;
+
+const forceErrorEnv =
+  import.meta.env.VITE_FORCE_ERROR;
+
+const pushApiUrlEnv =
+  import.meta.env.VITE_PUSH_API_URL;
 
 /**
  * ============================================================
@@ -39,18 +52,37 @@ function resolveDataMode(): DataMode | null {
   if (dataModeEnv === "seed") return "seed";
   if (dataModeEnv === "storage") return "storage";
   if (dataModeEnv === "api") return "api";
+
   return null;
 }
 
-function resolveReminderSource(): "seed" | "storage" {
-  if (reminderSourceEnv === "seed") return "seed";
+function resolveReminderSource():
+  | "seed"
+  | "storage" {
+  if (reminderSourceEnv === "seed") {
+    return "seed";
+  }
+
   return "storage";
 }
 
 function resolveMoodSource(): DataMode {
   if (moodSourceEnv === "seed") return "seed";
-  if (moodSourceEnv === "storage") return "storage";
+  if (moodSourceEnv === "storage") {
+    return "storage";
+  }
+
   return "api";
+}
+
+function resolvePushApiUrl(): string {
+  if (!pushApiUrlEnv) {
+    throw new Error(
+      "Missing env: VITE_PUSH_API_URL"
+    );
+  }
+
+  return pushApiUrlEnv;
 }
 
 /**
@@ -59,19 +91,31 @@ function resolveMoodSource(): DataMode {
  * ============================================================
  */
 
-function getOverride<T>(key: string): T | null {
+function getOverride<T>(
+  key: string
+): T | null {
   const value = localStorage.getItem(key);
+
   return value ? (value as T) : null;
 }
 
-const dataModeOverride = getOverride<DataMode>("debug:dataMode");
-const moodOverride = getOverride<DataMode>("debug:moodSource");
-const reminderOverride = getOverride<"seed" | "storage">(
-  "debug:reminderSource"
-);
-const forceErrorOverride = getOverride<"true" | "false">(
-  "debug:forceError"
-);
+const dataModeOverride =
+  getOverride<DataMode>("debug:dataMode");
+
+const moodOverride =
+  getOverride<DataMode>(
+    "debug:moodSource"
+  );
+
+const reminderOverride =
+  getOverride<"seed" | "storage">(
+    "debug:reminderSource"
+  );
+
+const forceErrorOverride =
+  getOverride<"true" | "false">(
+    "debug:forceError"
+  );
 
 /**
  * ============================================================
@@ -82,12 +126,15 @@ const forceErrorOverride = getOverride<"true" | "false">(
 /**
  * DATA MODE (principal)
  */
+
 const resolvedDataMode: DataMode =
   dataModeOverride ??
   resolveDataMode() ??
   moodOverride ??
   resolveMoodSource() ??
-  (import.meta.env.VITE_USE_MOCK === "true" ? "storage" : "api");
+  (import.meta.env.VITE_USE_MOCK === "true"
+    ? "storage"
+    : "api");
 
 /**
  * FORCE ERROR (QA)
@@ -97,6 +144,7 @@ const resolvedDataMode: DataMode =
  * 2. .env
  * 3. default false
  */
+
 const resolvedForceError: boolean =
   forceErrorOverride !== null
     ? forceErrorOverride === "true"
@@ -111,10 +159,20 @@ const resolvedForceError: boolean =
 export const env: EnvConfig = {
   dataMode: resolvedDataMode,
 
+  // push
+  pushApiUrl: resolvePushApiUrl(),
+
   // legado
-  useMock: import.meta.env.VITE_USE_MOCK === "true",
-  reminderSource: reminderOverride ?? resolveReminderSource(),
-  moodSource: moodOverride ?? resolveMoodSource(),
+  useMock:
+    import.meta.env.VITE_USE_MOCK === "true",
+
+  reminderSource:
+    reminderOverride ??
+    resolveReminderSource(),
+
+  moodSource:
+    moodOverride ??
+    resolveMoodSource(),
 
   // debug / QA
   forceError: resolvedForceError,
