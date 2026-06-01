@@ -118,9 +118,12 @@ export async function getMoodHistory(): Promise<MoodRecord[]> {
   }
 
   if (source === "api") {
+  const deviceId = getDeviceId();
+
   const { data, error } = await supabase
   .from("moods")
   .select("*")
+  .eq("device_id", deviceId)
   .order("checkin_date", { ascending: false })
   .order("created_at", { ascending: false });
 
