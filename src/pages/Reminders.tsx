@@ -7,7 +7,7 @@ import PostponeModal from "../components/reminders/PostponeModal";
 import PostponeConfirmModal from "../components/reminders/PostponeConfirmModal";
 import { useReminders } from "../hooks/useReminders";
 import { resetReminderLogs } from "../services/reminderService";
-import type { PostponeOption } from "../components/reminders/PostponeModal";
+import type { PostponeOption } from "../components/reminders/postponeOptions";
 
 /**
  * Etapas do fluxo de adiamento de um lembrete.

@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import type { PostponeOption } from "./PostponeModal";
+import type { PostponeOption } from "./postponeOptions";
 
 type PostponeConfirmModalProps = {
   option: PostponeOption;
