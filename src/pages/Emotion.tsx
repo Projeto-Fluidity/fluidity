@@ -49,6 +49,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, User, Settings } from "lucide-react";
 import { MoodConfirmModal } from "../components/MoodConfirmModal";
 import type { MoodType } from "../types/mood";
+import { useAuth } from "../hooks/useAuth";
 
 /**
  * Tipagem dos exercícios exibidos na tela
@@ -85,6 +86,10 @@ export default function Emotion() {
    */
   const navigate = useNavigate();
 
+    /**
+   * Contexto de autenticação
+   */
+  const { user } = useAuth();
   /**
    * Hook responsável pela regra de negócio do humor
    * registerMood → envia/registrar humor
@@ -165,7 +170,7 @@ export default function Emotion() {
             {/* Texto de saudação */}
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">
-                Olá, Mariana!
+                Olá, { user?.name ?? "" }!
               </h1>
               <p className="mt-1 text-gray-500">Como você está?</p>
             </div>
