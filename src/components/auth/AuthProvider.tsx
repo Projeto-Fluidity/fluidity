@@ -1,5 +1,6 @@
 import {
   createProfile,
+  getProfile,
 } from "../../services/profileService";
 
 import {
@@ -83,6 +84,32 @@ export function AuthProvider({
 
   /**
    * ==========================================================
+   * LOAD USER PROFILE
+   * ==========================================================
+   *
+   * Combina informações do Auth com os dados
+   * persistidos na tabela profiles.
+   */
+    async function loadAuthenticatedUser() {
+      const currentUser =
+        await getCurrentUser();
+
+      if (!currentUser) {
+        return null;
+      }
+
+      const profile =
+        await getProfile(currentUser.id);
+
+      return {
+        ...currentUser,
+        name:
+          profile?.name ??
+          currentUser.name,
+      };
+    }
+  /**
+   * ==========================================================
    * REFRESH USER
    * ==========================================================
    *
@@ -93,7 +120,7 @@ export function AuthProvider({
     useCallback(async () => {
       try {
         const currentUser =
-          await getCurrentUser();
+          await loadAuthenticatedUser();
 
         setUser(currentUser);
       } catch (err) {
@@ -282,7 +309,7 @@ export function AuthProvider({
 
         if (session) {
           const currentUser =
-            await getCurrentUser();
+            await loadAuthenticatedUser();
 
           setUser(currentUser);
         }
