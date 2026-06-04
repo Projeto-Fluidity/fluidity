@@ -1,4 +1,8 @@
 import {
+  createProfile,
+} from "../../services/profileService";
+
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -154,9 +158,24 @@ export function AuthProvider({
 
         try {
           const newUser =
-            await registerService(
-              payload
-            );
+          await registerService(
+            payload
+          );
+
+          /**
+           * ========================================================
+           * CREATE PROFILE
+           * ========================================================
+           *
+           * Cria o registro inicial do usuário
+           * na tabela profiles.
+           *
+           * Mantemos esta responsabilidade fora
+           * do authService para preservar a
+           * separação entre autenticação e
+           * domínio da aplicação.
+           */
+          await createProfile(newUser);
 
           setUser(newUser);
         } catch (err) {
