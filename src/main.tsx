@@ -8,6 +8,9 @@ import { resetReminderLogs } from "./utils/debug/resetReminderLogs";
 import { registerSW }
   from "virtual:pwa-register";
 
+import { AuthProvider }
+  from "./components/auth/AuthProvider";  
+
 /**
  * ============================================================
  * REGISTRO AUTOMÁTICO DO PWA
@@ -50,7 +53,9 @@ if (import.meta.env.DEV) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
+    <AuthProvider>
       <App />
-    </BrowserRouter>
+    </AuthProvider>
+  </BrowserRouter>
   </StrictMode>,
 );
