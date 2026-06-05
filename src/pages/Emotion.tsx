@@ -177,13 +177,13 @@ export default function Emotion() {
     navigate("/settings");
   }
 
-  function handleUserAction() {
-    if (user) {
-      navigate("/profile");
+  async function handleUserAction() {
+    if (!user) {
+      navigate("/login");
       return;
     }
 
-    navigate("/login");
+    navigate("/profile");
   }
 
   return (
