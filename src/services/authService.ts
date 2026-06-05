@@ -115,18 +115,21 @@ export async function logout(): Promise<void> {
  * Envia email de recuperação de senha.
  */
 export async function resetPassword(
-  payload: ResetPasswordPayload
-): Promise<void> {
-  const { error } =
-    await supabase.auth.resetPasswordForEmail(
-      payload.email
-    );
+    payload: ResetPasswordPayload
+  ): Promise<void> {
+    const { error } =
+      await supabase.auth.resetPasswordForEmail(
+        payload.email,
+        {
+          redirectTo:
+            `${window.location.origin}/reset-password`,
+        }
+      );
 
-  if (error) {
-    throw new Error(error.message);
+    if (error) {
+      throw new Error(error.message);
+    }
   }
-}
-
 /**
  * ============================================================
  * CURRENT USER

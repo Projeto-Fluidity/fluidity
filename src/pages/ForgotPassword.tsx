@@ -13,6 +13,7 @@ import {
   resetPasswordSchema,
   type ResetPasswordFormData,
 } from "../lib/validation/authSchemas";
+import fluidityLogo from "../assets/logos/fluidity-logo.svg";
 
 /**
  * ============================================================
@@ -90,20 +91,45 @@ export default function ForgotPassword() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
+    <main className="flex min-h-screen items-center justify-center bg-[#EAF5EC] px-6">
       <div className="w-full max-w-md">
         {/* ======================================================
             CABEÇALHO
            ====================================================== */}
+        <Link
+          to="/login"
+          className="mb-6 inline-flex items-center text-[#008236]"
+        >
+          ← Voltar
+        </Link>
+
+        <div className="mb-6 flex justify-center">
+        <div
+          className="
+            flex
+            h-[88px]
+            w-[88px]
+            items-center
+            justify-center
+            rounded-full
+            bg-[#008236]
+          "
+        >
+            <img
+              src={fluidityLogo}
+              alt="Fluidity"
+              className="h-34 w-24 scale-150"
+            />
+          </div>
+        </div>
 
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900">
-            Recuperar senha
+            Esqueci senha
           </h1>
 
           <p className="mt-2 text-sm text-gray-600">
-            Informe seu e-mail para receber
-            as instruções de recuperação.
+            Digite seu e-mail para recuperar sua conta.
           </p>
         </div>
 
