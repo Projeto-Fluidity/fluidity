@@ -131,13 +131,32 @@ export default function Emotion() {
   /**
    * Confirmação do registro:
    * - Garante que existe um humor selecionado
+   * - Exige autenticação para persistir o humor
+   * - Redireciona para login quando necessário
    * - Chama o hook de registro
    * - Fecha o modal
    */
   function handleConfirm() {
-    if (!selectedMood) return;
+    if (!selectedMood) {
+      return;
+    }
+
+    /**
+     * Usuário não autenticado.
+     *
+     * O Emotion permanece público,
+     * porém o registro do humor exige login.
+     */
+    if (!user) {
+      setIsConfirmOpen(false);
+
+      navigate("/login");
+
+      return;
+    }
 
     registerMood(selectedMood);
+
     setIsConfirmOpen(false);
   }
 
@@ -158,6 +177,15 @@ export default function Emotion() {
     navigate("/settings");
   }
 
+  function handleUserAction() {
+    if (user) {
+      navigate("/profile");
+      return;
+    }
+
+    navigate("/login");
+  }
+
   return (
     <>
       {/* Background principal da tela */}
@@ -170,7 +198,9 @@ export default function Emotion() {
             {/* Texto de saudação */}
             <div>
               <h1 className="text-2xl font-semibold text-gray-800">
-                Olá, { user?.name ?? "" }!
+                {user
+                  ? `Olá, ${user.name}!`
+                  : "Olá!"}
               </h1>
               <p className="mt-1 text-gray-500">Como você está?</p>
             </div>
@@ -187,9 +217,14 @@ export default function Emotion() {
               </button>
 
               {/* Avatar do usuário (placeholder por enquanto) */}
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/80 text-green-600 shadow-sm backdrop-blur">
-                <User size={20} />
-              </div>
+              <button
+                onClick={handleUserAction}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-green-700 font-semibold shadow-sm"
+              >
+                {user?.name
+                  ? user.name.charAt(0).toUpperCase()
+                  : <User size={20} />}
+              </button>
             </div>
           </div>
 

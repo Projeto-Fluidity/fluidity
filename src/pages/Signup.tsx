@@ -108,7 +108,7 @@ export default function Signup() {
         >
           <Input
             label="Nome"
-            placeholder="Seu nome"
+            placeholder="Como você gostaria de ser chamado?"
             error={errors.name?.message}
             {...register("name")}
           />

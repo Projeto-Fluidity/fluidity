@@ -1,9 +1,15 @@
 import {
   forwardRef,
+  useState,
   type InputHTMLAttributes,
 } from "react";
 
 import clsx from "clsx";
+
+import {
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 /**
  * ============================================================
@@ -52,12 +58,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       error,
       className,
       id,
+      type,
       ...props
     },
     ref
   ) => {
     const inputId =
       id ?? props.name ?? crypto.randomUUID();
+
+    const [showPassword, setShowPassword] =
+      useState(false);
+
+    const isPasswordField =
+      type === "password";
 
     return (
       <div className="flex flex-col gap-2">
@@ -70,22 +83,55 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         </label>
 
         {/* Campo */}
-        <input
-          ref={ref}
-          id={inputId}
-          className={clsx(
-            "w-full rounded-2xl border",
-            "bg-white px-4 py-3",
-            "text-sm text-gray-900",
-            "outline-none transition-colors",
-            "placeholder:text-gray-400",
-            error
-              ? "border-red-500 focus:border-red-500"
-              : "border-gray-200 focus:border-green-600",
-            className
-          )}
-          {...props}
-        />
+        <div className="relative">
+          <input
+            ref={ref}
+            id={inputId}
+            type={
+              isPasswordField
+              ? showPassword
+                ? "text"
+                : "password"
+              : type
+            }
+            className={clsx(
+              "w-full rounded-2xl border",
+              "bg-white px-4 py-3",
+              "pr-12",
+              "text-sm text-gray-900",
+              "outline-none transition-colors",
+              "placeholder:text-gray-400",
+              error
+                ? "border-red-500 focus:border-red-500"
+                : "border-gray-200 focus:border-green-600",
+              className
+            )}
+            {...props}
+          />
+
+            {isPasswordField && (
+              <button
+                type="button"
+                onClick={() =>
+                  setShowPassword(
+                    (prev) => !prev
+                  )
+                }
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                aria-label={
+                  showPassword
+                    ? "Ocultar senha"
+                    : "Mostrar senha"
+                }
+              >
+                {showPassword ? (
+                  <EyeOff size={18} />
+                ) : (
+                  <Eye size={18} />
+                )}
+              </button>
+            )}
+        </div>
 
         {/* Erro */}
         {error && (
@@ -93,6 +139,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {error}
           </span>
         )}
+
       </div>
     );
   }

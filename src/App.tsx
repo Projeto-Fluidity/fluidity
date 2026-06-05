@@ -54,20 +54,81 @@ function App() {
           element={<ForgotPassword />}
         />
 
-        {/* =======================================================
-            ROTAS PROTEGIDAS
-           ======================================================= */}
-
         <Route
           path="/"
           element={
-            <ProtectedRoute>
-              <AppLayout>
-                <Emotion />
-              </AppLayout>
-            </ProtectedRoute>
+            <AppLayout>
+              <Emotion />
+            </AppLayout>
           }
         />
+
+        <Route
+          path="/success"
+          element={
+            <AppLayout>
+              <MoodSuccess />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/error"
+          element={
+            <AppLayout>
+              <MoodError />
+            </AppLayout>
+          }
+        />
+        
+        <Route
+          path="/breathing"
+          element={
+            <AppLayout>
+              <BreathingGuide />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/practices"
+          element={
+            <AppLayout>
+              <Practices />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/meditation"
+          element={
+            <AppLayout>
+              <QuickMeditation />
+            </AppLayout>
+          }
+        />
+
+          <Route
+          path="/water"
+          element={
+            <AppLayout>
+              <WaterReminder />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/rest"
+          element={
+            <AppLayout>
+              <VisualRest />
+            </AppLayout>
+          }
+        />
+
+        {/* =======================================================
+            ROTAS PROTEGIDAS
+           ======================================================= */}
 
         <Route
           path="/history"
@@ -81,88 +142,11 @@ function App() {
         />
 
         <Route
-          path="/success"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <MoodSuccess />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/error"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <MoodError />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/practices"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <Practices />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/profile"
           element={
             <ProtectedRoute>
               <AppLayout>
                 <Profile />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/breathing"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <BreathingGuide />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/water"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <WaterReminder />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/rest"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <VisualRest />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/meditation"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <QuickMeditation />
               </AppLayout>
             </ProtectedRoute>
           }

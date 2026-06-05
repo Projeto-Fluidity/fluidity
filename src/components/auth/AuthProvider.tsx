@@ -1,5 +1,4 @@
 import {
-  createProfile,
   getProfile,
 } from "../../services/profileService";
 
@@ -188,21 +187,6 @@ export function AuthProvider({
           await registerService(
             payload
           );
-
-          /**
-           * ========================================================
-           * CREATE PROFILE
-           * ========================================================
-           *
-           * Cria o registro inicial do usuário
-           * na tabela profiles.
-           *
-           * Mantemos esta responsabilidade fora
-           * do authService para preservar a
-           * separação entre autenticação e
-           * domínio da aplicação.
-           */
-          await createProfile(newUser);
 
           setUser(newUser);
         } catch (err) {
