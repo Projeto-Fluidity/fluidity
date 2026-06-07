@@ -1,7 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import { useReminderTrigger } from "./hooks/useReminderTrigger"; // 👈 ADD
+
+import { useReminderTrigger } from "./hooks/useReminderTrigger";
 
 import AppLayout from "./components/layout/AppLayout";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+
 import Emotion from "./pages/Emotion";
 import History from "./pages/History";
 import MoodSuccess from "./pages/MoodSuccess";
@@ -14,31 +17,179 @@ import VisualRest from "./pages/VisualRest";
 import QuickMeditation from "./pages/QuickMeditation";
 import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
-import DevTools from "./components/debug/DevTools";
 import ReminderConfig from "./pages/ReminderConfig";
+
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+
+import DevTools from "./components/debug/DevTools";
 
 function App() {
   /**
-   * ATIVA O MOTOR DE LEMBRETES
+   * ============================================================
+   * MOTOR DE LEMBRETES
+   * ============================================================
+   *
+   * Mantido por compatibilidade com a arquitetura atual.
+   *
+   * Em uma evolução futura pode ser movido para a área
+   * autenticada da aplicação.
    */
   useReminderTrigger();
 
   return (
     <>
       <Routes>
-        <Route path="/" element={<AppLayout><Emotion /></AppLayout>} />
-        <Route path="/history" element={<AppLayout><History /></AppLayout>} />
-        <Route path="/success" element={<AppLayout><MoodSuccess /></AppLayout>} />
-        <Route path="/error" element={<AppLayout><MoodError /></AppLayout>} />
-        <Route path="/practices" element={<AppLayout><Practices /></AppLayout>} />
-        <Route path="/profile" element={<AppLayout><Profile /></AppLayout>} />
-        <Route path="/breathing" element={<AppLayout><BreathingGuide /></AppLayout>} />
-        <Route path="/water" element={<AppLayout><WaterReminder /></AppLayout>} />
-        <Route path="/rest" element={<AppLayout><VisualRest /></AppLayout>} />
-        <Route path="/meditation" element={<AppLayout><QuickMeditation /></AppLayout>} />
-        <Route path="/reminders" element={<AppLayout><Reminders /></AppLayout>} />
-        <Route path="/settings" element={<AppLayout><Settings /></AppLayout>} />
-        <Route path="/reminder-config" element={<AppLayout><ReminderConfig /></AppLayout>} />
+        {/* =======================================================
+            ROTAS PÚBLICAS
+           ======================================================= */}
+
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/signup" element={<Signup />} />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
+        />
+
+        <Route
+          path="/"
+          element={
+            <AppLayout>
+              <Emotion />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/success"
+          element={
+            <AppLayout>
+              <MoodSuccess />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/error"
+          element={
+            <AppLayout>
+              <MoodError />
+            </AppLayout>
+          }
+        />
+        
+        <Route
+          path="/breathing"
+          element={
+            <AppLayout>
+              <BreathingGuide />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/practices"
+          element={
+            <AppLayout>
+              <Practices />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/meditation"
+          element={
+            <AppLayout>
+              <QuickMeditation />
+            </AppLayout>
+          }
+        />
+
+          <Route
+          path="/water"
+          element={
+            <AppLayout>
+              <WaterReminder />
+            </AppLayout>
+          }
+        />
+
+        <Route
+          path="/rest"
+          element={
+            <AppLayout>
+              <VisualRest />
+            </AppLayout>
+          }
+        />
+
+        {/* =======================================================
+            ROTAS PROTEGIDAS
+           ======================================================= */}
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <History />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Profile />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reminders"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Reminders />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Settings />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/reminder-config"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <ReminderConfig />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
 
       {import.meta.env.DEV && <DevTools />}

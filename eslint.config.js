@@ -13,7 +13,12 @@ import { defineConfig, globalIgnores } from "eslint/config";
  * do código durante o desenvolvimento.
  */
 export default defineConfig([
-  globalIgnores(["dist"]),
+  globalIgnores([
+    "dist",
+    "dev-dist",
+    "node_modules",
+    ".vite",
+  ]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -25,6 +30,9 @@ export default defineConfig([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+    },
+      rules: {
+      "react-hooks/set-state-in-effect": "off",
     },
   },
 ]);
