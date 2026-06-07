@@ -90,5 +90,17 @@ export type AuthContextValue = AuthState & {
     payload: ResetPasswordPayload
   ) => Promise<void>;
 
+  /**
+   * ========================================================
+   * UPDATE PASSWORD
+   * ========================================================
+   *
+   * Atualiza a senha do usuário durante o
+   * fluxo de recuperação.
+   */
+  updatePassword: (
+    password: string
+  ) => Promise<void>;
+
   refreshUser: () => Promise<void>;
 };

@@ -19,6 +19,7 @@ import {
   logout as logoutService,
   register as registerService,
   resetPassword as resetPasswordService,
+  updatePassword as updatePasswordService,
 } from "../../services/authService";
 
 import type {
@@ -273,6 +274,36 @@ export function AuthProvider({
       []
     );
 
+  const updatePassword =
+  useCallback(
+    async (
+      password: string
+    ) => {
+      setError(null);
+
+      try {
+        await updatePasswordService(
+          password
+        );
+      } catch (err) {
+        console.error(
+          "Erro ao atualizar senha:",
+          err
+        );
+
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Erro ao atualizar senha";
+
+        setError(message);
+
+        throw err;
+      }
+    },
+    []
+  );
+
   /**
    * ==========================================================
    * SESSION RECOVERY
@@ -333,6 +364,7 @@ export function AuthProvider({
         logout,
         resetPassword,
         refreshUser,
+        updatePassword,
       }),
       [
         user,
@@ -342,6 +374,7 @@ export function AuthProvider({
         register,
         logout,
         resetPassword,
+        updatePassword,
         refreshUser,
       ]
     );

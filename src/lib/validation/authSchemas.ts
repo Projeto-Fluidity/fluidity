@@ -94,3 +94,46 @@ export type RegisterFormData =
 export type ResetPasswordFormData =
   z.infer<typeof resetPasswordSchema>;
   
+/**
+ * ============================================================
+ * NOVA SENHA SCHEMA
+ * ============================================================
+ *
+ * Regras:
+ * - senha obrigatória
+ * - mínimo 8 caracteres
+ * - confirmação obrigatória
+ * - senhas devem coincidir
+ */
+export const updatePasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(
+        8,
+        "Senha deve possuir pelo menos 8 caracteres"
+      ),
+
+    confirmPassword: z
+      .string()
+      .min(
+        1,
+        "Confirme sua senha"
+      ),
+  })
+  .refine(
+    (data) =>
+      data.password ===
+      data.confirmPassword,
+    {
+      message:
+        "As senhas não coincidem",
+      path: ["confirmPassword"],
+    }
+  );
+
+export type UpdatePasswordFormData =
+  z.infer<
+    typeof updatePasswordSchema
+  >;
+  

@@ -171,3 +171,25 @@ export async function getSession() {
 
   return data.session;
 }
+
+/**
+ * ============================================================
+ * UPDATE PASSWORD
+ * ============================================================
+ *
+ * Atualiza a senha do usuário autenticado
+ * através do fluxo de recuperação.
+ */
+export async function updatePassword(
+  password: string
+): Promise<void> {
+  const { error } =
+    await supabase.auth.updateUser({
+      password,
+    });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+}
+
