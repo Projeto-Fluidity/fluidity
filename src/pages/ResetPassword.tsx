@@ -1,11 +1,15 @@
+import fluidityLogo from "../assets/logos/fluidity-logo.svg";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Lock } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+// import PasswordRequirements
+//   from "../components/auth/PasswordRequirements";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -124,22 +128,55 @@ export default function ResetPassword() {
   } // fecha onSubmit
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#EAF5EC] px-6">
-      <div className="w-full max-w-md">
-        {/* ====================================================
-            CABEÇALHO
-           ==================================================== */}
+    <main className="min-h-screen bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4]">
+      <div
+        className="
+          mx-auto
+          w-full
+          max-w-[321px]
+          px-5
+          pt-10
+          pb-8
+        "
+      >
+      {/* ====================================================
+          LOGO
+      ==================================================== */}
 
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Redefinir senha
-          </h1>
-
-          <p className="mt-2 text-sm text-gray-600">
-            Informe sua nova senha para
-            continuar utilizando sua conta.
-          </p>
+      <div className="mb-6 flex justify-center">
+        <div
+          className="
+            flex
+            h-20
+            w-20
+            items-center
+            justify-center
+            rounded-full
+            bg-[#008236]
+          "
+        >
+          <img
+            src={fluidityLogo}
+            alt="Fluidity"
+            className="h-24 w-24"
+          />
         </div>
+      </div>
+
+      {/* ====================================================
+          CABEÇALHO
+      ==================================================== */}
+
+      <div className="mb-8 text-center">
+        <h1 className="text-[30px] font-semibold leading-[36px] text-[#1E293B]">
+          Redefinir senha
+        </h1>
+
+        <p className="mt-2 text-sm text-[#64748B]">
+          Informe sua nova senha para continuar
+          utilizando sua conta.
+        </p>
+      </div>
 
         {/* ====================================================
             FORMULÁRIO
@@ -149,28 +186,23 @@ export default function ResetPassword() {
           onSubmit={handleSubmit(onSubmit)}
           className="space-y-5"
         >
-          <Input
-            label="Nova senha"
-            type="password"
-            placeholder="********"
-            error={
-              errors.password?.message
-            }
-            {...register("password")}
-          />
+        <Input
+          label="Nova senha"
+          type="password"
+          leftIcon={<Lock size={18} />}
+          placeholder="********"
+          error={errors.password?.message}
+          {...register("password")}
+        />
 
-          <Input
-            label="Confirmar senha"
-            type="password"
-            placeholder="********"
-            error={
-              errors.confirmPassword
-                ?.message
-            }
-            {...register(
-              "confirmPassword"
-            )}
-          />
+        <Input
+          label="Confirmar senha"
+          type="password"
+          leftIcon={<Lock size={18} />}
+          placeholder="********"
+          error={errors.confirmPassword?.message}
+          {...register("confirmPassword")}
+        />
 
           {serverError && (
             <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">

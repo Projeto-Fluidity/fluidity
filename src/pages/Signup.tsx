@@ -1,10 +1,20 @@
+import fluidityLogo from "../assets/logos/fluidity-logo.svg";
+
 import { Link, Navigate } from "react-router-dom";
+import {
+  User,
+  Mail,
+  Lock,
+  ArrowLeft,
+} from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+import PasswordRequirements
+  from "../components/auth/PasswordRequirements";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -12,6 +22,7 @@ import {
   registerSchema,
   type RegisterFormData,
 } from "../lib/validation/authSchemas";
+
 
 /**
  * ============================================================
@@ -76,24 +87,60 @@ export default function Signup() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#EAF5EC] px-6">
-      <div className="w-full max-w-md">
+    <main className="min-h-screen bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4]">
+  <div
+    className="
+      mx-auto
+      w-full
+      max-w-[321px]
+      px-5
+      pt-10
+      pb-8
+    "
+  >
         {/* ====================================================
             LOGO
            ==================================================== */}
-
-        <div className="mb-8 text-center">
-          <div className="mb-4 flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-700 text-white">
-              🌿
+          <Link
+            to="/login"
+            className="
+              inline-flex
+              items-center
+              gap-1
+              text-sm
+              font-medium
+              text-[#008236]
+            "
+          >
+            <ArrowLeft size={16} />
+            Voltar
+          </Link>
+        <div className="mb-8 mt-8 text-center">
+          <div className="mb-6 flex justify-center">
+            <div
+              className="
+                flex
+                h-20
+                w-20
+                items-center
+                justify-center
+                rounded-full
+                bg-[#008236]
+              "
+            >
+              <img
+                src={fluidityLogo}
+                alt="Fluidity"
+                className="h-24 w-24"
+              />
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-[30px] font-semibold leading-[36px] text-[#1E293B]">
             Criar conta
           </h1>
 
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-[#64748B]">
             Comece a acompanhar seu humor hoje
           </p>
         </div>
@@ -108,6 +155,7 @@ export default function Signup() {
         >
           <Input
             label="Nome"
+            leftIcon={<User size={18} />}
             placeholder="Como você gostaria de ser chamado?"
             error={errors.name?.message}
             {...register("name")}
@@ -115,15 +163,18 @@ export default function Signup() {
 
           <Input
             label="E-mail"
+            leftIcon={<Mail size={18} />}
             type="email"
             placeholder="seu@email.com"
             error={errors.email?.message}
             {...register("email")}
           />
+          <PasswordRequirements />
 
           <Input
             label="Senha"
             type="password"
+            leftIcon={<Lock size={18} />}
             placeholder="********"
             error={errors.password?.message}
             {...register("password")}
@@ -132,6 +183,7 @@ export default function Signup() {
           <Input
             label="Confirmar senha"
             type="password"
+            leftIcon={<Lock size={18} />}
             placeholder="********"
             error={
               errors.confirmPassword?.message
