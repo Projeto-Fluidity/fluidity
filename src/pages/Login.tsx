@@ -1,4 +1,10 @@
+import fluidityLogo from "../assets/logos/fluidity-logo.svg";
+
 import { Link, Navigate } from "react-router-dom";
+import {
+  Mail,
+  Lock,
+} from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -75,27 +81,50 @@ export default function Login() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#EAF5EC] px-6">
-      <div className="w-full max-w-md">
+    <main className="min-h-screen bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4]">
+      <div
+        className="
+          mx-auto
+          w-full
+          max-w-[321px]
+          px-5
+          pt-10
+          pb-8
+        "
+      >
         {/* ====================================================
             LOGO
            ==================================================== */}
 
-        <div className="mb-8 text-center">
-          <div className="mb-4 flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-700 text-white">
-              🌿
+          <div className="mb-8 text-center">
+            <div className="mb-6 flex justify-center">
+              <div
+                className="
+                  flex
+                  h-20
+                  w-20
+                  items-center
+                  justify-center
+                  rounded-full
+                  bg-[#008236]
+                "
+              >
+                <img
+                  src={fluidityLogo}
+                  alt="Fluidity"
+                  className="h-24 w-24"
+                />
+              </div>
             </div>
+
+            <h1 className="text-[30px] font-semibold leading-[36px] text-[#1E293B]">
+              Bem-vindo!
+            </h1>
+
+            <p className="mt-2 text-sm text-[#64748B]">
+              Entre para acompanhar seu humor
+            </p>
           </div>
-
-          <h1 className="text-3xl font-bold text-gray-900">
-            Bem-vindo!
-          </h1>
-
-          <p className="mt-2 text-sm text-gray-600">
-            Entre para acompanhar seu humor
-          </p>
-        </div>
 
         {/* ====================================================
             FORMULÁRIO
@@ -109,6 +138,7 @@ export default function Login() {
             label="E-mail"
             type="email"
             placeholder="seu@email.com"
+            leftIcon={<Mail size={18} />}
             error={errors.email?.message}
             {...register("email")}
           />
@@ -117,6 +147,7 @@ export default function Login() {
             label="Senha"
             type="password"
             placeholder="********"
+            leftIcon={<Lock size={18} />}
             error={errors.password?.message}
             {...register("password")}
           />
@@ -165,7 +196,7 @@ export default function Login() {
             Cadastre-se
           </Link>
         </div>
-      </div>
+       </div> {/* fecha max-w-[321px] */}
     </main>
   );
 }
