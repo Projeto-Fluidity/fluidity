@@ -120,7 +120,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           }
           className={clsx(
             "w-full rounded-2xl border",
-            "bg-white py-3",
+            "bg-white h-[58px]",
             leftIcon
               ? isPasswordField
                 ? "pl-12 pr-12"
@@ -130,10 +130,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 : "px-4",
             "text-sm text-gray-900",
             "outline-none transition-colors",
+            "focus:ring-0",
             "placeholder:text-gray-400",
             error
               ? "border-red-500 focus:border-red-500"
-              : "border-gray-200 focus:border-green-600",
+              : "border-[#E5E7EB] focus:border-[#E5E7EB]",
             className
           )}
           {...props}
