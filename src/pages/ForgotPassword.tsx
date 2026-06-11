@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Mail } from "lucide-react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -91,8 +92,17 @@ export default function ForgotPassword() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#EAF5EC] px-6">
-      <div className="w-full max-w-md">
+    <main className="min-h-screen bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4]">
+      <div
+        className="
+          mx-auto
+          w-full
+          max-w-[321px]
+          px-5
+          pt-10
+          pb-8
+        "
+      >
         {/* ======================================================
             CABEÇALHO
            ====================================================== */}
@@ -124,8 +134,8 @@ export default function ForgotPassword() {
         </div>
 
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Esqueci senha
+          <h1 className="text-[30px] font-semibold leading-[36px] text-[#1E2939]">
+            Criar conta
           </h1>
 
           <p className="mt-2 text-sm text-gray-600">
@@ -145,6 +155,7 @@ export default function ForgotPassword() {
             label="E-mail"
             type="email"
             placeholder="voce@email.com"
+            leftIcon={<Mail size={18} />}
             error={errors.email?.message}
             {...register("email")}
           />
@@ -179,7 +190,7 @@ export default function ForgotPassword() {
         <div className="mt-6 text-center">
           <Link
             to="/login"
-            className="text-sm font-medium text-primary"
+            className="text-sm font-medium text-[#008236]"
           >
             Voltar para o login
           </Link>

@@ -43,7 +43,7 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const variants = {
-    primary: "bg-primary text-white",
+    primary: "bg-[#008236] text-white",
     error: "bg-error text-white",
     success: "bg-success text-white",
   };
@@ -53,7 +53,7 @@ export default function Button({
       type="button"
       className={clsx(
         "flex items-center justify-center gap-2",
-        "h-14 px-6",
+        "h-[52px] px-6",
         "rounded-2xl",
         "text-base font-semibold",
         "transition-all duration-200",

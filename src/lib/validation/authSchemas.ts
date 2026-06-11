@@ -1,4 +1,35 @@
 import { z } from "zod";
+/**
+ * ============================================================
+ * PASSWORD SCHEMA
+ * ============================================================
+ *
+ * Política de senha utilizada em toda aplicação.
+ *
+ * Regras:
+ *
+ * - mínimo 8 caracteres
+ * - pelo menos uma letra minúscula
+ * - pelo menos uma letra maiúscula
+ * - pelo menos um número
+ * - pelo menos um caractere especial
+ *
+ * Exemplos válidos:
+ *
+ * Senha@123
+ * Fluidity#2026
+ * MinhaSenha!1
+ */
+const passwordSchema = z
+  .string()
+  .min(
+    8,
+    "Senha deve possuir pelo menos 8 caracteres"
+  )
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/,
+    "A senha deve conter letra maiúscula, letra minúscula, número e caractere especial"
+  );
 
 /**
  * ============================================================
@@ -44,9 +75,7 @@ export const registerSchema = z
       .email("Informe um e-mail válido")
       .trim(),
 
-    password: z
-      .string()
-      .min(8, "Senha deve possuir pelo menos 8 caracteres"),
+    password: passwordSchema,
 
     confirmPassword: z
       .string()
@@ -107,12 +136,7 @@ export type ResetPasswordFormData =
  */
 export const updatePasswordSchema = z
   .object({
-    password: z
-      .string()
-      .min(
-        8,
-        "Senha deve possuir pelo menos 8 caracteres"
-      ),
+    password: passwordSchema,
 
     confirmPassword: z
       .string()

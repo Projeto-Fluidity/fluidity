@@ -1,6 +1,7 @@
 import {
   forwardRef,
   useState,
+  type ReactNode,
   type InputHTMLAttributes,
 } from "react";
 
@@ -35,6 +36,11 @@ export interface InputProps
    * Mensagem de erro do campo.
    */
   error?: string;
+
+  /**
+ * Ícone exibido à esquerda do campo.
+ */
+  leftIcon?: ReactNode;
 }
 
 /**
@@ -56,6 +62,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     {
       label,
       error,
+      leftIcon,
       className,
       id,
       type,
@@ -83,55 +90,76 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         </label>
 
         {/* Campo */}
-        <div className="relative">
-          <input
-            ref={ref}
-            id={inputId}
-            type={
-              isPasswordField
+      <div className="relative">
+        {leftIcon && (
+          <div
+            className="
+              pointer-events-none
+              absolute
+              left-4
+              inset-y-0
+              flex
+              items-center
+              text-gray-400
+              z-10
+            "
+          >
+            {leftIcon}
+          </div>
+        )}
+
+        <input
+          ref={ref}
+          id={inputId}
+          type={
+            isPasswordField
               ? showPassword
                 ? "text"
                 : "password"
               : type
-            }
-            className={clsx(
-              "w-full rounded-2xl border",
-              "bg-white px-4 py-3",
-              "pr-12",
-              "text-sm text-gray-900",
-              "outline-none transition-colors",
-              "placeholder:text-gray-400",
-              error
-                ? "border-red-500 focus:border-red-500"
-                : "border-gray-200 focus:border-green-600",
-              className
-            )}
-            {...props}
-          />
+          }
+          className={clsx(
+            "w-full rounded-2xl border",
+            "bg-white py-3",
+            leftIcon
+              ? isPasswordField
+                ? "pl-12 pr-12"
+                : "pl-12 pr-4"
+              : isPasswordField
+                ? "px-4 pr-12"
+                : "px-4",
+            "text-sm text-gray-900",
+            "outline-none transition-colors",
+            "placeholder:text-gray-400",
+            error
+              ? "border-red-500 focus:border-red-500"
+              : "border-gray-200 focus:border-green-600",
+            className
+          )}
+          {...props}
+        />
 
-            {isPasswordField && (
-              <button
-                type="button"
-                onClick={() =>
-                  setShowPassword(
-                    (prev) => !prev
-                  )
-                }
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                aria-label={
-                  showPassword
-                    ? "Ocultar senha"
-                    : "Mostrar senha"
-                }
-              >
-                {showPassword ? (
-                  <EyeOff size={18} />
-                ) : (
-                  <Eye size={18} />
-                )}
-              </button>
+        {isPasswordField && (
+          <button
+            type="button"
+            onClick={() =>
+              setShowPassword((prev) => !prev)
+            }
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            aria-label={
+              showPassword
+                ? "Ocultar senha"
+                : "Mostrar senha"
+            }
+          >
+            {showPassword ? (
+              <EyeOff size={18} />
+            ) : (
+              <Eye size={18} />
             )}
-        </div>
+          </button>
+        )}
+      </div>
 
         {/* Erro */}
         {error && (
