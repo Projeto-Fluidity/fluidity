@@ -25,6 +25,7 @@ export function useMood() {
    * Busca histórico no service
    */
   async function loadHistory() {
+
     try {
       const data = await getMoodHistory();
       setHistory(data);
@@ -47,26 +48,27 @@ export function useMood() {
     setStatus("loading");
     setError(null);
 
-    try {
-      const result = await saveMood(mood);
+  try {
+    const result = await saveMood(mood);
 
-      if (result?.error) {
-        setError(result.message || "Erro ao registrar humor");
-        setStatus("error");
-      } else {
-        setStatus("success");
-      }
-
-      /**
-       * Sempre atualiza histórico,
-       * independentemente de sucesso ou erro.
-       */
-      await loadHistory();
-    } catch (err) {
-      console.error("Erro inesperado:", err);
-      setError("Erro inesperado");
+    if (result?.error) {
+      setError(result.message || "Erro ao registrar humor");
       setStatus("error");
+    } else {
+      setStatus("success");
     }
+
+    await loadHistory();
+
+  } catch (err) {
+    console.error(
+       "Erro ao registrar humor:",
+      err
+    );
+
+    setError("Erro inesperado");
+    setStatus("error");
+  }
   }
 
   /**
