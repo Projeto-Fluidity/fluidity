@@ -43,6 +43,8 @@
 
 import MoodSelector from "../components/MoodSelector";
 import EmotionExerciseCard from "../components/EmotionExerciseCard";
+import InstallAppCard from "../components/pwa/InstallAppCard";
+
 import { useMood } from "../hooks/useMood";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -81,6 +83,7 @@ const exercises: EmotionExercise[] = [
 ];
 
 export default function Emotion() {
+
   /**
    * Hook de navegação do React Router
    */
@@ -107,6 +110,10 @@ export default function Emotion() {
    */
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
+  const [showInstallPrompt, setShowInstallPrompt] =
+  useState(false);
+
+
   /**
    * Efeito responsável por reagir ao resultado do registro
    *
@@ -117,6 +124,27 @@ export default function Emotion() {
     if (status === "success") navigate("/success");
     if (status === "error") navigate("/error");
   }, [status, navigate]);
+
+  /**
+   * Exibe convite de instalação
+   * após retorno da tela de sucesso.
+   */
+useEffect(() => {
+  const shouldShow =
+    sessionStorage.getItem(
+      "fluidity:show-install-prompt"
+    ) === "true";
+
+  if (!shouldShow) {
+    return;
+  }
+
+  setShowInstallPrompt(true);
+
+  sessionStorage.removeItem(
+    "fluidity:show-install-prompt"
+  );
+}, []);
 
   /**
    * Quando o usuário seleciona um humor:
@@ -227,6 +255,11 @@ export default function Emotion() {
               </button>
             </div>
           </div>
+
+          {/* Instalação do App */}
+          {showInstallPrompt && (
+            <InstallAppCard />
+          )}
 
           {/* ======================================================
               Seleção de Humor
