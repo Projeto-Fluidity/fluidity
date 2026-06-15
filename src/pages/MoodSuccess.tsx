@@ -7,6 +7,12 @@ export default function MoodSuccess() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    
+    sessionStorage.setItem(
+      "fluidity:show-install-prompt",
+      "true"
+    );
+
     const timer = setTimeout(() => {
       navigate("/", { replace: true });
     }, 3000);

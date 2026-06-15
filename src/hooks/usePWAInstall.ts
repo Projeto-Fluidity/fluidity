@@ -143,18 +143,23 @@ export function usePWAInstall() {
    * - aguarda decisão do navegador.
    */
   const install = useCallback(
-    async () => {
+    async (): Promise<
+      "accepted" | "dismissed" | null
+    > => {
       if (!installEvent) {
-        return;
+        return null;
       }
 
       await installEvent.prompt();
 
-      await installEvent.userChoice;
+      const { outcome } =
+        await installEvent.userChoice;
 
       setCanInstall(false);
 
       setInstallEvent(null);
+
+      return outcome;
     },
     [installEvent]
   );
