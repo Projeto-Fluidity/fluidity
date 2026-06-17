@@ -24,6 +24,12 @@
   } from "../lib/date";
   import { getDeviceId } from "../lib/deviceId"; 
 
+  type SaveMoodResult = {
+    error?: boolean;
+    message?: string;
+    code?: "ALREADY_REGISTERED";
+  };
+
   /**
 
   * ============================================================
@@ -171,10 +177,8 @@
 
   export async function saveMood(
     mood: MoodType
-  ): Promise<{
-    error?: boolean;
-    message?: string;
-  } | void> {
+  ): Promise<SaveMoodResult
+   | void> {
     const source = env.dataMode;
 
   /**
@@ -195,7 +199,10 @@
   );
 
   if (alreadyExists) {
-    return { error: true, message: "Você já registrou seu humor hoje" };
+    return { 
+      error: true, 
+      code: "ALREADY_REGISTERED",
+      message: "Você já registrou seu humor hoje" };
   }
 
   const newRecord: MoodRecord = {
@@ -230,7 +237,10 @@
   );
 
   if (alreadyExists) {
-    return { error: true, message: "Você já registrou seu humor hoje" };
+    return { error: true, 
+      code: "ALREADY_REGISTERED",
+      message: "Você já registrou seu humor hoje", 
+    };
   }
 
   const newRecord: MoodRecord = {
