@@ -18,7 +18,11 @@ export function useMood() {
   const [error, setError] = useState<string | null>(null);
 
   const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
+    | "idle"
+    | "loading"
+    | "success"
+    | "already-registered"
+    | "error"
   >("idle");
 
   /**
@@ -51,7 +55,10 @@ export function useMood() {
   try {
     const result = await saveMood(mood);
 
-    if (result?.error) {
+    if (result?.code === "ALREADY_REGISTERED") {
+      setError(result.message || null);
+      setStatus("already-registered");
+    } else if (result?.error) {
       setError(result.message || "Erro ao registrar humor");
       setStatus("error");
     } else {
