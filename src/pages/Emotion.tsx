@@ -41,6 +41,7 @@
  * ============================================================
  */
 
+import { MoodAlreadyRegisteredModal } from "../components/MoodAlreadyRegisteredModal";
 import MoodSelector from "../components/MoodSelector";
 import EmotionExerciseCard from "../components/EmotionExerciseCard";
 import InstallAppCard from "../components/pwa/InstallAppCard";
@@ -113,6 +114,8 @@ export default function Emotion() {
   const [showInstallPrompt, setShowInstallPrompt] =
   useState(false);
 
+  const [showAlreadyRegistered, setShowAlreadyRegistered] =
+  useState(false);
 
   /**
    * Efeito responsável por reagir ao resultado do registro
@@ -123,6 +126,9 @@ export default function Emotion() {
   useEffect(() => {
     if (status === "success") navigate("/success");
     if (status === "error") navigate("/error");
+    if (status === "already-registered")
+      {setShowAlreadyRegistered(true);
+  }
   }, [status, navigate]);
 
   /**
@@ -320,6 +326,17 @@ useEffect(() => {
           mood={selectedMood}
           onConfirm={handleConfirm}
           onCancel={handleCancel}
+        />
+      )}
+
+      {/* ======================================================
+          Modal informativo
+         ====================================================== */}
+      {showAlreadyRegistered && (
+        <MoodAlreadyRegisteredModal
+          onClose={() =>
+            setShowAlreadyRegistered(false)
+          }
         />
       )}
     </>
