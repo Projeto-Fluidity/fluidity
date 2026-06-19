@@ -72,7 +72,6 @@
   }
 
   /**
-
   * ============================================================
   * UTILITÁRIOS
   * ============================================================
@@ -108,60 +107,84 @@
     const source = env.dataMode;
 
     if (source === "seed") {
-        return loadSeed().sort(
-        (a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
-      );
-    }
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (source === "storage") {
-      return loadMock().sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
-      );
-    }
+      if (!user) {
+        return [];
+      }
 
-    if (source === "api") {
-    /**
-     * Recupera usuário autenticado.
-     */
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      return loadSeed()
+        .filter(
+          (record) => record.user_id === user.id
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() -
+            new Date(a.created_at).getTime()
+        );
+      }
 
-    /**
-     * Sem usuário autenticado.
-     */
-    if (!user) {
-      return [];
-    }
+      if (source === "storage") {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-    const { data, error } = await supabase
+        if (!user) {
+          return [];
+        }
+
+        return loadMock()
+          .filter(
+            (record) => record.user_id === user.id
+          )
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          );
+      }
+
+      if (source === "api") {
+      /**
+       * Recupera usuário autenticado.
+       */
+        const {
+          data: { user },
+      } = await supabase.auth.getUser();  
+
+      /**
+       * Sem usuário autenticado.
+       */
+      if (!user) {
+        return [];
+      }
+
+      const { data, error } = await supabase
       .from("moods")
       .select("*")
       .eq("user_id", user.id)
       .order("checkin_date", { ascending: false })
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error(
-        "Erro ao buscar histórico:",
-        error
-      );
+      if (error) {
+        console.error(
+          "Erro ao buscar histórico:",
+          error
+        );
 
-      return [];
-    }
+        return [];
+      }
 
-    const seen = new Set<string>();
+     const seen = new Set<string>();
 
-    return (data ?? []).filter((record) => {
-      const key = getRecordDate(record);
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+      return (data ?? []).filter((record) => {
+        const key = getRecordDate(record);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
 
     }
 
@@ -192,11 +215,22 @@
     /**
      * Recupera usuário autenticado.
      */
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    const alreadyExists = seedState.some( 
+    if (!user) {
+      return {
+        error: true,
+        message: "Usuário não autenticado",
+      };
+    }
 
-    (item) => toLocalDate(item.created_at) === today
-  );
+    const alreadyExists = seedState.some(
+      (item) =>
+        item.user_id === user.id &&
+        getRecordDate(item) === today
+    );
 
   if (alreadyExists) {
     return { 
@@ -207,7 +241,9 @@
 
   const newRecord: MoodRecord = {
     id: String(Date.now()),
+    user_id: user.id,
     mood,
+    checkin_date: today,
     created_at: getCurrentTimestamp(),
   };
 
@@ -231,31 +267,45 @@
     const mockData = loadMock();
     const today = getLocalDate();
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return {
+        error: true,
+        message: "Usuário não autenticado",
+      };
+    }
+
     const alreadyExists = mockData.some(
+      (item) =>
+        item.user_id === user.id &&
+        getRecordDate(item) === today
+    );
 
-    (item) => toLocalDate(item.created_at) === today
-  );
+    if (alreadyExists) {
+      return { error: true, 
+        code: "ALREADY_REGISTERED",
+        message: "Você já registrou seu humor hoje", 
+      };
+    }
 
-  if (alreadyExists) {
-    return { error: true, 
-      code: "ALREADY_REGISTERED",
-      message: "Você já registrou seu humor hoje", 
+    const newRecord: MoodRecord = {
+      id: String(Date.now()),
+      user_id: user.id,
+      mood,
+      checkin_date: today,
+      created_at: getCurrentTimestamp(),
     };
-  }
 
-  const newRecord: MoodRecord = {
-    id: String(Date.now()),
-    mood,
-    created_at: getCurrentTimestamp(),
-  };
+    saveMock([newRecord, ...mockData]);
 
-  saveMock([newRecord, ...mockData]);
+    if (isForceErrorEnabled()) {
+      return { error: true, message: "Erro simulado (QA)" };
+    }
 
-  if (isForceErrorEnabled()) {
-    return { error: true, message: "Erro simulado (QA)" };
-  }
-
-  return;
+    return;
 
   }
 
@@ -300,10 +350,11 @@
     });
 
     if (error) {
-      console.error(
-        "Erro ao registrar humor:",
+      console.log(
+        "SUPABASE ERROR:",
         error
       );
+
       return {
         error: true,
         message: error.message,
