@@ -349,17 +349,27 @@
       device_id: getDeviceId(),
     });
 
-    if (error) {
-      console.log(
-        "SUPABASE ERROR:",
-        error
+  if (error) {
+
+    const isDuplicateMood =
+      error.code === "23505" &&
+      error.message?.includes(
+        "moods_user_day_unique"
       );
 
+    if (isDuplicateMood) {
       return {
         error: true,
-        message: error.message,
+        code: "ALREADY_REGISTERED",
+        message: "Você já registrou seu humor hoje",
       };
     }
+
+    return {
+      error: true,
+      message: error.message,
+    };
+  }
 
     if (isForceErrorEnabled()) {
       return {
