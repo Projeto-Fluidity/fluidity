@@ -10,7 +10,7 @@ export default function ReminderToggleCard() {
 
   return (
     <button
-      onClick={() => navigate("/reminder-config")}
+      onClick={() => navigate("/smart-reminders")}
       className="flex w-full items-center justify-between rounded-2xl bg-white p-4 shadow-sm transition hover:bg-gray-50"
     >
       <div className="flex items-center gap-3">

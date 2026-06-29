@@ -9,7 +9,7 @@ export default function ReminderNavigationCard() {
 
   return (
     <div
-      onClick={() => navigate("/reminder-config")}
+      onClick={() => navigate("/smart-reminders")}
       className="group flex items-center justify-between rounded-2xl px-5 py-4 cursor-pointer shadow-sm transition-all duration-200 hover:shadow-md bg-gradient-to-r from-[#00A63E] to-[#008236] text-white"
     >
       <div className="flex items-center gap-4">

@@ -35,7 +35,7 @@ type Reminder = {
   time: string;
   customDays: string[];
   active: boolean;
-  type?: string; // 👈 importante
+  type?: string; // importante
 };
 
 export default function ReminderConfig() {
@@ -53,7 +53,7 @@ export default function ReminderConfig() {
    */
     useEffect(() => {
     async function init() {
-      await ensureFixedReminders(); // 👈 garante dados
+      await ensureFixedReminders(); // garante dados
 
       const { data, error } = await supabase
         .from("scheduled_reminders")
