@@ -40,20 +40,41 @@ export default function SmartReminders() {
 
     /**
    * ==========================================================
-   * NAVIGATION
+   * CATEGORY ROUTES
    * ==========================================================
    *
-   * Encaminha o usuário para a tela de configuração
-   * da categoria selecionada.
+   * Mapeia cada categoria para sua tela de destino.
    *
-   * Nesta primeira versão a categoria ainda não
-   * altera o comportamento da tela de configuração,
-   * mas já é enviada para preparar futuras evoluções.
+   * Manter este objeto centralizado facilita a
+   * manutenção e futuras expansões do Hub de
+   * Lembretes Inteligentes.
    */
+  const categoryRoutes: Record<ReminderCategory, string> = {
+    hydration: "/reminder-config",
+    mood: "/reminder-config",
+    break: "/break-reminder",
+    relax: "/relax-reminder",
+  };
+
+/**
+ * ==========================================================
+ * NAVIGATION
+ * ==========================================================
+ *
+ * Encaminha o usuário para a tela correspondente
+ * à categoria selecionada.
+ *
+ * As categorias de hidratação e humor utilizam
+ * a tela atual de configuração.
+ *
+ * As categorias de pausa e relaxamento possuem,
+ * temporariamente, uma tela informando que a
+ * funcionalidade está em desenvolvimento.
+ */
   function handleCategoryClick(
     category: ReminderCategory,
   ) {
-    navigate("/reminder-config", {
+    navigate(categoryRoutes[category], {
       state: {
         category,
       },

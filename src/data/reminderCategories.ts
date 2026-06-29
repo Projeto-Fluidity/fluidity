@@ -70,18 +70,18 @@ description: string;
 export const reminderCategories:
   ReminderCategoryItem[] = [
 
+      {
+    id: "mood",
+    title: "Como está seu humor?",
+    description: "Registre seu humor diariamente",
+    icon: Smile,
+  },
+  
   {
     id: "hydration",
     title: "Hora de se hidratar",
     description: "Beba água regularmente",
     icon: Droplets,
-  },
-
-  {
-    id: "mood",
-    title: "Como está seu humor?",
-    description: "Registre seu humor diariamente",
-    icon: Smile,
   },
 
   {
