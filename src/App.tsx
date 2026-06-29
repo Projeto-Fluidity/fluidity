@@ -6,7 +6,6 @@ import AppLayout from "./components/layout/AppLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import Emotion from "./pages/Emotion";
-import History from "./pages/History";
 import MoodSuccess from "./pages/MoodSuccess";
 import MoodError from "./pages/MoodError";
 import Practices from "./pages/Practices";
@@ -15,8 +14,10 @@ import BreathingGuide from "./pages/BreathingGuide";
 import WaterReminder from "./pages/WaterReminder";
 import VisualRest from "./pages/VisualRest";
 import QuickMeditation from "./pages/QuickMeditation";
-import Reminders from "./pages/Reminders";
 import Settings from "./pages/Settings";
+import SmartReminders from "./pages/SmartReminders";
+import History from "./pages/History";
+import Reminders from "./pages/Reminders";
 import ReminderConfig from "./pages/ReminderConfig";
 
 import Login from "./pages/Login";
@@ -142,6 +143,17 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <History />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/smart-reminders"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <SmartReminders />
               </AppLayout>
             </ProtectedRoute>
           }
