@@ -21,6 +21,8 @@ import Reminders from "./pages/Reminders";
 import BreakReminder from "./pages/BreakReminder";
 import RelaxReminder from "./pages/RelaxReminder";
 import ReminderConfig from "./pages/ReminderConfig";
+import MoodReminderConfig from "./pages/MoodReminderConfig";
+import HydrationReminderConfig from "./pages/HydrationReminderConfig";
 
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -222,6 +224,29 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/mood-reminder-config"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <MoodReminderConfig />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/hydration-reminder-config"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <HydrationReminderConfig />
+              </AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        
       </Routes>
 
       {import.meta.env.DEV && <DevTools />}
