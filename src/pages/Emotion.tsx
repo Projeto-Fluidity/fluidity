@@ -41,18 +41,22 @@
  * ============================================================
  */
 
-import { MoodAlreadyRegisteredModal } from "../components/MoodAlreadyRegisteredModal";
-import MoodSelector from "../components/MoodSelector";
 import EmotionExerciseCard from "../components/EmotionExerciseCard";
+import { MoodAlreadyRegisteredModal } from "../components/MoodAlreadyRegisteredModal";
+import { MoodConfirmModal } from "../components/MoodConfirmModal";
+import MoodSelector from "../components/MoodSelector";
 import InstallAppCard from "../components/pwa/InstallAppCard";
+import ReminderNavigationCard from "../components/reminders/ReminderNavigationCard";
 
+import { useAuth } from "../hooks/useAuth";
 import { useMood } from "../hooks/useMood";
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, User, Settings } from "lucide-react";
-import { MoodConfirmModal } from "../components/MoodConfirmModal";
+
+import { ArrowRight, Settings, User } from "lucide-react";
+
 import type { MoodType } from "../types/mood";
-import { useAuth } from "../hooks/useAuth";
 
 /**
  * Tipagem dos exercícios exibidos na tela
@@ -273,10 +277,19 @@ useEffect(() => {
           <MoodSelector onSelect={handleSelectMood} />
 
           {/* ======================================================
+              Lembretes Inteligentes
+            ======================================================
+
+            Acesso rápido para configuração dos lembretes
+            personalizados do usuário.
+          */}
+          <ReminderNavigationCard />
+
+          {/* ======================================================
               Exercícios Recomendados
              ====================================================== */}
           <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-gray-800">
+            <h2 className="text-lg font-bold text-gray-800">
               Exercícios recomendados
             </h2>
 
@@ -296,10 +309,38 @@ useEffect(() => {
              ====================================================== */}
           <button
             onClick={() => navigate("/history")}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 font-medium text-white transition hover:bg-green-700"
+            className="
+              group
+              flex
+              w-full
+              items-center
+              justify-center
+              gap-2
+              rounded-2xl
+              px-5
+              py-4
+              font-semibold
+              text-white
+              transition-all
+              duration-200
+              hover:shadow-md
+            "
+            style={{
+              background: "linear-gradient(90deg, #00A63E 0%, #008236 100%)",
+              boxShadow:
+                "0px 4px 14px rgba(0,0,0,0.08), 0px 1px 4px rgba(0,0,0,0.04)",
+            }}
           >
             Ver histórico completo
-            <ArrowRight size={18} />
+
+            <ArrowRight
+              size={20}
+              className="
+                transition-transform
+                duration-200
+                group-hover:translate-x-1
+              "
+            />
           </button>
         </div>
 

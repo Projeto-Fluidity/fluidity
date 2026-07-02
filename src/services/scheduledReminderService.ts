@@ -18,7 +18,6 @@ import { getDeviceId } from "../lib/deviceId";
  * - Nunca duplica (garantido por UNIQUE + onConflict)
  */
 export async function ensureFixedReminders(): Promise<void> {
-  console.log("🚀 ensureFixedReminders FOI CHAMADO");
 
   const deviceId = getDeviceId();
 
@@ -33,25 +32,25 @@ export async function ensureFixedReminders(): Promise<void> {
       [
         {
           device_id: deviceId,
-          type: "fixed",
-          label: "Check-in",
+          type: "fixed_mood",
+          label: "Registro diário",
+          hour: 8,
+          minute: 0,
+          time: "08:00",
+          active: true,
+        },
+        {
+          device_id: deviceId,
+          type: "fixed_hydration",
+          label: "Hora de se hidratar",
           hour: 9,
           minute: 0,
           time: "09:00",
           active: true,
         },
-        {
-          device_id: deviceId,
-          type: "fixed",
-          label: "Hidratação",
-          hour: 14,
-          minute: 0,
-          time: "14:00",
-          active: true,
-        },
       ],
       {
-        onConflict: "device_id,label", // 🔥 ESSENCIAL
+        onConflict: "device_id,label", // ESSENCIAL
       }
     );
 
@@ -65,10 +64,4 @@ export async function ensureFixedReminders(): Promise<void> {
     return;
   }
 
-  /**
-   * ============================================================
-   * SUCESSO
-   * ============================================================
-   */
-  console.log("✅ Reminders fixos garantidos (idempotente)");
 }

@@ -132,7 +132,7 @@ export default function ReminderConfig() {
     const r = reminders.find((r) => r.id === id);
 
     const isFixed =
-      r?.type === "fixed_checkin" ||
+      r?.type === "fixed_mood" ||
       r?.type === "fixed_hydration";
 
     if (isFixed) {
@@ -245,7 +245,7 @@ export default function ReminderConfig() {
             onEdit={() => handleEdit(reminder.id)}
            onDelete={() => {
             if (
-              reminder.type === "fixed_checkin" ||
+              reminder.type === "fixed_mood" ||
               reminder.type === "fixed_hydration"
             ) {
               return; // bloqueia
