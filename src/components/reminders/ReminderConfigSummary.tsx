@@ -1,13 +1,35 @@
 import { Bell } from "lucide-react";
 
+/**
+ * ============================================================
+ * PROPS
+ * ============================================================
+ */
 type Props = {
-  activeCount: number;
+  /**
+   * Título exibido no card.
+   *
+   * Exemplo:
+   *
+   * - Lembrete diário
+   * - 3 lembretes ativos
+   */
+  title: string;
+
+  /**
+   * Texto complementar exibido abaixo do título.
+   */
+  description: string;
 };
 
 /**
  * Card de resumo exibindo o total de lembretes ativos.
  */
-export default function ReminderConfigSummary({ activeCount }: Props) {
+export default function ReminderConfigSummary({ 
+    title,
+    description, 
+  }: Props) 
+  {
   return (
     <div
       className="rounded-2xl bg-white px-5 py-4 flex items-center gap-4"
@@ -19,15 +41,14 @@ export default function ReminderConfigSummary({ activeCount }: Props) {
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
         <Bell size={22} style={{ color: "#008236" }} />
       </div>
+      
       <div className="flex-1">
         <p className="text-lg font-bold text-gray-800">
-          {activeCount}{" "}
-          <span className="text-sm font-normal text-gray-500">
-            {activeCount === 1 ? "lembrete ativo" : "lembretes ativos"}
-          </span>
+          {title}
         </p>
+
         <p className="text-xs text-gray-400">
-          Voce pode adicionar ate 10 lembretes por dia
+          {description}
         </p>
       </div>
     </div>

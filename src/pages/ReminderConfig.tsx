@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, X, Plus } from "lucide-react";
+import { ChevronLeft, Plus } from "lucide-react";
 
 import ReminderConfigSummary from "../components/reminders/ReminderConfigSummary";
 import ReminderConfigItem from "../components/reminders/ReminderConfigItem";
+import ReminderEditModal from "../components/reminders/ReminderEditModal";
 
 import { supabase } from "../services/supabaseClient";
 import { getDeviceId } from "../lib/deviceId";
@@ -203,58 +204,17 @@ export default function ReminderConfig() {
     <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
 
       {/* Modal */}
-      {editingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
-            onClick={handleClose}
-          />
-          <div className="relative z-10 w-full max-w-sm rounded-3xl bg-white px-6 py-6 shadow-xl space-y-5">
-
-            <button
-              onClick={handleClose}
-              className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"
-            >
-              <X size={14} />
-            </button>
-
-            <p className="text-base font-semibold text-gray-800">{modalTitle}</p>
-
-            <input
-              type="time"
-              value={editTime}
-              onChange={(e) => setEditTime(e.target.value)}
-              className="border rounded-xl p-2 w-full"
-            />
-
-            <div className="flex gap-2 flex-wrap">
-              {WEEK_DAYS.map((day) => {
-                const selected = editDays.includes(day.id);
-                return (
-                  <button
-                    key={day.id}
-                    onClick={() => handleDayToggle(day.id)}
-                    className={`px-3 py-2 rounded-full text-xs ${
-                      selected ? "bg-green-600 text-white" : "bg-gray-100"
-                    }`}
-                  >
-                    {day.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="flex gap-2">
-              <button onClick={handleClose} className="flex-1 border rounded-xl py-2">
-                Cancelar
-              </button>
-              <button onClick={handleSave} className="flex-1 bg-green-600 text-white rounded-xl py-2">
-                Salvar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ReminderEditModal
+        open={!!editingId}
+        title={modalTitle}
+        time={editTime}
+        days={editDays}
+        weekDays={WEEK_DAYS}
+        onTimeChange={setEditTime}
+        onDayToggle={handleDayToggle}
+        onSave={handleSave}
+        onClose={handleClose}
+      />
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
@@ -264,7 +224,14 @@ export default function ReminderConfig() {
         <h1 className="text-xl font-bold">Configurar Lembretes</h1>
       </div>
 
-      <ReminderConfigSummary activeCount={activeCount} />
+      <ReminderConfigSummary
+        title={`${activeCount} ${
+          activeCount === 1
+            ? "lembrete ativo"
+            : "lembretes ativos"
+        }`}
+        description="Você pode adicionar até 10 lembretes por dia."
+      />
 
       <div className="space-y-3 mt-4">
         {reminders.map((reminder) => (

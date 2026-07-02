@@ -17,6 +17,18 @@ type Props = {
   time: string;
   customDays: string[];
   active: boolean;
+
+  canDelete?: boolean;
+
+  /**
+   * Define se a informação dos dias da semana
+   * deverá ser ocultada.
+   *
+   * Utilizado em categorias que possuem um único
+   * lembrete diário, como Humor.
+   */
+  hideDays?: boolean;
+
   onToggle: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -46,6 +58,10 @@ export default function ReminderConfigItem({
   time,
   customDays,
   active,
+
+  canDelete = true,
+  hideDays = false,
+
   onToggle,
   onEdit,
   onDelete,
@@ -66,7 +82,12 @@ export default function ReminderConfigItem({
             <Clock size={12} className="text-gray-500" />
             <span className="text-xs font-medium text-gray-600">{time}</span>
           </div>
-          <p className="text-xs text-gray-400 mt-0.5">{formatDays(customDays)}</p>
+          
+          {!hideDays && (
+            <p className="text-xs text-gray-400 mt-0.5">
+              {formatDays(customDays)}
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -78,13 +99,30 @@ export default function ReminderConfigItem({
             <Pencil size={15} className="text-gray-600" />
           </button>
 
-          <button
-            onClick={onDelete}
-            aria-label="Excluir lembrete"
-            className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-red-50"
-          >
-            <Trash2 size={15} className="text-red-400" />
-          </button>
+          {/* ======================================================
+              EXCLUIR
+            ======================================================
+
+            A exibição do botão é controlada pela tela que utiliza
+            este componente.
+
+            Exemplo:
+
+            - Humor: não permite exclusão;
+            - Hidratação: permite exclusão.
+          */}
+          {canDelete && (
+            <button
+              onClick={onDelete}
+              aria-label="Excluir lembrete"
+              className="flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-red-50"
+            >
+              <Trash2
+                size={15}
+                className="text-red-400"
+              />
+            </button>
+          )}
 
           <button
             onClick={onToggle}
