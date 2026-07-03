@@ -1,67 +1,134 @@
 import { supabase } from "./supabaseClient";
-import { getDeviceId } from "../lib/deviceId";
 
 /**
  * ============================================================
- * GARANTE LEMBRETES FIXOS (CHECK-IN + HIDRATAÇÃO)
+ * TYPES
+ * ============================================================
+ */
+
+/**
+ * Categorias de lembretes obrigatórios da aplicação.
+ */
+type FixedReminderCategory =
+  | "mood"
+  | "hydration";
+
+/**
+ * Dados necessários para criação
+ * de um lembrete fixo.
+ */
+type FixedReminder = {
+  userId: string;
+  category: FixedReminderCategory;
+  label: string;
+  time: string;
+};
+
+/**
+ * ============================================================
+ * CREATE FIXED REMINDER
  * ============================================================
  *
- * Estratégia Sênior:
- * - Usa UPSERT (idempotente)
- * - Não depende de SELECT prévio
- * - Funciona com React Strict Mode (double execution)
- * - Evita race conditions
+ * Cria um lembrete obrigatório da aplicação.
  *
- * Regras:
- * - Sempre existe 1 Check-in
- * - Sempre existe 1 Hidratação
- * - Nunca duplica (garantido por UNIQUE + onConflict)
+ * Esta função é utilizada exclusivamente
+ * pelo ensureFixedReminders().
  */
-export async function ensureFixedReminders(): Promise<void> {
-
-  const deviceId = getDeviceId();
-
-  /**
-   * ============================================================
-   * UPSERT DIRETO (SEM SELECT)
-   * ============================================================
-   */
+async function createFixedReminder({
+  userId,
+  category,
+  label,
+  time,
+}: FixedReminder) {
   const { error } = await supabase
     .from("scheduled_reminders")
-    .upsert(
-      [
-        {
-          device_id: deviceId,
-          type: "fixed_mood",
-          label: "Registro diário",
-          hour: 8,
-          minute: 0,
-          time: "08:00",
-          active: true,
-        },
-        {
-          device_id: deviceId,
-          type: "fixed_hydration",
-          label: "Hora de se hidratar",
-          hour: 9,
-          minute: 0,
-          time: "09:00",
-          active: true,
-        },
-      ],
-      {
-        onConflict: "device_id,label", // ESSENCIAL
-      }
-    );
+    .insert({
+      user_id: userId,
+      category,
+      is_fixed: true,
+      label,
+      time,
+      active: true,
+    });
+
+  if (error) {
+    throw error;
+  }
+}
+
+/**
+ * ============================================================
+ * ENSURE FIXED REMINDERS
+ * ============================================================
+ *
+ * Garante que o usuário possua todos os
+ * lembretes obrigatórios do sistema.
+ *
+ * Regras:
+ *
+ * • Humor
+ *   - sempre existe um único lembrete
+ *
+ * • Hidratação
+ *   - sempre existe ao menos um lembrete
+ *
+ * Caso algum lembrete obrigatório não exista,
+ * ele será criado automaticamente.
+ */
+export async function ensureFixedReminders(
+  userId: string,
+): Promise<void> {
 
   /**
    * ============================================================
-   * ERRO
+   * CARREGA LEMBRETES FIXOS
    * ============================================================
    */
+  const { data, error } = await supabase
+    .from("scheduled_reminders")
+    .select("category")
+    .eq("user_id", userId)
+    .eq("is_fixed", true);
+
   if (error) {
-    console.error("❌ Erro ao garantir reminders fixos:", error);
+    console.error(error);
     return;
   }
 
+  /**
+   * Categorias já existentes.
+   */
+  const categories = new Set(
+    (data ?? []).map(
+      (item) => item.category,
+    ),
+  );
+
+  /**
+   * ============================================================
+   * HUMOR
+   * ============================================================
+   */
+  if (!categories.has("mood")) {
+    await createFixedReminder({
+      userId,
+      category: "mood",
+      label: "Registro diário",
+      time: "08:00",
+    });
+  }
+
+  /**
+   * ============================================================
+   * HIDRATAÇÃO
+   * ============================================================
+   */
+  if (!categories.has("hydration")) {
+    await createFixedReminder({
+      userId,
+      category: "hydration",
+      label: "Hora de se hidratar",
+      time: "09:00",
+    });
+  }
 }

@@ -20,7 +20,7 @@ import History from "./pages/History";
 import Reminders from "./pages/Reminders";
 import BreakReminder from "./pages/BreakReminder";
 import RelaxReminder from "./pages/RelaxReminder";
-import ReminderConfig from "./pages/ReminderConfig";
+
 import MoodReminderConfig from "./pages/MoodReminderConfig";
 import HydrationReminderConfig from "./pages/HydrationReminderConfig";
 
@@ -209,17 +209,6 @@ function App() {
             <ProtectedRoute>
               <AppLayout>
                 <Settings />
-              </AppLayout>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/reminder-config"
-          element={
-            <ProtectedRoute>
-              <AppLayout>
-                <ReminderConfig />
               </AppLayout>
             </ProtectedRoute>
           }

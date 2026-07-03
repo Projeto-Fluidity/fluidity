@@ -6,7 +6,7 @@ import {
   shouldTriggerReminder,
   toUiReminder,
 } from "../lib/reminderAdapter";
-
+import { useAuth } from "./useAuth";
 /**
  * ============================================================
  * GLOBAL WINDOW TYPE
@@ -48,6 +48,7 @@ export function useReminderTrigger() {
    *
    * Guarda IDs já disparados no dia atual.
    */
+  const { user } = useAuth();
   const triggeredRef =
     useRef<Set<string>>(new Set());
 
@@ -74,6 +75,12 @@ export function useReminderTrigger() {
      * - StrictMode
      * podem duplicar os intervals.
      */
+    if (!user) {
+      return;
+    }
+
+    const currentUser = user;
+    
     if (window.__REMINDER_TRIGGER_STARTED__) {
 
       return;
@@ -121,7 +128,7 @@ export function useReminderTrigger() {
        * ============================================================
        */
       const reminders =
-        await getScheduledReminders();
+        await getScheduledReminders(currentUser.id);
 
       /**
        * ============================================================
@@ -212,5 +219,5 @@ export function useReminderTrigger() {
         false;
     };
 
-  }, []);
+  }, [user]);
 }

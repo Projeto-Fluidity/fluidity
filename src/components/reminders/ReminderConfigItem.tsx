@@ -77,7 +77,7 @@ export default function ReminderConfigItem({
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold text-gray-800">{label}</p>
+          <p className="text-sm font-semibold text-gray-800">{label}</p>
           <div className="flex items-center gap-1 mt-1">
             <Clock size={12} className="text-gray-500" />
             <span className="text-xs font-medium text-gray-600">{time}</span>

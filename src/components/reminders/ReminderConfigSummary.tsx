@@ -43,11 +43,11 @@ export default function ReminderConfigSummary({
       </div>
       
       <div className="flex-1">
-        <p className="text-lg font-bold text-gray-800">
+        <p className="text-lg font-semibold text-gray-800">
           {title}
         </p>
 
-        <p className="text-xs text-gray-400">
+        <p className="text-sm text-slate-500 leading-5">
           {description}
         </p>
       </div>
