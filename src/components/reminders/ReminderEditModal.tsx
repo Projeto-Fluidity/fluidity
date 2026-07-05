@@ -9,10 +9,10 @@ import { X } from "lucide-react";
 /**
  * Representa um dia da semana exibido no seletor.
  */
-type WeekDay = {
+type WeekDay = Readonly<{
   id: string;
   label: string;
-};
+}>;
 
 /**
  * ============================================================
@@ -55,7 +55,7 @@ type Props = {
   /**
    * Lista de dias disponíveis para seleção.
    */
-  weekDays: WeekDay[];
+  weekDays: readonly WeekDay[];
 
   /**
    * Disparado quando o usuário altera o horário.
@@ -125,30 +125,28 @@ export default function ReminderEditModal({
       {/* ======================================================
           MODAL
          ====================================================== */}
-      <div className="relative z-10 w-full max-w-sm rounded-3xl bg-white px-6 py-6 shadow-xl space-y-5">
+      <div className="relative z-10 w-full max-w-sm space-y-5 rounded-3xl bg-white px-6 py-6 shadow-xl">
         {/* Botão de fechar */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition"
+          className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 transition hover:bg-gray-200"
         >
           <X size={14} />
         </button>
 
         {/* Título */}
-        <p className="text-base font-semibold text-gray-800">
-          {title}
-        </p>
+        <p className="text-base font-semibold text-gray-800">{title}</p>
 
         {/* Campo de horário */}
         <input
           type="time"
           value={time}
           onChange={(e) => onTimeChange(e.target.value)}
-          className="border rounded-xl p-2 w-full"
+          className="w-full rounded-xl border p-2"
         />
 
         {/* Dias da semana */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
           {weekDays.map((day) => {
             const selected = days.includes(day.id);
 
@@ -156,10 +154,8 @@ export default function ReminderEditModal({
               <button
                 key={day.id}
                 onClick={() => onDayToggle(day.id)}
-                className={`px-3 py-2 rounded-full text-xs ${
-                  selected
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-100"
+                className={`rounded-full px-3 py-2 text-xs ${
+                  selected ? "bg-green-600 text-white" : "bg-gray-100"
                 }`}
               >
                 {day.label}
@@ -170,16 +166,13 @@ export default function ReminderEditModal({
 
         {/* Ações */}
         <div className="flex gap-2">
-          <button
-            onClick={onClose}
-            className="flex-1 border rounded-xl py-2"
-          >
+          <button onClick={onClose} className="flex-1 rounded-xl border py-2">
             Cancelar
           </button>
 
           <button
             onClick={onSave}
-            className="flex-1 bg-green-600 text-white rounded-xl py-2"
+            className="flex-1 rounded-xl bg-green-600 py-2 text-white"
           >
             Salvar
           </button>
