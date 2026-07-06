@@ -11,14 +11,15 @@ import {
   createReminder,
   deleteReminder,
   getScheduledReminders,
-  toggleReminder,
   updateReminder,
 } from "../services/reminderConfigService";
 
 import { useAuth } from "../hooks/useAuth";
 
-import { DEFAULT_HYDRATION_DAYS, WEEK_DAYS } from "../constants/weekDays";
-
+import {
+  DEFAULT_HYDRATION_DAYS,
+  DEFAULT_HYDRATION_TIME,
+} from "../constants/reminderDefaults";
 import type { ScheduledReminder } from "../types/scheduledReminder";
 
 /**
@@ -115,23 +116,6 @@ export default function HydrationReminderConfig() {
     setIsCreating(false);
     setEditingReminder(reminder);
     setEditingTime(reminder.time);
-    setEditingDays(reminder.days);
-  }, []);
-
-  /**
-   * ============================================================
-   * DIAS DA SEMANA
-   * ============================================================
-   *
-   * Alterna a seleção dos dias utilizados pelo
-   * lembrete.
-   */
-  const handleDayToggle = useCallback((dayId: string) => {
-    setEditingDays((current) =>
-      current.includes(dayId)
-        ? current.filter((day) => day !== dayId)
-        : [...current, dayId],
-    );
   }, []);
 
   /**
@@ -145,7 +129,6 @@ export default function HydrationReminderConfig() {
   const resetModalState = useCallback(() => {
     setEditingReminder(null);
     setEditingTime("");
-    setEditingDays([]);
     setIsCreating(false);
   }, []);
 
@@ -220,23 +203,43 @@ export default function HydrationReminderConfig() {
 
   /**
    * ============================================================
-   * TOGGLE REMINDER
+   * ALTERAR DIA DA SEMANA
    * ============================================================
    *
-   * Ativa ou desativa um lembrete.
+   * Atualiza imediatamente os dias de um
+   * lembrete sem necessidade de abrir o modal.
    *
-   * Após a atualização no banco os dados são
-   * recarregados para manter a interface sempre
-   * sincronizada.
-   */
-  const handleToggleReminder = useCallback(
-    async (reminder: ScheduledReminder) => {
+   * Fluxo:
+   *
+   * Card
+   * ↓
+   * Atualiza lista de dias
+   * ↓
+   * Persiste no banco
+   * ↓
+   * Recarrega os lembretes
+  */
+  const handleToggleReminderDay = useCallback(
+    async (
+      reminder: ScheduledReminder,
+      dayId: string,
+    ) => {
+      const updatedDays = reminder.days.includes(dayId)
+        ? reminder.days.filter((day) => day !== dayId)
+        : [...reminder.days, dayId];
+
       try {
-        await toggleReminder(reminder.id, !reminder.active);
+        await updateReminder(reminder.id, {
+          time: reminder.time,
+          days: updatedDays,
+        });
 
         await loadReminders();
       } catch (error) {
-        console.error("Erro ao atualizar lembrete:", error);
+        console.error(
+          "Erro ao atualizar dias do lembrete:",
+          error,
+        );
       }
     },
     [loadReminders],
@@ -255,7 +258,7 @@ export default function HydrationReminderConfig() {
 
     setEditingReminder(null);
 
-    setEditingTime("09:00");
+    setEditingTime(DEFAULT_HYDRATION_TIME);
 
     setEditingDays([...DEFAULT_HYDRATION_DAYS]);
   }, []);
@@ -267,14 +270,16 @@ export default function HydrationReminderConfig() {
    *
    * Abre o modal de confirmação para exclusão
    * do lembrete selecionado.
+   *
+   * Na categoria de hidratação todos os
+   * lembretes podem ser removidos.
    */
-  const handleDeleteReminder = useCallback((reminder: ScheduledReminder) => {
-    if (reminder.isFixed) {
-      return;
-    }
-
-    setDeletingReminder(reminder);
-  }, []);
+  const handleDeleteReminder = useCallback(
+    (reminder: ScheduledReminder) => {
+      setDeletingReminder(reminder);
+    },
+    [],
+  );
 
   /**
    * ============================================================
@@ -358,10 +363,13 @@ export default function HydrationReminderConfig() {
             label={reminder.label}
             time={reminder.time}
             customDays={reminder.days}
-            active={reminder.active}
-            canDelete={!reminder.isFixed}
-            onToggle={() => handleToggleReminder(reminder)}
+
+            canDelete
+
             onEdit={() => handleEditReminder(reminder)}
+            onToggleDay={(dayId) =>
+              handleToggleReminderDay(reminder, dayId)
+            }
             onDelete={() => handleDeleteReminder(reminder)}
           />
         ))}
@@ -377,12 +385,13 @@ export default function HydrationReminderConfig() {
 
       <ReminderEditModal
         open={isCreating || editingReminder !== null}
-        title={isCreating ? "Novo lembrete" : (editingReminder?.label ?? "")}
+        title={
+          isCreating
+            ? "Novo lembrete"
+            : (editingReminder?.label ?? "")
+        }
         time={editingTime}
-        days={editingDays}
-        weekDays={WEEK_DAYS}
         onTimeChange={setEditingTime}
-        onDayToggle={handleDayToggle}
         onSave={handleSaveReminder}
         onClose={handleCloseModal}
       />

@@ -2,20 +2,6 @@ import { X } from "lucide-react";
 
 /**
  * ============================================================
- * TYPES
- * ============================================================
- */
-
-/**
- * Representa um dia da semana exibido no seletor.
- */
-type WeekDay = Readonly<{
-  id: string;
-  label: string;
-}>;
-
-/**
- * ============================================================
  * PROPS
  * ============================================================
  *
@@ -48,24 +34,9 @@ type Props = {
   time: string;
 
   /**
-   * Dias atualmente selecionados.
-   */
-  days: string[];
-
-  /**
-   * Lista de dias disponíveis para seleção.
-   */
-  weekDays: readonly WeekDay[];
-
-  /**
    * Disparado quando o usuário altera o horário.
    */
   onTimeChange: (value: string) => void;
-
-  /**
-   * Disparado quando um dia da semana é selecionado.
-   */
-  onDayToggle: (dayId: string) => void;
 
   /**
    * Disparado ao salvar a configuração.
@@ -96,10 +67,7 @@ export default function ReminderEditModal({
   open,
   title,
   time,
-  days,
-  weekDays,
   onTimeChange,
-  onDayToggle,
   onSave,
   onClose,
 }: Props) {
@@ -144,25 +112,6 @@ export default function ReminderEditModal({
           onChange={(e) => onTimeChange(e.target.value)}
           className="w-full rounded-xl border p-2"
         />
-
-        {/* Dias da semana */}
-        <div className="flex flex-wrap gap-2">
-          {weekDays.map((day) => {
-            const selected = days.includes(day.id);
-
-            return (
-              <button
-                key={day.id}
-                onClick={() => onDayToggle(day.id)}
-                className={`rounded-full px-3 py-2 text-xs ${
-                  selected ? "bg-green-600 text-white" : "bg-gray-100"
-                }`}
-              >
-                {day.label}
-              </button>
-            );
-          })}
-        </div>
 
         {/* Ações */}
         <div className="flex gap-2">

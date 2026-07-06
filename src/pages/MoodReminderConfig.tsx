@@ -147,10 +147,8 @@ export default function MoodReminderConfig() {
             label={reminder.label}
             time={reminder.time}
             customDays={reminder.customDays}
-            active={reminder.active}
             canDelete={false}
             hideDays={true}
-            onToggle={() => {}}
             onEdit={() => {}}
             onDelete={() => {}}
           />

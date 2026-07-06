@@ -7,11 +7,12 @@ import { supabase } from "./supabaseClient";
  */
 
 /**
- * Categorias de lembretes obrigatórios da aplicação.
+ * Categorias de lembretes obrigatórios.
+ *
+ * Atualmente apenas o lembrete de humor é
+ * obrigatório para a aplicação.
  */
-type FixedReminderCategory =
-  | "mood"
-  | "hydration";
+type FixedReminderCategory = "mood";
 
 /**
  * Dados necessários para criação
@@ -61,19 +62,17 @@ async function createFixedReminder({
  * ENSURE FIXED REMINDERS
  * ============================================================
  *
- * Garante que o usuário possua todos os
- * lembretes obrigatórios do sistema.
+ * Garante a existência apenas dos lembretes
+ * obrigatórios da aplicação.
  *
- * Regras:
+ * Atualmente existe somente um lembrete
+ * obrigatório:
  *
- * • Humor
- *   - sempre existe um único lembrete
+ * • Registro diário de humor.
  *
- * • Hidratação
- *   - sempre existe ao menos um lembrete
- *
- * Caso algum lembrete obrigatório não exista,
- * ele será criado automaticamente.
+ * Os lembretes de hidratação são totalmente
+ * gerenciados pelo usuário e não são mais
+ * recriados automaticamente.
  */
 export async function ensureFixedReminders(
   userId: string,
@@ -115,20 +114,6 @@ export async function ensureFixedReminders(
       category: "mood",
       label: "Registro diário",
       time: "08:00",
-    });
-  }
-
-  /**
-   * ============================================================
-   * HIDRATAÇÃO
-   * ============================================================
-   */
-  if (!categories.has("hydration")) {
-    await createFixedReminder({
-      userId,
-      category: "hydration",
-      label: "Hora de se hidratar",
-      time: "09:00",
     });
   }
 }
