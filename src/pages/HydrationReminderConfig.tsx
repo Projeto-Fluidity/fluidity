@@ -1,5 +1,5 @@
 import { ChevronLeft, Plus } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
 
@@ -10,11 +10,11 @@ import ReminderDeleteModal from "../components/reminders/ReminderDeleteModal";
 import {
   createReminder,
   deleteReminder,
-  getScheduledReminders,
   updateReminder,
 } from "../services/reminderConfigService";
 
 import { useAuth } from "../hooks/useAuth";
+import { useReminderConfig } from "../hooks/useReminderConfig";
 
 import {
   DEFAULT_HYDRATION_DAYS,
@@ -42,106 +42,30 @@ export default function HydrationReminderConfig() {
    * ============================================================
    */
 
-  /**
-   * Lembretes carregados do banco de dados.
-   */
-  const [reminders, setReminders] = useState<ScheduledReminder[]>([]);
+  const {
+    reminders,
 
-  /**
-   * Lembrete atualmente em edição.
-   */
-  const [editingReminder, setEditingReminder] =
-    useState<ScheduledReminder | null>(null);
+    editingReminder,
+    editingTime,
+    setEditingTime,
 
-  /**
-   * Horário temporário utilizado pelo modal.
-   */
-  const [editingTime, setEditingTime] = useState("");
+    editingDays,
 
-  /**
-   * Dias temporários utilizados pelo modal.
-   */
-  const [editingDays, setEditingDays] = useState<string[]>([]);
+    isCreating,
+    deletingReminder,
 
-  /**
-   * Indica se o modal está sendo utilizado
-   * para criação de um novo lembrete.
-   */
-  const [isCreating, setIsCreating] = useState(false);
+    loadReminders,
 
-  /**
-   * Lembrete aguardando confirmação de exclusão.
-   */
-  const [deletingReminder, setDeletingReminder] =
-    useState<ScheduledReminder | null>(null);
+    openEditModal,
+    openCreateModal,
+    closeEditModal,
 
-  /**
-   * ============================================================
-   * CARREGAMENTO
-   * ============================================================
-   *
-   * Busca todos os lembretes de hidratação do
-   * usuário autenticado.
-   *
-   * Esta função será reutilizada pelas próximas
-   * implementações após:
-   *
-   * • criar;
-   * • editar;
-   * • excluir;
-   * • ativar/desativar.
-   */
-  const loadReminders = useCallback(async () => {
-    if (!user) {
-      return;
-    }
-
-    try {
-      const data = await getScheduledReminders(user.id, "hydration");
-
-      setReminders(data);
-    } catch (error) {
-      console.error("Erro ao carregar lembretes:", error);
-    }
-  }, [user]);
-
-  /**
-   * ============================================================
-   * EDITAR LEMBRETE
-   * ============================================================
-   *
-   * Prepara os dados para edição e abre o modal.
-   */
-  const handleEditReminder = useCallback((reminder: ScheduledReminder) => {
-    setIsCreating(false);
-    setEditingReminder(reminder);
-    setEditingTime(reminder.time);
-  }, []);
-
-  /**
-   * ============================================================
-   * RESET DO MODAL
-   * ============================================================
-   *
-   * Limpa todo o estado utilizado durante a
-   * criação ou edição de lembretes.
-   */
-  const resetModalState = useCallback(() => {
-    setEditingReminder(null);
-    setEditingTime("");
-    setIsCreating(false);
-  }, []);
-
-  /**
-   * ============================================================
-   * RESET DO MODAL DE EXCLUSÃO
-   * ============================================================
-   *
-   * Fecha o modal de confirmação de exclusão.
-   */
-  const resetDeleteModalState = useCallback(() => {
-    setDeletingReminder(null);
-  }, []);
+    openDeleteModal,
+    closeDeleteModal,
+  } = useReminderConfig({
+    userId: user?.id,
+    category: "hydration",
+  });
 
   /**
    * ============================================================
@@ -176,7 +100,7 @@ export default function HydrationReminderConfig() {
         });
       }
 
-      resetModalState();
+      closeEditModal();
 
       await loadReminders();
     } catch (error) {
@@ -189,7 +113,7 @@ export default function HydrationReminderConfig() {
     isCreating,
     user,
     loadReminders,
-    resetModalState,
+    closeEditModal,
   ]);
 
   /**
@@ -198,8 +122,8 @@ export default function HydrationReminderConfig() {
    * ============================================================
    */
   const handleCloseModal = useCallback(() => {
-    resetModalState();
-  }, [resetModalState]);
+    closeEditModal();
+  }, [closeEditModal]);
 
   /**
    * ============================================================
@@ -208,17 +132,7 @@ export default function HydrationReminderConfig() {
    *
    * Atualiza imediatamente os dias de um
    * lembrete sem necessidade de abrir o modal.
-   *
-   * Fluxo:
-   *
-   * Card
-   * ↓
-   * Atualiza lista de dias
-   * ↓
-   * Persiste no banco
-   * ↓
-   * Recarrega os lembretes
-  */
+   */
   const handleToggleReminderDay = useCallback(
     async (
       reminder: ScheduledReminder,
@@ -247,42 +161,6 @@ export default function HydrationReminderConfig() {
 
   /**
    * ============================================================
-   * NOVO LEMBRETE
-   * ============================================================
-   *
-   * Prepara o modal para criação de um novo
-   * lembrete personalizado.
-   */
-  const handleCreateReminder = useCallback(() => {
-    setIsCreating(true);
-
-    setEditingReminder(null);
-
-    setEditingTime(DEFAULT_HYDRATION_TIME);
-
-    setEditingDays([...DEFAULT_HYDRATION_DAYS]);
-  }, []);
-
-  /**
-   * ============================================================
-   * EXCLUIR LEMBRETE
-   * ============================================================
-   *
-   * Abre o modal de confirmação para exclusão
-   * do lembrete selecionado.
-   *
-   * Na categoria de hidratação todos os
-   * lembretes podem ser removidos.
-   */
-  const handleDeleteReminder = useCallback(
-    (reminder: ScheduledReminder) => {
-      setDeletingReminder(reminder);
-    },
-    [],
-  );
-
-  /**
-   * ============================================================
    * CONFIRMAR EXCLUSÃO
    * ============================================================
    *
@@ -297,24 +175,26 @@ export default function HydrationReminderConfig() {
     try {
       await deleteReminder(deletingReminder.id);
 
-      resetDeleteModalState();
+      closeDeleteModal();
 
       await loadReminders();
     } catch (error) {
       console.error("Erro ao excluir lembrete:", error);
     }
-  }, [deletingReminder, loadReminders, resetDeleteModalState]);
+  }, [
+    deletingReminder,
+    loadReminders,
+    closeDeleteModal,
+  ]);
 
   /**
    * ============================================================
    * FECHAR MODAL DE EXCLUSÃO
    * ============================================================
-   *
-   * Fecha o modal sem realizar a exclusão.
    */
   const handleCloseDeleteModal = useCallback(() => {
-    resetDeleteModalState();
-  }, [resetDeleteModalState]);
+    closeDeleteModal();
+  }, [closeDeleteModal]);
 
   /**
    * ============================================================
@@ -358,25 +238,28 @@ export default function HydrationReminderConfig() {
       */}
       <div className="mt-4 space-y-3">
         {reminders.map((reminder) => (
-          <ReminderConfigItem
-            key={reminder.id}
-            label={reminder.label}
-            time={reminder.time}
-            customDays={reminder.days}
-
-            canDelete
-
-            onEdit={() => handleEditReminder(reminder)}
-            onToggleDay={(dayId) =>
-              handleToggleReminderDay(reminder, dayId)
-            }
-            onDelete={() => handleDeleteReminder(reminder)}
-          />
+        <ReminderConfigItem
+          key={reminder.id}
+          label={reminder.label}
+          time={reminder.time}
+          customDays={reminder.days}
+          canDelete
+          onEdit={() => openEditModal(reminder)}
+          onToggleDay={(dayId) =>
+            handleToggleReminderDay(reminder, dayId)
+          }
+          onDelete={() => openDeleteModal(reminder)}
+        />
         ))}
       </div>
 
       <button
-        onClick={handleCreateReminder}
+        onClick={() =>
+          openCreateModal(
+            DEFAULT_HYDRATION_TIME,
+            DEFAULT_HYDRATION_DAYS,
+          )
+        }
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-white"
       >
         <Plus size={20} />

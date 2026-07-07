@@ -17,21 +17,12 @@ import type {
  */
 
 /**
- * Categorias que permitem criação de
- * lembretes personalizados.
- *
- * Atualmente apenas hidratação permite
- * criação de novos lembretes.
- */
-type CreateReminderCategory = Extract<ReminderCategory, "hydration">;
-
-/**
  * Dados necessários para criação
  * de um lembrete personalizado.
  */
 type CreateReminderData = {
   label: string;
-  category: CreateReminderCategory;
+  category: ReminderCategory;
   time: string;
   days: string[];
   active: boolean;

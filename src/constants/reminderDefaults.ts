@@ -30,3 +30,19 @@ export const DEFAULT_HYDRATION_DAYS = [
   "qui",
   "sex",
 ] as const;
+
+/**
+ * Rótulos padrão utilizados durante a criação
+ * automática dos lembretes da aplicação.
+ *
+ * Estes valores são utilizados como sugestão
+ * inicial para cada categoria de lembrete.
+ *
+ * A alteração deste objeto reflete em todas as
+ * telas que utilizam o fluxo genérico de criação
+ * de lembretes.
+ */
+export const DEFAULT_REMINDER_LABEL = {
+  mood: "Registro diário",
+  hydration: "Hora de se hidratar",
+} as const;
