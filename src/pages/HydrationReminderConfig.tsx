@@ -1,5 +1,5 @@
 import { ChevronLeft, Plus } from "lucide-react";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 
 import { useNavigate } from "react-router-dom";
 
@@ -7,11 +7,6 @@ import ReminderConfigSummary from "../components/reminders/ReminderConfigSummary
 import ReminderConfigItem from "../components/reminders/ReminderConfigItem";
 import ReminderEditModal from "../components/reminders/ReminderEditModal";
 import ReminderDeleteModal from "../components/reminders/ReminderDeleteModal";
-import {
-  createReminder,
-  deleteReminder,
-  updateReminder,
-} from "../services/reminderConfigService";
 
 import { useAuth } from "../hooks/useAuth";
 import { useReminderConfig } from "../hooks/useReminderConfig";
@@ -20,7 +15,6 @@ import {
   DEFAULT_HYDRATION_DAYS,
   DEFAULT_HYDRATION_TIME,
 } from "../constants/reminderDefaults";
-import type { ScheduledReminder } from "../types/scheduledReminder";
 
 /**
  * ============================================================
@@ -49,8 +43,6 @@ export default function HydrationReminderConfig() {
     editingTime,
     setEditingTime,
 
-    editingDays,
-
     isCreating,
     deletingReminder,
 
@@ -62,139 +54,15 @@ export default function HydrationReminderConfig() {
 
     openDeleteModal,
     closeDeleteModal,
+
+    handleConfirmDelete,
+    handleSaveReminder,
+
+    createToggleDayHandler,
   } = useReminderConfig({
     userId: user?.id,
     category: "hydration",
   });
-
-  /**
-   * ============================================================
-   * SALVAR ALTERAÇÕES
-   * ============================================================
-   *
-   * Persiste as alterações realizadas pelo
-   * usuário e atualiza a lista.
-   */
-  const handleSaveReminder = useCallback(async () => {
-    try {
-      if (isCreating) {
-        if (!user) {
-          return;
-        }
-
-        await createReminder(user.id, {
-          label: "Hora de se hidratar",
-          category: "hydration",
-          time: editingTime,
-          days: editingDays,
-          active: true,
-        });
-      } else {
-        if (!editingReminder) {
-          return;
-        }
-
-        await updateReminder(editingReminder.id, {
-          time: editingTime,
-          days: editingDays,
-        });
-      }
-
-      closeEditModal();
-
-      await loadReminders();
-    } catch (error) {
-      console.error("Erro ao atualizar lembrete:", error);
-    }
-  }, [
-    editingReminder,
-    editingTime,
-    editingDays,
-    isCreating,
-    user,
-    loadReminders,
-    closeEditModal,
-  ]);
-
-  /**
-   * ============================================================
-   * FECHAR MODAL
-   * ============================================================
-   */
-  const handleCloseModal = useCallback(() => {
-    closeEditModal();
-  }, [closeEditModal]);
-
-  /**
-   * ============================================================
-   * ALTERAR DIA DA SEMANA
-   * ============================================================
-   *
-   * Atualiza imediatamente os dias de um
-   * lembrete sem necessidade de abrir o modal.
-   */
-  const handleToggleReminderDay = useCallback(
-    async (
-      reminder: ScheduledReminder,
-      dayId: string,
-    ) => {
-      const updatedDays = reminder.days.includes(dayId)
-        ? reminder.days.filter((day) => day !== dayId)
-        : [...reminder.days, dayId];
-
-      try {
-        await updateReminder(reminder.id, {
-          time: reminder.time,
-          days: updatedDays,
-        });
-
-        await loadReminders();
-      } catch (error) {
-        console.error(
-          "Erro ao atualizar dias do lembrete:",
-          error,
-        );
-      }
-    },
-    [loadReminders],
-  );
-
-  /**
-   * ============================================================
-   * CONFIRMAR EXCLUSÃO
-   * ============================================================
-   *
-   * Remove o lembrete do banco de dados e
-   * atualiza a lista da tela.
-   */
-  const handleConfirmDelete = useCallback(async () => {
-    if (!deletingReminder) {
-      return;
-    }
-
-    try {
-      await deleteReminder(deletingReminder.id);
-
-      closeDeleteModal();
-
-      await loadReminders();
-    } catch (error) {
-      console.error("Erro ao excluir lembrete:", error);
-    }
-  }, [
-    deletingReminder,
-    loadReminders,
-    closeDeleteModal,
-  ]);
-
-  /**
-   * ============================================================
-   * FECHAR MODAL DE EXCLUSÃO
-   * ============================================================
-   */
-  const handleCloseDeleteModal = useCallback(() => {
-    closeDeleteModal();
-  }, [closeDeleteModal]);
 
   /**
    * ============================================================
@@ -245,9 +113,7 @@ export default function HydrationReminderConfig() {
           customDays={reminder.days}
           canDelete
           onEdit={() => openEditModal(reminder)}
-          onToggleDay={(dayId) =>
-            handleToggleReminderDay(reminder, dayId)
-          }
+          onToggleDay={createToggleDayHandler(reminder)}
           onDelete={() => openDeleteModal(reminder)}
         />
         ))}
@@ -276,14 +142,14 @@ export default function HydrationReminderConfig() {
         time={editingTime}
         onTimeChange={setEditingTime}
         onSave={handleSaveReminder}
-        onClose={handleCloseModal}
+        onClose={closeEditModal}
       />
 
       <ReminderDeleteModal
         open={deletingReminder !== null}
         title={deletingReminder?.label ?? ""}
         onConfirm={handleConfirmDelete}
-        onClose={handleCloseDeleteModal}
+        onClose={closeDeleteModal}
       />
     </div>
   );

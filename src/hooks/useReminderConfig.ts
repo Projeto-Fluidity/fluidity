@@ -198,6 +198,23 @@ export function useReminderConfig({
     [loadReminders],
   );
 
+     /**
+     * ============================================================
+     * CREATE TOGGLE DAY HANDLER
+     * ============================================================
+     *
+     * Cria um callback já vinculado ao lembrete,
+     * simplificando o consumo pelos componentes
+     * de interface.
+     */
+    const createToggleDayHandler = useCallback(
+    (reminder: ScheduledReminder) => {
+        return (dayId: string) =>
+        handleToggleReminderDay(reminder, dayId);
+    },
+    [handleToggleReminderDay],
+    );
+
   return {
     reminders,
 
@@ -225,5 +242,6 @@ export function useReminderConfig({
     handleConfirmDelete,
 
     handleToggleReminderDay,
+    createToggleDayHandler,
   };
 }
