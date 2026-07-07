@@ -16,6 +16,8 @@ import {
   DEFAULT_HYDRATION_TIME,
 } from "../constants/reminderDefaults";
 
+import { reminderConfigMetadata } from "../data/reminderConfigMetadata";
+
 /**
  * ============================================================
  * HYDRATION REMINDER CONFIG
@@ -27,8 +29,8 @@ import {
  */
 export default function HydrationReminderConfig() {
   const navigate = useNavigate();
-
   const { user } = useAuth();
+  const config = reminderConfigMetadata.hydration;
 
   /**
    * ============================================================
@@ -93,8 +95,8 @@ export default function HydrationReminderConfig() {
           RESUMO
          ====================================================== */}
       <ReminderConfigSummary
-        title="Lembretes de hidratação"
-        description="Adicione lembretes ao longo do dia para manter uma boa hidratação."
+        title={config.summaryTitle}
+        description={config.summaryDescription}
       />
 
       {/* ======================================================
@@ -106,25 +108,22 @@ export default function HydrationReminderConfig() {
       */}
       <div className="mt-4 space-y-3">
         {reminders.map((reminder) => (
-        <ReminderConfigItem
-          key={reminder.id}
-          label={reminder.label}
-          time={reminder.time}
-          customDays={reminder.days}
-          canDelete
-          onEdit={() => openEditModal(reminder)}
-          onToggleDay={createToggleDayHandler(reminder)}
-          onDelete={() => openDeleteModal(reminder)}
-        />
+          <ReminderConfigItem
+            key={reminder.id}
+            label={reminder.label}
+            time={reminder.time}
+            customDays={reminder.days}
+            canDelete={config.allowDelete}
+            onEdit={() => openEditModal(reminder)}
+            onToggleDay={createToggleDayHandler(reminder)}
+            onDelete={() => openDeleteModal(reminder)}
+          />
         ))}
       </div>
 
       <button
         onClick={() =>
-          openCreateModal(
-            DEFAULT_HYDRATION_TIME,
-            DEFAULT_HYDRATION_DAYS,
-          )
+          openCreateModal(DEFAULT_HYDRATION_TIME, DEFAULT_HYDRATION_DAYS)
         }
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-green-600 py-3 text-white"
       >
@@ -134,11 +133,7 @@ export default function HydrationReminderConfig() {
 
       <ReminderEditModal
         open={isCreating || editingReminder !== null}
-        title={
-          isCreating
-            ? "Novo lembrete"
-            : (editingReminder?.label ?? "")
-        }
+        title={isCreating ? "Novo lembrete" : (editingReminder?.label ?? "")}
         time={editingTime}
         onTimeChange={setEditingTime}
         onSave={handleSaveReminder}

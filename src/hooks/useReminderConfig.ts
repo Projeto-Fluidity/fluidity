@@ -56,6 +56,18 @@ export function useReminderConfig({
 
   /**
    * ============================================================
+   * LEMBRETE SELECIONADO
+   * ============================================================
+   *
+   * Exposição de uma visão derivada da coleção de lembretes.
+   *
+   * Utilizado por categorias que trabalham com um único
+   * lembrete, como Humor.
+   */
+  const reminder = reminders[0] ?? null;
+
+  /**
+   * ============================================================
    * CARREGAMENTO
    * ============================================================
    */
@@ -198,25 +210,25 @@ export function useReminderConfig({
     [loadReminders],
   );
 
-     /**
-     * ============================================================
-     * CREATE TOGGLE DAY HANDLER
-     * ============================================================
-     *
-     * Cria um callback já vinculado ao lembrete,
-     * simplificando o consumo pelos componentes
-     * de interface.
-     */
-    const createToggleDayHandler = useCallback(
+  /**
+   * ============================================================
+   * CREATE TOGGLE DAY HANDLER
+   * ============================================================
+   *
+   * Cria um callback já vinculado ao lembrete,
+   * simplificando o consumo pelos componentes
+   * de interface.
+   */
+  const createToggleDayHandler = useCallback(
     (reminder: ScheduledReminder) => {
-        return (dayId: string) =>
-        handleToggleReminderDay(reminder, dayId);
+      return (dayId: string) => handleToggleReminderDay(reminder, dayId);
     },
     [handleToggleReminderDay],
-    );
+  );
 
   return {
     reminders,
+    reminder,
 
     editingReminder,
     editingTime,
