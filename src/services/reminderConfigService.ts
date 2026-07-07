@@ -5,6 +5,8 @@ import {
   type DbScheduledReminder,
 } from "../lib/scheduledReminderAdapter";
 
+import { ensureFixedReminders } from "./scheduledReminderService";
+
 import type {
   ScheduledReminder,
   ReminderCategory,
@@ -37,6 +39,7 @@ type CreateReminderData = {
  *
  * Responsabilidades:
  *
+ * • garantir a existência dos lembretes obrigatórios;
  * • consultar o banco de dados;
  * • filtrar por usuário;
  * • permitir filtro por categoria;
@@ -50,6 +53,12 @@ export async function getScheduledReminders(
   userId: string,
   category?: ReminderCategory,
 ): Promise<ScheduledReminder[]> {
+  /**
+   * Garante que todos os lembretes obrigatórios
+   * da aplicação existam antes do carregamento.
+   */
+  await ensureFixedReminders(userId);
+
   let query = supabase
     .from("scheduled_reminders")
     .select("*")
