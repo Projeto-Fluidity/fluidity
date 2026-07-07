@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import ReminderConfigItem from "../components/reminders/ReminderConfigItem";
 import ReminderConfigSummary from "../components/reminders/ReminderConfigSummary";
 
+import { reminderConfigMetadata } from "../data/reminderConfigMetadata";
+
 import { useAuth } from "../hooks/useAuth";
 import { useReminderConfig } from "../hooks/useReminderConfig";
 
@@ -21,6 +23,9 @@ import { useReminderConfig } from "../hooks/useReminderConfig";
 export default function MoodReminderConfig() {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const config = reminderConfigMetadata.mood;
+
   const { reminder, loadReminders } = useReminderConfig({
     userId: user?.id,
     category: "mood",
@@ -55,8 +60,8 @@ export default function MoodReminderConfig() {
       </div>
 
       <ReminderConfigSummary
-        title="Lembrete diário"
-        description="Você pode alterar o horário e ativar ou desativar este lembrete."
+        title={config.summaryTitle}
+        description={config.summaryDescription}
       />
 
       <div className="mt-4 space-y-3">
@@ -65,8 +70,8 @@ export default function MoodReminderConfig() {
             label={reminder.label}
             time={reminder.time}
             customDays={reminder.days}
-            canDelete={false}
-            hideDays={true}
+            canDelete={config.allowDelete}
+            hideDays={!config.allowEditDays}
             onEdit={() => {}}
             onDelete={() => {}}
           />
