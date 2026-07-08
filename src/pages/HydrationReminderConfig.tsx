@@ -1,6 +1,4 @@
 import { ChevronLeft, Plus } from "lucide-react";
-import { useEffect } from "react";
-
 import { useNavigate } from "react-router-dom";
 
 import ReminderConfigSummary from "../components/reminders/ReminderConfigSummary";
@@ -48,8 +46,6 @@ export default function HydrationReminderConfig() {
     isCreating,
     deletingReminder,
 
-    loadReminders,
-
     openEditModal,
     openCreateModal,
     closeEditModal,
@@ -65,18 +61,6 @@ export default function HydrationReminderConfig() {
     userId: user?.id,
     category: "hydration",
   });
-
-  /**
-   * ============================================================
-   * LOAD INICIAL
-   * ============================================================
-   *
-   * Sempre que houver um usuário autenticado,
-   * os lembretes são carregados.
-   */
-  useEffect(() => {
-    loadReminders();
-  }, [loadReminders]);
 
   return (
     <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">

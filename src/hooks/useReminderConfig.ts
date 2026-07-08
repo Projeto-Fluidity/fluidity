@@ -1,9 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import {
   createReminder,
   deleteReminder,
   getScheduledReminders,
+  toggleReminder,
   updateReminder,
 } from "../services/reminderConfigService";
 
@@ -81,6 +82,18 @@ export function useReminderConfig({
 
     setReminders(data);
   }, [userId, category]);
+
+  /**
+   * ============================================================
+   * LOAD INICIAL
+   * ============================================================
+   *
+   * Carrega automaticamente os lembretes sempre que o
+   * usuário ou a categoria forem alterados.
+   */
+  useEffect(() => {
+    void loadReminders();
+  }, [loadReminders]);
 
   /**
    * ============================================================
@@ -191,6 +204,39 @@ export function useReminderConfig({
 
   /**
    * ============================================================
+   * ALTERAR STATUS
+   * ============================================================
+   *
+   * Ativa ou desativa um lembrete e recarrega
+   * a lista para manter a interface sincronizada.
+   */
+  const handleToggleReminder = useCallback(
+    async (reminder: ScheduledReminder) => {
+      await toggleReminder(reminder.id, !reminder.active);
+
+      await loadReminders();
+    },
+    [loadReminders],
+  );
+
+  /**
+ * ============================================================
+ * CREATE TOGGLE REMINDER HANDLER
+ * ============================================================
+ *
+ * Cria um callback já vinculado ao lembrete,
+ * simplificando o consumo pelos componentes
+ * de interface.
+ */
+const createToggleReminderHandler = useCallback(
+  (reminder: ScheduledReminder) => {
+    return () => handleToggleReminder(reminder);
+  },
+  [handleToggleReminder],
+);
+
+  /**
+   * ============================================================
    * ALTERAR DIA
    * ============================================================
    */
@@ -252,6 +298,8 @@ export function useReminderConfig({
     handleSaveReminder,
 
     handleConfirmDelete,
+    handleToggleReminder,
+    createToggleReminderHandler,
 
     handleToggleReminderDay,
     createToggleDayHandler,

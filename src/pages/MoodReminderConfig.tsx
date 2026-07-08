@@ -1,9 +1,10 @@
-import { useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import ReminderConfigItem from "../components/reminders/ReminderConfigItem";
 import ReminderConfigSummary from "../components/reminders/ReminderConfigSummary";
+import ReminderEditModal from "../components/reminders/ReminderEditModal";
+import ReminderActivationSection from "../components/reminders/ReminderActivationSection";
 
 import { reminderConfigMetadata } from "../data/reminderConfigMetadata";
 
@@ -23,28 +24,25 @@ import { useReminderConfig } from "../hooks/useReminderConfig";
 export default function MoodReminderConfig() {
   const navigate = useNavigate();
   const { user } = useAuth();
-
   const config = reminderConfigMetadata.mood;
 
-  const { reminder, loadReminders } = useReminderConfig({
+  const {
+    reminder,
+
+    editingReminder,
+    editingTime,
+
+    setEditingTime,
+    openEditModal,
+    closeEditModal,
+
+    handleSaveReminder,
+
+    createToggleReminderHandler,
+  } = useReminderConfig({
     userId: user?.id,
     category: "mood",
   });
-
-  /**
-   * ============================================================
-   * CARREGAMENTO VIA HOOK
-   * ============================================================
-   *
-   * Inicia o carregamento utilizando a nova infraestrutura
-   * compartilhada de configuração de lembretes.
-   *
-   * Nesta etapa o carregamento legado permanece ativo
-   * para permitir validação incremental da refatoração.
-   */
-  useEffect(() => {
-    loadReminders();
-  }, [loadReminders]);
 
   return (
     <div className="min-h-full bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
@@ -72,11 +70,29 @@ export default function MoodReminderConfig() {
             customDays={reminder.days}
             canDelete={config.allowDelete}
             hideDays={!config.allowEditDays}
-            onEdit={() => {}}
+            onEdit={() => openEditModal(reminder)}
             onDelete={() => {}}
           />
         )}
       </div>
+
+      {reminder && (
+        <ReminderActivationSection
+          title="Lembrete ativo"
+          description="Receba diariamente um lembrete para registrar seu humor."
+          active={reminder.active}
+          onToggle={createToggleReminderHandler(reminder)}
+        />
+      )}
+
+      <ReminderEditModal
+        open={editingReminder !== null}
+        title={reminder?.label ?? ""}
+        time={editingTime}
+        onTimeChange={setEditingTime}
+        onSave={handleSaveReminder}
+        onClose={closeEditModal}
+      />
     </div>
   );
 }
