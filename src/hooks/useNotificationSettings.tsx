@@ -1,20 +1,16 @@
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 import { Bell, Vibrate, Volume2 } from "lucide-react";
 
 import {
-  createOrGetSubscription,
-  unsubscribePush,
-} from "../services/pushService";
+  enableNotifications,
+  disableNotifications,
+} from "../services/notificationSettingsService";
 
-import {
-  getSettings,
-  saveSettings,
-} from "../services/settingsService";
+import { getSettings } from "../services/settingsService";
 
 import { getSWReady } from "../services/swService";
-
-import type { ReactNode } from "react";
 
 /**
  * ============================================================
@@ -107,8 +103,31 @@ export function useNotificationSettings() {
    * ==========================================================
    */
 
-  const [generalSettings, setGeneralSettings] =
-    useState(INITIAL_SETTINGS);
+  const [generalSettings, setGeneralSettings] = useState(INITIAL_SETTINGS);
+
+  /**
+   * ==========================================================
+   * UPDATE SETTING
+   * ==========================================================
+   *
+   * Atualiza o estado de uma configuração local da interface.
+   *
+   * Essa função centraliza a atualização dos toggles para
+   * evitar duplicação de código e manter uma única forma
+   * de alterar o estado da tela.
+   */
+  function updateSetting(id: string, enabled: boolean) {
+    setGeneralSettings((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              enabled,
+            }
+          : item,
+      ),
+    );
+  }
 
   /**
    * ==========================================================
@@ -125,16 +144,7 @@ export function useNotificationSettings() {
       return;
     }
 
-    setGeneralSettings((prev) =>
-      prev.map((item) =>
-        item.id === "notifications"
-          ? {
-              ...item,
-              enabled: settings.enabled,
-            }
-          : item,
-      ),
-    );
+    updateSetting("notifications", settings.enabled);
   }
 
   /**
@@ -147,133 +157,63 @@ export function useNotificationSettings() {
    *
    * Atualmente esta sincronização mantém exatamente
    * o comportamento já existente na aplicação.
-   *
-   * Em uma futura evolução arquitetural essa regra
-   * poderá ser revista para evitar duplicidade entre:
-   *
-   * - reminder_settings.enabled
-   * - Push Subscription
    */
   async function syncPushState() {
     try {
       const registration = await getSWReady();
 
-      const subscription =
-        await registration.pushManager.getSubscription();
+      const subscription = await registration.pushManager.getSubscription();
 
-      const hasSubscription = !!subscription;
-
-      setGeneralSettings((prev) =>
-        prev.map((item) =>
-          item.id === "notifications"
-            ? {
-                ...item,
-                enabled: hasSubscription,
-              }
-            : item,
-        ),
-      );
+      updateSetting("notifications", !!subscription);
     } catch (error) {
-      console.error(
-        "Erro ao sincronizar Push Subscription:",
-        error,
-      );
+      console.error("Erro ao sincronizar Push Subscription:", error);
     }
   }
 
   /**
    * ==========================================================
-   * TOGGLE SETTINGS
+   * TOGGLE GENERAL SETTINGS
    * ==========================================================
    *
    * Responsável por tratar alterações realizadas
    * pelo usuário nos toggles da tela.
    *
-   * Nesta etapa apenas reproduzimos exatamente
-   * o comportamento já existente.
+   * O toggle global de notificações delega toda
+   * a regra de negócio ao
+   * notificationSettingsService.
+   *
+   * Os demais toggles permanecem locais até que
+   * possuam persistência própria.
    */
   async function handleToggleGeneral(id: string) {
     if (id === "notifications") {
-      const current =
-        generalSettings.find((item) => item.id === id);
+      const currentSetting = generalSettings.find((item) => item.id === id);
 
-      const enabled = current?.enabled ?? false;
-
-      const currentSettings = await getSettings();
+      const enabled = currentSetting?.enabled ?? false;
 
       try {
         if (enabled) {
-          await unsubscribePush();
-
-          await saveSettings({
-            start_hour: currentSettings?.start_hour ?? 8,
-            end_hour: currentSettings?.end_hour ?? 22,
-            frequency_minutes:
-              currentSettings?.frequency_minutes ?? 60,
-            max_per_day:
-              currentSettings?.max_per_day ?? 10,
-            enabled: false,
-          });
-
-          setGeneralSettings((prev) =>
-            prev.map((item) =>
-              item.id === id
-                ? {
-                    ...item,
-                    enabled: false,
-                  }
-                : item,
-            ),
-          );
-
-          return;
+          await disableNotifications();
+        } else {
+          await enableNotifications();
         }
 
-        await createOrGetSubscription();
-
-        await saveSettings({
-          start_hour: currentSettings?.start_hour ?? 8,
-          end_hour: currentSettings?.end_hour ?? 22,
-          frequency_minutes:
-            currentSettings?.frequency_minutes ?? 60,
-          max_per_day:
-            currentSettings?.max_per_day ?? 10,
-          enabled: true,
-        });
-
-        setGeneralSettings((prev) =>
-          prev.map((item) =>
-            item.id === id
-              ? {
-                  ...item,
-                  enabled: true,
-                }
-              : item,
-          ),
-        );
+        updateSetting(id, !enabled);
       } catch (error) {
-        console.error(
-          "Erro ao alterar estado das notificações:",
-          error,
-        );
+        console.error("Erro ao alterar estado das notificações:", error);
       }
 
       return;
     }
 
     /**
-     * Demais configurações locais.
+     * ========================================================
+     * LOCAL SETTINGS
+     * ========================================================
      */
-    setGeneralSettings((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              enabled: !item.enabled,
-            }
-          : item,
-      ),
-    );
+    const currentSetting = generalSettings.find((item) => item.id === id);
+
+    updateSetting(id, !(currentSetting?.enabled ?? false));
   }
 
   /**
@@ -294,6 +234,22 @@ export function useNotificationSettings() {
     };
 
     void initialize();
+
+    /**
+     * ========================================================
+     * IMPORTANTE
+     * ========================================================
+     *
+     * A inicialização ocorre apenas na montagem do hook.
+     *
+     * As funções utilizadas neste efeito pertencem ao próprio
+     * hook e não são compartilhadas nem utilizadas como
+     * dependência de outros hooks.
+     *
+     * Por esse motivo, mantemos deliberadamente este efeito
+     * executando apenas uma vez.
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
