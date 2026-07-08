@@ -7,7 +7,7 @@ import PostponeModal from "../components/reminders/PostponeModal";
 import PostponeConfirmModal from "../components/reminders/PostponeConfirmModal";
 import { useReminders } from "../hooks/useReminders";
 import { resetReminderLogs } from "../services/reminderService";
-import type { PostponeOption } from "../components/reminders/postponeOptions";
+import type { PostponeOption } from "../data/postponeOptions";
 
 /**
  * Etapas do fluxo de adiamento de um lembrete.
@@ -31,7 +31,6 @@ type PostponeStep = "idle" | "selecting" | "confirmed";
  */
 
 export default function Reminders() {
-  
   const {
     reminders,
     feedback,
@@ -39,8 +38,8 @@ export default function Reminders() {
     postponeReminder,
     reloadReminders,
   } = useReminders();
-console.log("REMINDERS:", reminders); // ✅ aqui sim
-console.log("NOW:", new Date());
+  console.log("REMINDERS:", reminders); // ✅ aqui sim
+  console.log("NOW:", new Date());
 
   /**
    * Etapa atual do fluxo de adiamento.
@@ -55,7 +54,9 @@ console.log("NOW:", new Date());
   /**
    * Opcao de adiamento selecionada pelo usuario.
    */
-  const [selectedOption, setSelectedOption] = useState<PostponeOption | null>(null);
+  const [selectedOption, setSelectedOption] = useState<PostponeOption | null>(
+    null,
+  );
 
   /**
    * Abre o modal de selecao de tempo para o lembrete informado.
@@ -97,10 +98,7 @@ console.log("NOW:", new Date());
 
       {/* Modal de selecao de tempo */}
       {postponeStep === "selecting" && (
-        <PostponeModal
-          onSelect={handleOptionSelect}
-          onClose={handleClose}
-        />
+        <PostponeModal onSelect={handleOptionSelect} onClose={handleClose} />
       )}
 
       {/* Modal de confirmacao */}
@@ -114,18 +112,21 @@ console.log("NOW:", new Date());
 
       <div className="flex-1 bg-gradient-to-b from-[#DCFCE7] to-[#F0FDF4] p-4">
         <div className="space-y-3">
-
           {/* Cabecalho */}
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">Lembretes</h1>
-            <p className="text-sm text-gray-600">Sugestoes inteligentes para voce</p>
+            <p className="text-sm text-gray-600">
+              Sugestoes inteligentes para voce
+            </p>
           </div>
 
           {/* Metricas */}
           <ReminderStatsCard />
 
           {/* Lista */}
-          <h2 className="text-sm font-medium text-gray-700">Sugestoes de hoje</h2>
+          <h2 className="text-sm font-medium text-gray-700">
+            Sugestoes de hoje
+          </h2>
 
           {reminders.map((reminder) => (
             <ReminderItemCard
