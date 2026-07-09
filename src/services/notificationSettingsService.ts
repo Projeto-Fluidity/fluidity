@@ -39,7 +39,7 @@ type NotificationSettings = {
  *
  * Esses valores garantem que o serviço consiga realizar
  * um UPSERT mesmo quando ainda não existir um registro
- * para o dispositivo.
+ * persistido para o usuário.
  */
 const DEFAULT_SETTINGS: NotificationSettings = {
   start_hour: 8,
@@ -62,8 +62,10 @@ const DEFAULT_SETTINGS: NotificationSettings = {
  * retorna uma configuração padrão para permitir
  * que o fluxo continue normalmente.
  */
-async function loadCurrentSettings(): Promise<NotificationSettings> {
-  const settings = await getSettings();
+async function loadCurrentSettings(
+  userId: string,
+): Promise<NotificationSettings> {
+  const settings = await getSettings(userId);
 
   return {
     start_hour:
@@ -87,24 +89,52 @@ async function loadCurrentSettings(): Promise<NotificationSettings> {
 
 /**
  * ============================================================
+ * LOAD NOTIFICATION SETTINGS
+ * ============================================================
+ *
+ * Recupera as configurações globais de notificações
+ * do usuário autenticado.
+ *
+ * Esta função representa a API pública do serviço para
+ * leitura das configurações.
+ *
+ * A implementação reutiliza o helper privado
+ * loadCurrentSettings(), mantendo uma única fonte de
+ * verdade para o carregamento das configurações.
+ */
+export async function loadNotificationSettings(
+  userId: string,
+): Promise<NotificationSettings> {
+  return loadCurrentSettings(userId);
+}
+
+/**
+ * ============================================================
  * ENABLE NOTIFICATIONS
  * ============================================================
  *
  * Responsável por habilitar o recebimento de
- * notificações do dispositivo.
+ * notificações do usuário.
+ *
+ * O identificador do usuário é recebido pela
+ * camada superior para manter este serviço
+ * desacoplado da implementação de autenticação.
  *
  * Fluxo:
  *
- * 1. Recupera as configurações atuais.
+ * 1. Carrega as configurações atuais.
  * 2. Garante a existência da Push Subscription.
  * 3. Persiste a preferência do usuário.
  */
-export async function enableNotifications(): Promise<void> {
-  const settings = await loadCurrentSettings();
+export async function enableNotifications(
+  userId: string,
+): Promise<void> {
+  const settings =
+    await loadCurrentSettings(userId);
 
   await createOrGetSubscription();
 
-  await saveSettings({
+  await saveSettings(userId, {
     ...settings,
     enabled: true,
   });
@@ -116,20 +146,27 @@ export async function enableNotifications(): Promise<void> {
  * ============================================================
  *
  * Responsável por desabilitar o recebimento de
- * notificações do dispositivo.
+ * notificações do usuário.
+ *
+ * O identificador do usuário é recebido pela
+ * camada superior para manter este serviço
+ * desacoplado da implementação de autenticação.
  *
  * Fluxo:
  *
- * 1. Recupera as configurações atuais.
+ * 1. Carrega as configurações atuais.
  * 2. Remove a Push Subscription.
  * 3. Persiste a preferência do usuário.
  */
-export async function disableNotifications(): Promise<void> {
-  const settings = await loadCurrentSettings();
+export async function disableNotifications(
+  userId: string,
+): Promise<void> {
+  const settings =
+    await loadCurrentSettings(userId);
 
   await unsubscribePush();
 
-  await saveSettings({
+  await saveSettings(userId, {
     ...settings,
     enabled: false,
   });

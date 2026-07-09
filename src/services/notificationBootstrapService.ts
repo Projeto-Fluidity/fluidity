@@ -50,14 +50,17 @@ export type NotificationBootstrapResult = {
  *          ▼
  * criar subscription se necessário
  */
-export async function bootstrapNotifications(): Promise<NotificationBootstrapResult> {
+export async function bootstrapNotifications(
+  userId: string,
+): Promise<NotificationBootstrapResult> {
   /**
    * ==========================================================
    * USER SETTINGS
    * ==========================================================
    */
 
-  const settings = await getSettings();
+  const settings =
+  await getSettings(userId);
 
   const enabled = settings?.enabled ?? false;
 

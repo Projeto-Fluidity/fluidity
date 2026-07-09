@@ -4,13 +4,14 @@ import type { ReactNode } from "react";
 import { Bell, Vibrate, Volume2 } from "lucide-react";
 
 import {
+  loadNotificationSettings,
   enableNotifications,
   disableNotifications,
 } from "../services/notificationSettingsService";
 
-import { getSettings } from "../services/settingsService";
-
 import { getSWReady } from "../services/swService";
+
+import { useAuth } from "./useAuth";
 
 /**
  * ============================================================
@@ -107,6 +108,20 @@ export function useNotificationSettings() {
 
   /**
    * ==========================================================
+   * AUTH
+   * ==========================================================
+   *
+   * Recupera o usuário autenticado.
+   *
+   * As regras de negócio permanecem encapsuladas no
+   * notificationSettingsService. O hook utiliza apenas
+   * o identificador do usuário para solicitar operações
+   * ao serviço.
+   */
+  const { user } = useAuth();
+
+  /**
+   * ==========================================================
    * UPDATE SETTING
    * ==========================================================
    *
@@ -134,15 +149,15 @@ export function useNotificationSettings() {
    * LOAD SETTINGS
    * ==========================================================
    *
-   * Busca as configurações persistidas no banco
-   * para sincronizar o estado inicial da interface.
+   * Carrega as configurações globais de notificações do
+   * usuário autenticado.
    */
   async function loadSettings() {
-    const settings = await getSettings();
-
-    if (!settings) {
+    if (!user) {
       return;
     }
+
+    const settings = await loadNotificationSettings(user.id);
 
     updateSetting("notifications", settings.enabled);
   }
@@ -191,11 +206,15 @@ export function useNotificationSettings() {
 
       const enabled = currentSetting?.enabled ?? false;
 
+      if (!user) {
+        return;
+      }
+
       try {
         if (enabled) {
-          await disableNotifications();
+          await disableNotifications(user.id);
         } else {
-          await enableNotifications();
+          await enableNotifications(user.id);
         }
 
         updateSetting(id, !enabled);

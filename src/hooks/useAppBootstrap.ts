@@ -2,6 +2,8 @@ import { useEffect } from "react";
 
 import { bootstrapNotifications } from "../services/notificationBootstrapService";
 
+import { useAuth } from "./useAuth";
+
 /**
  * ============================================================
  * APP BOOTSTRAP
@@ -28,28 +30,45 @@ import { bootstrapNotifications } from "../services/notificationBootstrapService
 export function useAppBootstrap() {
   /**
    * ==========================================================
+   * AUTH
+   * ==========================================================
+   *
+   * Recupera o usuário autenticado.
+   *
+   * O bootstrap depende do identificador do usuário para
+   * sincronizar corretamente a infraestrutura de notificações.
+   */
+  const { user } = useAuth();
+
+  /**
+   * ==========================================================
    * EFFECT
    * ==========================================================
+   *
+   * Executa o bootstrap sempre que um usuário autenticado
+   * estiver disponível.
+   *
+   * Isso garante que:
+   *
+   * - o bootstrap não execute antes da autenticação;
+   * - logout/login sincronize corretamente o novo usuário;
+   * - a infraestrutura de notificações permaneça consistente.
    */
-
   useEffect(() => {
-    /**
-     * ========================================================
-     * INITIALIZE APPLICATION
-     * ========================================================
-     */
+    if (!user) {
+      return;
+    }
+
+    const currentUser = user;
 
     async function initialize() {
       try {
-        await bootstrapNotifications();
+        await bootstrapNotifications(currentUser.id);
       } catch (error) {
-        console.error(
-          "Erro durante bootstrap da aplicação:",
-          error,
-        );
+        console.error("Erro durante bootstrap da aplicação:", error);
       }
     }
 
     void initialize();
-  }, []);
+  }, [user]);
 }
