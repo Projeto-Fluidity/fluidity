@@ -158,7 +158,10 @@ export function useNotificationSettings() {
     }
 
     const settings = await loadNotificationSettings(user.id);
-
+console.log(
+  "Banco:",
+  settings.enabled,
+);
     updateSetting("notifications", settings.enabled);
   }
 
@@ -174,11 +177,20 @@ export function useNotificationSettings() {
    * o comportamento já existente na aplicação.
    */
   async function syncPushState() {
+    
     try {
+      
       const registration = await getSWReady();
 
       const subscription = await registration.pushManager.getSubscription();
-
+console.log(
+  "Subscription:",
+  !!subscription,
+);
+console.log(
+  "Subscription:",
+  subscription,
+);
       updateSetting("notifications", !!subscription);
     } catch (error) {
       console.error("Erro ao sincronizar Push Subscription:", error);
@@ -211,11 +223,19 @@ export function useNotificationSettings() {
       }
 
       try {
-        if (enabled) {
-          await disableNotifications(user.id);
-        } else {
-          await enableNotifications(user.id);
-        }
+if (enabled) {
+  console.log("Antes do disable:", enabled);
+
+  await disableNotifications(user.id);
+
+  console.log("Disable executado");
+} else {
+  console.log("Antes do enable:", enabled);
+
+  await enableNotifications(user.id);
+
+  console.log("Enable executado");
+}
 
         updateSetting(id, !enabled);
       } catch (error) {

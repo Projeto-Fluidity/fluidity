@@ -2,102 +2,121 @@ import { getDeviceId } from "../lib/deviceId";
 
 /**
  * ============================================================
- * SALVAR SUBSCRIPTION NO BANCO (SEM HEADER CUSTOM)
+ * SAVE PUSH SUBSCRIPTION
  * ============================================================
  *
- * Estratégia atual:
- * - Não usamos headers customizados (x-device-id)
- * - RLS valida apenas via dados da linha (device_id)
- * - Utilizamos UPSERT para evitar duplicação
+ * Persiste a Push Subscription do navegador.
  *
- * Fluxo:
- * 1. Gera/recupera device_id
- * 2. Extrai dados da subscription
- * 3. Envia para o Supabase via REST
- * 4. Usa "merge-duplicates" para atualizar se já existir
+ * Nesta etapa da migração mantemos o UPSERT por
+ * device_id para preservar compatibilidade com a
+ * infraestrutura atual.
+ *
+ * O registro já passa a armazenar:
+ *
+ * - user_id
+ * - device_id
+ * - endpoint
+ * - user_agent
+ * - last_seen_at
+ *
+ * Em uma etapa posterior o on_conflict será migrado
+ * para a chave definitiva da nova arquitetura.
  */
-
 export async function saveSubscription(
-  subscription: PushSubscription
+  userId: string,
+  subscription: PushSubscription,
 ): Promise<void> {
-  
   /**
-   * ============================================================
-   * 1. IDENTIFICAÇÃO DO DISPOSITIVO
-   * ============================================================
+   * ==========================================================
+   * DEVICE
+   * ==========================================================
    */
+
   const deviceId = getDeviceId();
 
   /**
-   * ============================================================
-   * 2. EXTRAÇÃO DOS DADOS DA SUBSCRIPTION
-   * ============================================================
+   * ==========================================================
+   * SUBSCRIPTION
+   * ==========================================================
    */
+
   const json = subscription.toJSON();
 
   const endpoint = json.endpoint;
   const keys = json.keys;
-  
-  /**
-   * Validação básica
-   */
+
   if (!endpoint || !keys?.p256dh || !keys?.auth) {
     throw new Error("Subscription inválida");
   }
 
   /**
-   * ============================================================
-   * 3. VARIÁVEIS DE AMBIENTE
-   * ============================================================
+   * ==========================================================
+   * ENVIRONMENT
+   * ==========================================================
    */
+
   const url = import.meta.env.VITE_SUPABASE_URL;
+
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   /**
-   * ============================================================
-   * 4. REQUEST PARA O SUPABASE (UPSERT)
-   * ============================================================
+   * ==========================================================
+   * UPSERT
+   * ==========================================================
    *
-   * IMPORTANTE:
-   * - NÃO usamos mais headers customizados
-   * - "Prefer: resolution=merge-duplicates" faz UPSERT
+   * Mantido temporariamente utilizando device_id
+   * até a conclusão da migração do banco.
    */
 
   const response = await fetch(
-    `${url}/rest/v1/push_subscriptions?on_conflict=device_id`,
+    `${url}/rest/v1/push_subscriptions?on_conflict=user_id`,
     {
       method: "POST",
+
       headers: {
         "Content-Type": "application/json",
 
         apikey: key,
+
         Authorization: `Bearer ${key}`,
 
         Prefer: "resolution=merge-duplicates",
       },
 
       body: JSON.stringify({
+        user_id: userId,
+
         device_id: deviceId,
-        endpoint: endpoint,
+
+        endpoint,
+
         p256dh: keys.p256dh,
+
         auth: keys.auth,
+
+        user_agent: navigator.userAgent,
+
+        last_seen_at: new Date().toISOString(),
       }),
-    }
+    },
   );
 
   /**
-   * ============================================================
-   * 5. TRATAMENTO DE ERRO
-   * ============================================================
+   * ==========================================================
+   * ERROR
+   * ==========================================================
    */
+
   if (!response.ok) {
     const errorText = await response.text();
 
     console.error(
-      "ERRO SUPABASE:",
-      errorText
+      "Erro ao salvar Push Subscription:",
+      errorText,
     );
 
-    throw new Error("Erro ao salvar subscription");
+    throw new Error(
+      "Erro ao salvar Push Subscription",
+    );
   }
 }

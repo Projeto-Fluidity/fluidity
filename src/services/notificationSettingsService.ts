@@ -132,7 +132,7 @@ export async function enableNotifications(
   const settings =
     await loadCurrentSettings(userId);
 
-  await createOrGetSubscription();
+  await createOrGetSubscription(userId);
 
   await saveSettings(userId, {
     ...settings,

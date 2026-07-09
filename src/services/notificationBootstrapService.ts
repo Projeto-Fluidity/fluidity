@@ -125,7 +125,7 @@ export async function bootstrapNotifications(
    * Tentamos reconstruir automaticamente
    * a infraestrutura.
    */
-  await createOrGetSubscription();
+  await createOrGetSubscription(userId);
 
   return {
     enabled: true,
