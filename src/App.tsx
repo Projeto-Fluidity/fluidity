@@ -1,37 +1,63 @@
 import { Routes, Route } from "react-router-dom";
 
+/**
+ * ============================================================
+ * COMPONENTS
+ * ============================================================
+ */
+
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import DevTools from "./components/debug/DevTools";
+import AppLayout from "./components/layout/AppLayout";
+
+/**
+ * ============================================================
+ * HOOKS
+ * ============================================================
+ */
+
+import { useAppBootstrap } from "./hooks/useAppBootstrap";
 import { useReminderTrigger } from "./hooks/useReminderTrigger";
 
-import AppLayout from "./components/layout/AppLayout";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
+/**
+ * ============================================================
+ * PAGES
+ * ============================================================
+ */
 
+import BreathingGuide from "./pages/BreathingGuide";
+import BreakReminder from "./pages/BreakReminder";
 import Emotion from "./pages/Emotion";
-import MoodSuccess from "./pages/MoodSuccess";
+import ForgotPassword from "./pages/ForgotPassword";
+import History from "./pages/History";
+import HydrationReminderConfig from "./pages/HydrationReminderConfig";
+import Login from "./pages/Login";
 import MoodError from "./pages/MoodError";
+import MoodReminderConfig from "./pages/MoodReminderConfig";
+import MoodSuccess from "./pages/MoodSuccess";
 import Practices from "./pages/Practices";
 import Profile from "./pages/Profile";
-import BreathingGuide from "./pages/BreathingGuide";
-import WaterReminder from "./pages/WaterReminder";
-import VisualRest from "./pages/VisualRest";
 import QuickMeditation from "./pages/QuickMeditation";
-import Settings from "./pages/Settings";
-import SmartReminders from "./pages/SmartReminders";
-import History from "./pages/History";
-import Reminders from "./pages/Reminders";
-import BreakReminder from "./pages/BreakReminder";
 import RelaxReminder from "./pages/RelaxReminder";
-
-import MoodReminderConfig from "./pages/MoodReminderConfig";
-import HydrationReminderConfig from "./pages/HydrationReminderConfig";
-
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
+import Reminders from "./pages/Reminders";
 import ResetPassword from "./pages/ResetPassword";
-
-import DevTools from "./components/debug/DevTools";
+import Settings from "./pages/Settings";
+import Signup from "./pages/Signup";
+import SmartReminders from "./pages/SmartReminders";
+import VisualRest from "./pages/VisualRest";
+import WaterReminder from "./pages/WaterReminder";
 
 function App() {
+
+    /**
+   * ============================================================
+   * APPLICATION BOOTSTRAP
+   * ============================================================
+   *
+   * Inicializa serviços globais da aplicação.
+   */
+  useAppBootstrap();
+
   /**
    * ============================================================
    * MOTOR DE LEMBRETES
