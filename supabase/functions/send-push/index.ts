@@ -17,10 +17,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 // SUPABASE CLIENT
 // ============================================================
 
-const supabase = createClient(
-  SUPABASE_URL,
-  SERVICE_ROLE_KEY
-);
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
 // ============================================================
 // SERVER
@@ -48,17 +45,11 @@ serve(async (req) => {
   }
 
   try {
-    console.log("==================================");
-    console.log("SEND-PUSH INICIADA");
-    console.log("==================================");
-
     // ==========================================================
     // BODY
     // ==========================================================
 
     const body = await req.json();
-
-    console.log("BODY RECEBIDO:", body);
 
     const device_id = body.device_id;
     const title = body.title;
@@ -83,11 +74,9 @@ serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
-
-    console.log("device_id:", device_id);
 
     // ==========================================================
     // BUSCAR SUBSCRIPTIONS
@@ -101,8 +90,6 @@ serve(async (req) => {
     // ==========================================================
     // LOGS
     // ==========================================================
-
-    console.log("Subscriptions encontradas:", subs?.length);
 
     if (error) {
       console.error("Erro Supabase:", error);
@@ -119,7 +106,7 @@ serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -137,25 +124,8 @@ serve(async (req) => {
             ...corsHeaders,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
-    }
-
-    // ==========================================================
-    // MOCK PUSH
-    // ==========================================================
-
-    console.log("==================================");
-    console.log("MOCK PUSH EXECUTADO");
-    console.log("==================================");
-
-    for (const sub of subs) {
-      console.log("SUBSCRIPTION:");
-      console.log({
-        endpoint: sub.endpoint,
-        p256dh: sub.p256dh,
-        auth: sub.auth,
-      });
     }
 
     // ==========================================================
@@ -180,19 +150,11 @@ serve(async (req) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
-
   } catch (err: unknown) {
-    console.error("==================================");
-    console.error("ERRO GERAL:");
-    console.error(err);
-    console.error("==================================");
-
     const errorMessage =
-      err instanceof Error
-        ? err.message
-        : "Erro desconhecido";
+      err instanceof Error ? err.message : "Erro desconhecido";
 
     return new Response(
       JSON.stringify({
@@ -206,7 +168,7 @@ serve(async (req) => {
           ...corsHeaders,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
 });

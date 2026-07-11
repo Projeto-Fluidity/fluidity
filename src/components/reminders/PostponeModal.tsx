@@ -3,7 +3,7 @@ import { Clock, Bell } from "lucide-react";
 import {
   postponeOptions,
   type PostponeOption,
-} from "./postponeOptions";
+} from "../../data/postponeOptions";
 
 type PostponeModalProps = {
   onSelect: (option: PostponeOption) => void;
@@ -16,7 +16,10 @@ type PostponeModalProps = {
  * Apresenta opcoes de tempo para adiar o lembrete.
  * A selecao de uma opcao dispara o callback onSelect.
  */
-export default function PostponeModal({ onSelect, onClose }: PostponeModalProps) {
+export default function PostponeModal({
+  onSelect,
+  onClose,
+}: PostponeModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay com desfoque */}
@@ -27,22 +30,24 @@ export default function PostponeModal({ onSelect, onClose }: PostponeModalProps)
 
       {/* Conteudo do modal */}
       <div
-        className="relative z-10 w-full max-w-sm rounded-3xl bg-[#FFF8F0] shadow-xl overflow-hidden"
+        className="relative z-10 w-full max-w-sm overflow-hidden rounded-3xl bg-[#FFF8F0] shadow-xl"
         style={{ maxHeight: "calc(100vh - 80px)" }}
       >
         {/* Area com scroll */}
-        <div className="overflow-y-auto px-6 pt-6 pb-6" style={{ maxHeight: "calc(100vh - 80px)" }}>
-
+        <div
+          className="overflow-y-auto px-6 pb-6 pt-6"
+          style={{ maxHeight: "calc(100vh - 80px)" }}
+        >
           {/* Botao fechar */}
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition text-sm font-medium"
+            className="absolute right-4 top-4 flex h-7 w-7 items-center justify-center rounded-full bg-gray-100 text-sm font-medium text-gray-500 transition hover:bg-gray-200"
           >
             x
           </button>
 
           {/* Icone principal com sino sobreposto */}
-          <div className="flex justify-center mb-4">
+          <div className="mb-4 flex justify-center">
             <div className="relative">
               <div
                 className="flex h-16 w-16 items-center justify-center rounded-full"
@@ -58,15 +63,19 @@ export default function PostponeModal({ onSelect, onClose }: PostponeModalProps)
                 className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full shadow-md"
                 style={{ backgroundColor: "#FFFFFF" }}
               >
-                <Bell size={12} strokeWidth={2.5} style={{ color: "#F54900" }} />
+                <Bell
+                  size={12}
+                  strokeWidth={2.5}
+                  style={{ color: "#F54900" }}
+                />
               </div>
             </div>
           </div>
 
           {/* Titulo */}
-          <div className="text-center mb-4">
+          <div className="mb-4 text-center">
             <h2 className="text-lg font-bold text-gray-800">Adiar Lembrete</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="mt-1 text-sm text-gray-500">
               Por quanto tempo voce quer adiar
               <br />
               este lembrete?
@@ -74,14 +83,15 @@ export default function PostponeModal({ onSelect, onClose }: PostponeModalProps)
           </div>
 
           {/* Opcoes */}
-          <div className="space-y-2 mb-4">
+          <div className="mb-4 space-y-2">
             {postponeOptions.map((option) => (
               <button
                 key={option.id}
                 onClick={() => onSelect(option)}
                 className="flex w-full items-center justify-between rounded-2xl bg-white px-4 py-3 transition hover:bg-orange-50"
                 style={{
-                  boxShadow: "0px 2px 8px rgba(0,0,0,0.08), 0px 1px 3px rgba(0,0,0,0.05)",
+                  boxShadow:
+                    "0px 2px 8px rgba(0,0,0,0.08), 0px 1px 3px rgba(0,0,0,0.05)",
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -89,14 +99,22 @@ export default function PostponeModal({ onSelect, onClose }: PostponeModalProps)
                     className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-50"
                     style={{ boxShadow: "0px 2px 6px rgba(249,115,22,0.15)" }}
                   >
-                    <Clock size={16} strokeWidth={2.5} className="text-orange-400" />
+                    <Clock
+                      size={16}
+                      strokeWidth={2.5}
+                      className="text-orange-400"
+                    />
                   </div>
                   <div className="text-left">
-                    <p className="text-sm font-semibold text-gray-800">{option.label}</p>
-                    <p className="text-xs text-gray-400">{option.description}</p>
+                    <p className="text-sm font-semibold text-gray-800">
+                      {option.label}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {option.description}
+                    </p>
                   </div>
                 </div>
-                <span className="text-gray-300 text-base">›</span>
+                <span className="text-base text-gray-300">›</span>
               </button>
             ))}
           </div>
@@ -117,7 +135,7 @@ export default function PostponeModal({ onSelect, onClose }: PostponeModalProps)
           {/* Botao voltar */}
           <button
             onClick={onClose}
-            className="mt-2 w-full rounded-2xl border border-gray-200 py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
+            className="mt-2 w-full rounded-2xl border border-gray-200 py-3 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
           >
             Voltar aos lembretes
           </button>

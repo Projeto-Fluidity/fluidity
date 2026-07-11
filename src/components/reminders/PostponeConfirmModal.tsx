@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import type { PostponeOption } from "./postponeOptions";
+import type { PostponeOption } from "../../data/postponeOptions";
 
 type PostponeConfirmModalProps = {
   option: PostponeOption;
@@ -23,10 +23,9 @@ export default function PostponeConfirmModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
 
-      <div className="relative z-10 mx-4 w-full max-w-sm rounded-3xl bg-white px-6 py-8 shadow-xl text-center">
-
+      <div className="relative z-10 mx-4 w-full max-w-sm rounded-3xl bg-white px-6 py-8 text-center shadow-xl">
         {/* Icone com gradiente */}
-        <div className="flex justify-center mb-4">
+        <div className="mb-4 flex justify-center">
           <div
             className="flex h-16 w-16 items-center justify-center rounded-full"
             style={{

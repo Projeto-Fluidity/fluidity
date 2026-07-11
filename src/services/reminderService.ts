@@ -1,6 +1,7 @@
 import { supabase } from "./supabaseClient";
-import { getDeviceId } from "../lib/deviceId";
+
 import type { Reminder } from "../types/reminder";
+
 import { ensureFixedReminders } from "./scheduledReminderService";
 
 import { toUiReminder } from "../lib/reminderAdapter";
@@ -12,41 +13,50 @@ import { toUiReminder } from "../lib/reminderAdapter";
  *
  * Responsável por:
  * - Buscar dados do banco
- * - Converter para UI
+ * - Garantir lembretes obrigatórios
+ * - Converter para o modelo utilizado pela UI
  *
  * NÃO deve:
  * - aplicar regra de disparo
  */
-export async function getReminders(): Promise<Reminder[]> {
-  console.log("getReminders CALLED");
+export async function getReminders(
+  userId: string,
+): Promise<Reminder[]> {
 
   if (!supabase) {
     console.warn("Supabase não disponível");
     return [];
   }
 
-  const deviceId = getDeviceId();
-
   /**
-   * TEMPORÁRIO (legado)
-   * Ideal: mover para bootstrap (App.tsx)
+   * TEMPORÁRIO
+   *
+   * Atualmente garantimos os lembretes
+   * obrigatórios antes da leitura.
+   *
+   * Em uma evolução futura essa
+   * responsabilidade deverá ser movida
+   * para o bootstrap da aplicação.
    */
-  await ensureFixedReminders();
+  await ensureFixedReminders(userId);
 
   const { data, error } = await supabase
     .from("scheduled_reminders")
     .select("*")
-    .eq("device_id", deviceId);
+    .eq("user_id", userId);
 
   if (error) {
-    console.error("Erro ao buscar scheduled_reminders:", error);
+    console.error(
+      "Erro ao buscar scheduled_reminders:",
+      error,
+    );
+
     return [];
   }
 
-  const uiReminders =
-    data?.map(toUiReminder).filter(Boolean) ?? [];
-
-  return uiReminders as Reminder[];
+  return (
+    data?.map(toUiReminder).filter(Boolean) as Reminder[]
+  ) ?? [];
 }
 
 /**
@@ -55,24 +65,30 @@ export async function getReminders(): Promise<Reminder[]> {
  * ============================================================
  *
  * Responsável por:
- * - Retornar modelo do banco (DbReminder)
- * - Usado pelo engine de disparo
+ * - Retornar registros do banco
+ * - Utilizado exclusivamente pelo
+ *   engine de disparo.
  */
-export async function getScheduledReminders() {
+export async function getScheduledReminders(
+  userId: string,
+) {
+
   if (!supabase) {
     console.warn("Supabase não disponível");
     return [];
   }
 
-  const deviceId = getDeviceId();
-
   const { data, error } = await supabase
     .from("scheduled_reminders")
     .select("*")
-    .eq("device_id", deviceId);
+    .eq("user_id", userId);
 
   if (error) {
-    console.error("Erro ao buscar scheduled_reminders:", error);
+    console.error(
+      "Erro ao buscar scheduled_reminders:",
+      error,
+    );
+
     return [];
   }
 
@@ -86,25 +102,26 @@ export async function getScheduledReminders() {
  */
 export async function updateReminderStatus(
   reminderId: string,
-  action: "accepted" | "postponed"
+  action: "accepted" | "postponed",
 ): Promise<void> {
+
   if (!supabase) {
     console.warn("Supabase não disponível");
     return;
   }
 
-  const deviceId = getDeviceId();
-
-  const { error } = await supabase.from("reminder_logs").insert({
-    reminder_id: reminderId,
-    action,
-    device_id: deviceId,
-  });
+  const { error } = await supabase
+    .from("reminder_logs")
+    .insert({
+      reminder_id: reminderId,
+      action,
+    });
 
   if (error) {
-    console.error("Erro ao atualizar status:", error);
-  } else {
-    console.log("Status registrado:", { reminderId, action });
+    console.error(
+      "Erro ao atualizar status:",
+      error,
+    );
   }
 }
 
@@ -114,21 +131,21 @@ export async function updateReminderStatus(
  * ============================================================
  */
 export async function resetReminderLogs(): Promise<void> {
+
   if (!supabase) {
     console.warn("Supabase não disponível");
     return;
   }
 
-  const deviceId = getDeviceId();
-
   const { error } = await supabase
     .from("reminder_logs")
     .delete()
-    .eq("device_id", deviceId);
+    .neq("id", "");
 
   if (error) {
-    console.error("Erro ao resetar logs:", error);
-  } else {
-    console.log("Logs resetados com sucesso");
+    console.error(
+      "Erro ao resetar logs:",
+      error,
+    );
   }
 }

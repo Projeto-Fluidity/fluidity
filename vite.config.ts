@@ -12,12 +12,19 @@ export default defineConfig({
       srcDir: "src",
       filename: "sw.ts",
 
-      // injectManifest: {
-      //   injectionPoint: undefined,
-      // },
       registerType: "autoUpdate",
 
       devOptions: {
+        /**
+         * Mantido desabilitado.
+         *
+         * As funcionalidades que dependem de Service Worker
+         * (Push Notifications / Notification Bootstrap)
+         * devem ser validadas utilizando:
+         *
+         * npm run build
+         * npm run preview
+         */
         enabled: false,
       },
 

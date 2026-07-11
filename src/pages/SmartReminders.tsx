@@ -38,39 +38,43 @@ export default function SmartReminders() {
 
   const navigate = useNavigate();
 
-    /**
+  /**
    * ==========================================================
    * CATEGORY ROUTES
    * ==========================================================
    *
-   * Mapeia cada categoria para sua tela de destino.
+   * Mapeia cada categoria para sua tela de configuração.
    *
-   * Manter este objeto centralizado facilita a
-   * manutenção e futuras expansões do Hub de
-   * Lembretes Inteligentes.
+   * Cada categoria possui sua própria experiência,
+   * mantendo baixo acoplamento entre as páginas e
+   * facilitando futuras evoluções.
    */
   const categoryRoutes: Record<ReminderCategory, string> = {
-    hydration: "/reminder-config",
-    mood: "/reminder-config",
+    mood: "/mood-reminder-config",
+
+    hydration: "/hydration-reminder-config",
+
     break: "/break-reminder",
+
     relax: "/relax-reminder",
   };
 
-/**
- * ==========================================================
- * NAVIGATION
- * ==========================================================
- *
- * Encaminha o usuário para a tela correspondente
- * à categoria selecionada.
- *
- * As categorias de hidratação e humor utilizam
- * a tela atual de configuração.
- *
- * As categorias de pausa e relaxamento possuem,
- * temporariamente, uma tela informando que a
- * funcionalidade está em desenvolvimento.
- */
+  /**
+   * ==========================================================
+   * NAVIGATION
+   * ==========================================================
+   *
+   * Encaminha o usuário para a tela correspondente
+   * à categoria selecionada.
+   *
+   * Cada categoria possui sua própria tela de
+   * configuração, permitindo que regras de negócio
+   * específicas permaneçam desacopladas.
+   *
+   * As categorias de Pausa e Relaxamento continuam
+   * utilizando telas temporárias até a implementação
+   * completa dessas funcionalidades.
+   */
   function handleCategoryClick(
     category: ReminderCategory,
   ) {

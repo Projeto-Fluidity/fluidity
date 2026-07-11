@@ -1,74 +1,119 @@
 import { supabase } from "./supabaseClient";
-import { getDeviceId } from "../lib/deviceId";
 
 /**
  * ============================================================
- * GARANTE LEMBRETES FIXOS (CHECK-IN + HIDRATAÇÃO)
+ * TYPES
+ * ============================================================
+ */
+
+/**
+ * Categorias de lembretes obrigatórios.
+ *
+ * Atualmente apenas o lembrete de humor é
+ * obrigatório para a aplicação.
+ */
+type FixedReminderCategory = "mood";
+
+/**
+ * Dados necessários para criação
+ * de um lembrete fixo.
+ */
+type FixedReminder = {
+  userId: string;
+  category: FixedReminderCategory;
+  label: string;
+  time: string;
+};
+
+/**
+ * ============================================================
+ * CREATE FIXED REMINDER
  * ============================================================
  *
- * Estratégia Sênior:
- * - Usa UPSERT (idempotente)
- * - Não depende de SELECT prévio
- * - Funciona com React Strict Mode (double execution)
- * - Evita race conditions
+ * Cria um lembrete obrigatório da aplicação.
  *
- * Regras:
- * - Sempre existe 1 Check-in
- * - Sempre existe 1 Hidratação
- * - Nunca duplica (garantido por UNIQUE + onConflict)
+ * Esta função é utilizada exclusivamente
+ * pelo ensureFixedReminders().
  */
-export async function ensureFixedReminders(): Promise<void> {
-  console.log("🚀 ensureFixedReminders FOI CHAMADO");
-
-  const deviceId = getDeviceId();
-
-  /**
-   * ============================================================
-   * UPSERT DIRETO (SEM SELECT)
-   * ============================================================
-   */
+async function createFixedReminder({
+  userId,
+  category,
+  label,
+  time,
+}: FixedReminder) {
   const { error } = await supabase
     .from("scheduled_reminders")
-    .upsert(
-      [
-        {
-          device_id: deviceId,
-          type: "fixed",
-          label: "Check-in",
-          hour: 9,
-          minute: 0,
-          time: "09:00",
-          active: true,
-        },
-        {
-          device_id: deviceId,
-          type: "fixed",
-          label: "Hidratação",
-          hour: 14,
-          minute: 0,
-          time: "14:00",
-          active: true,
-        },
-      ],
-      {
-        onConflict: "device_id,label", // 🔥 ESSENCIAL
-      }
-    );
+    .insert({
+      user_id: userId,
+      category,
+      is_fixed: true,
+      label,
+      time,
+      active: true,
+    });
+
+  if (error) {
+    throw error;
+  }
+}
+
+/**
+ * ============================================================
+ * ENSURE FIXED REMINDERS
+ * ============================================================
+ *
+ * Garante a existência apenas dos lembretes
+ * obrigatórios da aplicação.
+ *
+ * Atualmente existe somente um lembrete
+ * obrigatório:
+ *
+ * • Registro diário de humor.
+ *
+ * Os lembretes de hidratação são totalmente
+ * gerenciados pelo usuário e não são mais
+ * recriados automaticamente.
+ */
+export async function ensureFixedReminders(
+  userId: string,
+): Promise<void> {
 
   /**
    * ============================================================
-   * ERRO
+   * CARREGA LEMBRETES FIXOS
    * ============================================================
    */
+  const { data, error } = await supabase
+    .from("scheduled_reminders")
+    .select("category")
+    .eq("user_id", userId)
+    .eq("is_fixed", true);
+
   if (error) {
-    console.error("❌ Erro ao garantir reminders fixos:", error);
+    console.error(error);
     return;
   }
 
   /**
+   * Categorias já existentes.
+   */
+  const categories = new Set(
+    (data ?? []).map(
+      (item) => item.category,
+    ),
+  );
+
+  /**
    * ============================================================
-   * SUCESSO
+   * HUMOR
    * ============================================================
    */
-  console.log("✅ Reminders fixos garantidos (idempotente)");
+  if (!categories.has("mood")) {
+    await createFixedReminder({
+      userId,
+      category: "mood",
+      label: "Registro diário",
+      time: "08:00",
+    });
+  }
 }

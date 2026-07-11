@@ -11,7 +11,8 @@ import { registerSW } from "virtual:pwa-register";
 /**
  * Chave pública VAPID
  */
-const PUBLIC_VAPID_KEY = "BPEn32mXPKq94YXJ0vH-7Xud8rCfGCN6txV04maCcSIy8KIckTCkohWn4m7ieORWbMx68xz8ZVtkzreuv32IgQ8";
+const PUBLIC_VAPID_KEY =
+  "BPEn32mXPKq94YXJ0vH-7Xud8rCfGCN6txV04maCcSIy8KIckTCkohWn4m7ieORWbMx68xz8ZVtkzreuv32IgQ8";
 
 /**
  * ============================================================
@@ -30,15 +31,11 @@ registerSW({
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
 
-  const base64 = (base64String + padding)
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
 
-  return Uint8Array.from(
-    [...rawData].map((char) => char.charCodeAt(0))
-  );
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
 
 /**
@@ -73,8 +70,9 @@ export async function registerPush(): Promise<void> {
    */
   const subscription = await registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey:
-      urlBase64ToUint8Array(PUBLIC_VAPID_KEY) as BufferSource,
+    applicationServerKey: urlBase64ToUint8Array(
+      PUBLIC_VAPID_KEY,
+    ) as BufferSource,
   });
 
   /**
