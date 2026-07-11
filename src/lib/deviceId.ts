@@ -41,14 +41,12 @@ const DEVICE_ID_KEY = "fluidity_device_id";
  * - manter rastreabilidade do device.
  */
 export function getDeviceId(): string {
-
   /**
    * ============================================================
    * TENTA RECUPERAR ID EXISTENTE
    * ============================================================
    */
-  let id =
-    localStorage.getItem(DEVICE_ID_KEY);
+  let id = localStorage.getItem(DEVICE_ID_KEY);
 
   /**
    * ============================================================
@@ -57,7 +55,6 @@ export function getDeviceId(): string {
    * ============================================================
    */
   if (!id) {
-
     id = crypto.randomUUID();
 
     /**
@@ -65,15 +62,7 @@ export function getDeviceId(): string {
      * PERSISTE NO NAVEGADOR
      * ============================================================
      */
-    localStorage.setItem(
-      DEVICE_ID_KEY,
-      id
-    );
-
-    console.log(
-      "Novo DEVICE ID criado:",
-      id
-    );
+    localStorage.setItem(DEVICE_ID_KEY, id);
   }
 
   /**

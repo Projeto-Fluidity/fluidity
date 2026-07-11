@@ -43,7 +43,6 @@ const initialData: Reminder[] = [
 export function getMockReminders(): Reminder[] {
   // 🧠 DECISÃO DE FONTE PRIMEIRO
   if (env.reminderSource === "seed") {
-    console.log("[MOCK] Using SEED data");
     return initialData;
   }
 

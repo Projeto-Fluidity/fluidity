@@ -2,7 +2,6 @@ import ExerciseCard from "../components/ExerciseCard";
 import LastCheckinCard from "../components/history/LastCheckinCard";
 import MoodHistoryList from "../components/history/MoodHistoryList";
 import { useMood } from "../hooks/useMood";
-import ReminderNavigationCard from "../components/reminders/ReminderNavigationCard";
 import { resetMoodMock } from "../utils/debug/resetMoodMock";
 import { getLocalDate, toLocalDate } from "../lib/date";
 import type { MoodRecord } from "../types/moodRecord";
@@ -68,8 +67,6 @@ export default function History() {
 
           {/* Histórico completo — hoje no topo, mais antigo no fim */}
           <MoodHistoryList history={fullHistory} loading={loading} />
-
-          <ReminderNavigationCard />
         </div>
       </div>
 

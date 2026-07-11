@@ -5,6 +5,4 @@ export function resetMoodMock() {
 
   // opcional QA
   localStorage.removeItem("debug:forceError");
-
-  console.log("[QA] Dados de humor resetados com sucesso");
 }

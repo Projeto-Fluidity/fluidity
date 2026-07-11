@@ -9,11 +9,9 @@
 
 import { useState, useRef, useEffect } from "react";
 
-import { sendPushNotification }
-  from "../../services/notificationService";
+import { sendPushNotification } from "../../services/notificationService";
 
-import { getOrCreateDeviceId }
-  from "../../services/deviceService";
+import { getOrCreateDeviceId } from "../../services/deviceService";
 
 export default function DevTools() {
   const [isOpen, setIsOpen] = useState(true);
@@ -79,7 +77,7 @@ export default function DevTools() {
   }
 
   /**
-   *  RESET COMPLETO QA 
+   *  RESET COMPLETO QA
    */
   function clearOverrides() {
     // Configurações
@@ -92,38 +90,27 @@ export default function DevTools() {
     // Flags QA
     localStorage.removeItem("debug:forceError");
 
-    console.log("[QA] Reset completo aplicado");
-
     window.location.reload();
   }
 
-    /**
+  /**
    * ============================================================
    * TESTE DE PUSH
    * ============================================================
    */
   async function handleTestPush() {
-
     try {
-
       await sendPushNotification({
-        device_id:
-          getOrCreateDeviceId(),
+        device_id: getOrCreateDeviceId(),
 
         title: "Fluidity",
 
-        body:
-          "Push enviado via Railway com sucesso!",
+        body: "Push enviado via Railway com sucesso!",
 
         url: "/",
       });
-
     } catch (error) {
-
-      console.error(
-        "Erro ao enviar push:",
-        error
-      );
+      console.error("Erro ao enviar push:", error);
     }
   }
 
@@ -140,19 +127,19 @@ export default function DevTools() {
 
   return (
     <div
-      className="fixed z-50 text-white text-xs"
+      className="fixed z-50 text-xs text-white"
       style={{
         left: position.x,
         top: position.y,
       }}
     >
-      <div className="bg-black rounded-xl shadow-lg w-56">
+      <div className="w-56 rounded-xl bg-black shadow-lg">
         {/* HEADER */}
         <div
           onMouseDown={handleMouseDown}
-          className="cursor-move bg-gray-900 px-3 py-2 rounded-t-xl flex justify-between items-center"
+          className="flex cursor-move items-center justify-between rounded-t-xl bg-gray-900 px-3 py-2"
         >
-          <span className="font-bold text-sm">Dev Tools</span>
+          <span className="text-sm font-bold">Dev Tools</span>
 
           <button
             onClick={() => setIsOpen((prev) => !prev)}
@@ -164,15 +151,15 @@ export default function DevTools() {
 
         {/* CONTEÚDO */}
         {isOpen && (
-          <div className="p-3 space-y-4">
+          <div className="space-y-4 p-3">
             {/* DATA MODE */}
             <div>
-              <p className="text-gray-400 mb-1">Data Mode</p>
-              <p className="text-[10px] text-gray-500 mb-2">
+              <p className="mb-1 text-gray-400">Data Mode</p>
+              <p className="mb-2 text-[10px] text-gray-500">
                 atual: {currentMode ?? "env"}
               </p>
 
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setDataMode("seed")}
                   className={getButtonClass(currentMode === "seed")}
@@ -198,8 +185,8 @@ export default function DevTools() {
 
             {/* REMINDER */}
             <div>
-              <p className="text-gray-400 mb-1">Reminder Source</p>
-              <p className="text-[10px] text-gray-500 mb-2">
+              <p className="mb-1 text-gray-400">Reminder Source</p>
+              <p className="mb-2 text-[10px] text-gray-500">
                 atual: {currentReminder ?? "env"}
               </p>
 
@@ -222,17 +209,11 @@ export default function DevTools() {
 
             {/* PUSH */}
             <div>
-              <p className="text-gray-400 mb-1">
-                Push Notifications
-              </p>
+              <p className="mb-1 text-gray-400">Push Notifications</p>
 
               <button
                 onClick={handleTestPush}
-                className="
-                  px-2 py-1 rounded border text-xs transition
-                  bg-blue-600 border-blue-500 text-white
-                  hover:bg-blue-700
-                "
+                className="rounded border border-blue-500 bg-blue-600 px-2 py-1 text-xs text-white transition hover:bg-blue-700"
               >
                 Testar Push
               </button>
@@ -241,7 +222,7 @@ export default function DevTools() {
             {/* RESET */}
             <button
               onClick={clearOverrides}
-              className="text-red-400 hover:text-red-300 text-xs"
+              className="text-xs text-red-400 hover:text-red-300"
             >
               Reset QA
             </button>

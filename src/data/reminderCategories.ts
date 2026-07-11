@@ -1,15 +1,8 @@
-import {
-  Coffee,
-  Droplets,
-  Moon,
-  Smile,
-} from "lucide-react";
+import { Coffee, Droplets, Moon, Smile } from "lucide-react";
 
-import type { LucideIcon }
-  from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-import type { ReminderCategory }
-  from "../types/reminderCategory";
+import type { ReminderCategory } from "../types/reminderCategory";
 
 /**
  * ============================================================
@@ -23,7 +16,6 @@ import type { ReminderCategory }
  * o usuário.
  */
 export type ReminderCategoryItem = {
-
   /**
    * Identificador interno da categoria.
    */
@@ -34,10 +26,10 @@ export type ReminderCategoryItem = {
    */
   title: string;
 
-/**
- * Descrição exibida no card.
- */
-description: string;
+  /**
+   * Descrição exibida no card.
+   */
+  description: string;
 
   /**
    * Ícone associado à categoria.
@@ -47,7 +39,7 @@ description: string;
    * o card em um único local.
    */
   icon: LucideIcon;
-  };
+};
 
 /**
  * ============================================================
@@ -67,16 +59,14 @@ description: string;
  * A tela deverá apenas consumir esta lista
  * e renderizar os cards dinamicamente.
  */
-export const reminderCategories:
-  ReminderCategoryItem[] = [
-
-      {
+export const reminderCategories: ReminderCategoryItem[] = [
+  {
     id: "mood",
     title: "Como está seu humor?",
     description: "Registre seu humor diariamente",
     icon: Smile,
   },
-  
+
   {
     id: "hydration",
     title: "Hora de se hidratar",

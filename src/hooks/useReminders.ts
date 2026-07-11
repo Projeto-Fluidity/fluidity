@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { 
+  useCallback,
+  useEffect, 
+  useState,
+} from "react";
 import type { Reminder } from "../types/reminder";
 import {
   getReminders,
   updateReminderStatus,
 } from "../services/reminderService";
+import { useAuth } from "./useAuth";
 
 /**
  * Hook responsável por gerenciar os lembretes da aplicação.
@@ -21,21 +26,29 @@ import {
  * - UI → renderização
  */
 export function useReminders() {
-  console.log("🔥 useReminders EXECUTOU");
+
+  const { user } = useAuth();
   const [reminders, setReminders] = useState<Reminder[]>([]);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = 
+  useState<string | null>(null);
 
   /**
-   * Carrega os lembretes do dia
+   * Carrega os lembretes do usuário.
    */
-  async function loadReminders() {
+  const userId = user?.id;
+
+  const loadReminders = useCallback(async () => {
+    if (!userId) {
+      return;
+    }
+
     try {
-      const data = await getReminders();
+      const data = await getReminders(userId);
       setReminders(data);
     } catch (error) {
       console.error("Erro ao carregar lembretes:", error);
     }
-  }
+  }, [userId]);
 
   /**
    * Recarrega manualmente (QA / debug)
@@ -78,12 +91,8 @@ export function useReminders() {
    * Load inicial
    */
   useEffect(() => {
-    async function init() {
-      await loadReminders();
-    }
-
-    init();
-  }, []);
+    loadReminders();
+  }, [loadReminders]);
 
   /**
    * Controle do toast

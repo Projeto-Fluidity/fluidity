@@ -1,8 +1,5 @@
-import { saveSubscription }
-  from "./subscriptionService";
-
-import { getSWReady }
-  from "./swService";
+import { saveSubscription } from "./subscriptionService";
+import { getSWReady } from "./swService";
 
 /**
  * ============================================================
@@ -20,12 +17,11 @@ const VAPID_PUBLIC_KEY =
  */
 
 function urlBase64ToUint8Array(
-  base64String: string
+  base64String: string,
 ): Uint8Array {
-
   const padding =
     "=".repeat(
-      (4 - (base64String.length % 4)) % 4
+      (4 - (base64String.length % 4)) % 4,
     );
 
   const base64 =
@@ -38,8 +34,8 @@ function urlBase64ToUint8Array(
 
   return Uint8Array.from(
     [...rawData].map((char) =>
-      char.charCodeAt(0)
-    )
+      char.charCodeAt(0),
+    ),
   );
 }
 
@@ -49,9 +45,9 @@ function urlBase64ToUint8Array(
  * ============================================================
  */
 
-export async function createOrGetSubscription():
-  Promise<PushSubscription> {
-
+export async function createOrGetSubscription(
+  userId: string,
+): Promise<PushSubscription> {
   /**
    * ==========================================================
    * SUPORTE
@@ -62,9 +58,8 @@ export async function createOrGetSubscription():
     !("serviceWorker" in navigator) ||
     !("PushManager" in window)
   ) {
-
     throw new Error(
-      "Push notifications não suportadas"
+      "Push notifications não suportadas",
     );
   }
 
@@ -75,9 +70,8 @@ export async function createOrGetSubscription():
    */
 
   if (!VAPID_PUBLIC_KEY) {
-
     throw new Error(
-      "VITE_VAPID_PUBLIC_KEY não definida"
+      "VITE_VAPID_PUBLIC_KEY não definida",
     );
   }
 
@@ -87,26 +81,19 @@ export async function createOrGetSubscription():
    * ==========================================================
    */
 
-  if (
-    Notification.permission === "denied"
-  ) {
-
+  if (Notification.permission === "denied") {
     throw new Error(
-      "Notificações bloqueadas pelo usuário"
+      "Notificações bloqueadas pelo usuário",
     );
   }
 
-  if (
-    Notification.permission === "default"
-  ) {
-
+  if (Notification.permission === "default") {
     const permission =
       await Notification.requestPermission();
 
     if (permission !== "granted") {
-
       throw new Error(
-        "Permissão não concedida"
+        "Permissão não concedida",
       );
     }
   }
@@ -127,9 +114,7 @@ export async function createOrGetSubscription():
    */
 
   let subscription =
-    await registration
-      .pushManager
-      .getSubscription();
+    await registration.pushManager.getSubscription();
 
   /**
    * ==========================================================
@@ -138,18 +123,15 @@ export async function createOrGetSubscription():
    */
 
   if (!subscription) {
-
     subscription =
-      await registration
-        .pushManager
-        .subscribe({
-          userVisibleOnly: true,
+      await registration.pushManager.subscribe({
+        userVisibleOnly: true,
 
-          applicationServerKey:
-            urlBase64ToUint8Array(
-              VAPID_PUBLIC_KEY
-            ) as BufferSource,
-        });
+        applicationServerKey:
+          urlBase64ToUint8Array(
+            VAPID_PUBLIC_KEY,
+          ) as BufferSource,
+      });
   }
 
   /**
@@ -159,7 +141,8 @@ export async function createOrGetSubscription():
    */
 
   await saveSubscription(
-    subscription
+    userId,
+    subscription,
   );
 
   return subscription;
@@ -171,16 +154,12 @@ export async function createOrGetSubscription():
  * ============================================================
  */
 
-export async function hasPushSubscription():
-  Promise<boolean> {
-
+export async function hasPushSubscription(): Promise<boolean> {
   const registration =
     await getSWReady();
 
   const subscription =
-    await registration
-      .pushManager
-      .getSubscription();
+    await registration.pushManager.getSubscription();
 
   return !!subscription;
 }
@@ -191,21 +170,16 @@ export async function hasPushSubscription():
  * ============================================================
  */
 
-export async function unsubscribePush():
-  Promise<void> {
-
+export async function unsubscribePush(): Promise<void> {
   const registration =
     await getSWReady();
 
   const subscription =
-    await registration
-      .pushManager
-      .getSubscription();
+    await registration.pushManager.getSubscription();
 
   if (!subscription) {
     return;
   }
 
   await subscription.unsubscribe();
-  
 }

@@ -1,12 +1,10 @@
 import { useEffect, useRef } from "react";
 
 import { getScheduledReminders } from "../services/reminderService";
+import { getSettings } from "../services/settingsService";
 
-import {
-  shouldTriggerReminder,
-  toUiReminder,
-} from "../lib/reminderAdapter";
-
+import { shouldTriggerReminder, toUiReminder } from "../lib/reminderAdapter";
+import { useAuth } from "./useAuth";
 /**
  * ============================================================
  * GLOBAL WINDOW TYPE
@@ -40,7 +38,6 @@ declare global {
  * - funcionar com React StrictMode.
  */
 export function useReminderTrigger() {
-
   /**
    * ============================================================
    * CONTROLE DE DISPAROS
@@ -48,19 +45,17 @@ export function useReminderTrigger() {
    *
    * Guarda IDs já disparados no dia atual.
    */
-  const triggeredRef =
-    useRef<Set<string>>(new Set());
+  const { user } = useAuth();
+  const triggeredRef = useRef<Set<string>>(new Set());
 
   /**
    * ============================================================
    * CONTROLE DE RESET DIÁRIO
    * ============================================================
    */
-  const lastResetDateRef =
-    useRef<string | null>(null);
+  const lastResetDateRef = useRef<string | null>(null);
 
   useEffect(() => {
-
     /**
      * ============================================================
      * PROTEÇÃO GLOBAL
@@ -74,8 +69,11 @@ export function useReminderTrigger() {
      * - StrictMode
      * podem duplicar os intervals.
      */
-    if (window.__REMINDER_TRIGGER_STARTED__) {
+    if (!user) {
+      return;
+    }
 
+    if (window.__REMINDER_TRIGGER_STARTED__) {
       return;
     }
 
@@ -89,90 +87,108 @@ export function useReminderTrigger() {
      * LOOP PRINCIPAL
      * ============================================================
      */
-    async function runTrigger() {
+async function runTrigger() {
+  const now = new Date();
 
-      const now = new Date();
+  /**
+   * ============================================================
+   * CONFIGURAÇÕES DO USUÁRIO
+   * ============================================================
+   *
+   * Respeita a preferência global de notificações.
+   *
+   * Caso o usuário tenha desabilitado os lembretes,
+   * nenhuma verificação adicional será realizada.
+   */
+  if (!user) {
+    return;
+  }
 
-      /**
-       * ============================================================
-       * RESET DIÁRIO
-       * ============================================================
-       *
-       * Todo novo dia:
-       * - limpa reminders já disparados
-       * - permite novos disparos
-       */
-      const todayKey =
-        now.toDateString();
+  const settings = await getSettings(user.id);
 
-      if (
-        lastResetDateRef.current !== todayKey
-      ) {
+  /**
+   * Caso as notificações estejam desabilitadas
+   * globalmente, interrompe o processamento dos
+   * lembretes.
+   */
+  if (!settings?.enabled) {
+    return;
+  }
 
-        triggeredRef.current.clear();
+  /**
+   * ============================================================
+   * RESET DIÁRIO
+   * ============================================================
+   *
+   * Todo novo dia:
+   * - limpa reminders já disparados;
+   * - permite novos disparos.
+   */
+  const todayKey = now.toDateString();
 
-        lastResetDateRef.current =
-          todayKey;
-      }
+  if (lastResetDateRef.current !== todayKey) {
+    triggeredRef.current.clear();
 
-      /**
-       * ============================================================
-       * BUSCAR LEMBRETES
-       * ============================================================
-       */
-      const reminders =
-        await getScheduledReminders();
+    lastResetDateRef.current = todayKey;
+  }
 
-      /**
-       * ============================================================
-       * VERIFICAR CADA LEMBRETE
-       * ============================================================
-       */
-      reminders.forEach((r) => {
+  /**
+   * ============================================================
+   * BUSCAR LEMBRETES
+   * ============================================================
+   */
+  const reminders = await getScheduledReminders(user.id);
 
-        const alreadyTriggered =
-          triggeredRef.current.has(r.id);
+  /**
+   * ============================================================
+   * VERIFICAR CADA LEMBRETE
+   * ============================================================
+   */
+  reminders.forEach((reminder) => {
+    const alreadyTriggered =
+      triggeredRef.current.has(reminder.id);
 
-        const shouldTrigger =
-          shouldTriggerReminder(
-            r,
-            now,
-            alreadyTriggered
-          );
+    const shouldTrigger = shouldTriggerReminder(
+      reminder,
+      now,
+      alreadyTriggered,
+    );
 
-        /**
-         * Não deve disparar
-         */
-        if (!shouldTrigger) return;
-
-        /**
-         * ============================================================
-         * CONVERTER PARA UI
-         * ============================================================
-         */
-        const ui =
-          toUiReminder(r);
-
-        /**
-         * ============================================================
-         * MVP TEMPORÁRIO
-         * ============================================================
-         *
-         * Depois isso deve virar:
-         * - Notification API
-         * - Push notification
-         * - ou integração SW
-         */
-        alert(
-          `${ui.title}\n${ui.description}`
-        );
-
-        /**
-         * Marca reminder como disparado
-         */
-        triggeredRef.current.add(r.id);
-      });
+    /**
+     * Não deve disparar.
+     */
+    if (!shouldTrigger) {
+      return;
     }
+
+    /**
+     * ==========================================================
+     * CONVERTER PARA UI
+     * ==========================================================
+     */
+    const uiReminder = toUiReminder(reminder);
+
+    /**
+     * ==========================================================
+     * MVP TEMPORÁRIO
+     * ==========================================================
+     *
+     * Futuramente este fluxo será substituído por:
+     *
+     * - Notification API;
+     * - Push Notifications;
+     * - Service Worker.
+     */
+    alert(`${uiReminder.title}\n${uiReminder.description}`);
+
+    /**
+     * Marca o lembrete como disparado
+     * para evitar duplicidade durante
+     * o mesmo dia.
+     */
+    triggeredRef.current.add(reminder.id);
+  });
+}
 
     /**
      * ============================================================
@@ -188,11 +204,7 @@ export function useReminderTrigger() {
      *
      * Verifica reminders a cada 30 segundos.
      */
-    const interval =
-      setInterval(
-        runTrigger,
-        30 * 1000
-      );
+    const interval = setInterval(runTrigger, 30 * 1000);
 
     /**
      * ============================================================
@@ -202,15 +214,12 @@ export function useReminderTrigger() {
      * Remove interval ao desmontar.
      */
     return () => {
-
       clearInterval(interval);
 
       /**
        * Libera lock global
        */
-      window.__REMINDER_TRIGGER_STARTED__ =
-        false;
+      window.__REMINDER_TRIGGER_STARTED__ = false;
     };
-
-  }, []);
+  }, [user]);
 }

@@ -3,9 +3,7 @@ import cors from "cors";
 
 import { ENV } from "./config/env.js";
 
-import {
-  sendPushToDevice,
-} from "./services/push.service.js";
+import { sendPushToDevice } from "./services/push.service.js";
 
 /**
  * ============================================================
@@ -38,7 +36,7 @@ const app = express();
 app.use(
   cors({
     origin: true,
-  })
+  }),
 );
 
 /**
@@ -62,7 +60,6 @@ app.use(express.json());
  * - diagnóstico rápido.
  */
 app.get("/", (_, res) => {
-
   return res.json({
     success: true,
     service: "Fluidity Push Server",
@@ -82,15 +79,8 @@ app.get("/", (_, res) => {
  * - enviar push notification.
  */
 app.post("/send-push", async (req, res) => {
-
   try {
-
-    const {
-      device_id,
-      title,
-      body,
-      url,
-    } = req.body;
+    const { device_id, title, body, url } = req.body;
 
     /**
      * ========================================================
@@ -99,7 +89,6 @@ app.post("/send-push", async (req, res) => {
      */
 
     if (!device_id) {
-
       return res.status(400).json({
         success: false,
         error: "device_id obrigatório",
@@ -112,19 +101,13 @@ app.post("/send-push", async (req, res) => {
      * ========================================================
      */
 
-    await sendPushToDevice(
-      device_id,
-      {
-        title:
-          title || "Fluidity 💧",
+    await sendPushToDevice(device_id, {
+      title: title || "Fluidity 💧",
 
-        body:
-          body ||
-          "Hora do check-in emocional",
+      body: body || "Hora do check-in emocional",
 
-        url,
-      }
-    );
+      url,
+    });
 
     /**
      * ========================================================
@@ -134,21 +117,13 @@ app.post("/send-push", async (req, res) => {
 
     return res.json({
       success: true,
-      message:
-        "Push enviado com sucesso",
+      message: "Push enviado com sucesso",
     });
-
   } catch (err: unknown) {
-
-    console.error(
-      "SEND PUSH ERROR:",
-      err
-    );
+    console.error("SEND PUSH ERROR:", err);
 
     const errorMessage =
-      err instanceof Error
-        ? err.message
-        : "Erro desconhecido";
+      err instanceof Error ? err.message : "Erro desconhecido";
 
     /**
      * ========================================================
@@ -169,9 +144,4 @@ app.post("/send-push", async (req, res) => {
  * ============================================================
  */
 
-app.listen(ENV.PORT, () => {
-
-  console.log(
-    `Push Server running on ${ENV.PORT}`
-  );
-});
+app.listen(ENV.PORT, () => {});

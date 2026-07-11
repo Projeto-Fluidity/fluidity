@@ -12,18 +12,12 @@ export async function resetReminderLogs() {
   if (env.useMock) {
     const { resetMockLogs } = await import("../../mocks/reminderLogMock");
     resetMockLogs();
-    console.log("[QA] Logs resetados (mock)");
     return;
   }
 
-  const { error } = await supabase
-    .from("reminder_logs")
-    .delete()
-    .neq("id", "");
+  const { error } = await supabase.from("reminder_logs").delete().neq("id", "");
 
   if (error) {
     console.error("Erro ao resetar logs:", error);
   }
-
-  console.log("[QA] Logs resetados (DB)");
 }
