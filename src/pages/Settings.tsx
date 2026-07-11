@@ -28,10 +28,7 @@ export default function Settings() {
    * ==========================================================
    */
 
-  const {
-    generalSettings,
-    handleToggleGeneral,
-  } = useNotificationSettings();
+  const { generalSettings, handleToggleGeneral } = useNotificationSettings();
 
   /**
    * ==========================================================
@@ -60,9 +57,7 @@ export default function Settings() {
               Configurações
             </h1>
 
-            <p className="text-xs text-[#64748B]">
-              Personalize seus lembretes
-            </p>
+            <p className="text-xs text-[#64748B]">Personalize seus lembretes</p>
           </div>
         </div>
 
@@ -78,10 +73,7 @@ export default function Settings() {
 
           <div className="space-y-4">
             {generalSettings.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between"
-              >
+              <div key={item.id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
                     {item.icon}
@@ -92,17 +84,13 @@ export default function Settings() {
                       {item.label}
                     </p>
 
-                    <p className="text-xs text-[#94A3B8]">
-                      {item.description}
-                    </p>
+                    <p className="text-xs text-[#94A3B8]">{item.description}</p>
                   </div>
                 </div>
 
                 <Toggle
                   active={item.enabled}
-                  onToggle={() =>
-                    handleToggleGeneral(item.id)
-                  }
+                  onToggle={() => handleToggleGeneral(item.id)}
                 />
               </div>
             ))}

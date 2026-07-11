@@ -1,6 +1,4 @@
-import {
-  getProfile,
-} from "../../services/profileService";
+import { getProfile } from "../../services/profileService";
 
 import {
   useCallback,
@@ -70,17 +68,12 @@ type AuthProviderProps = {
  *  └─ AuthProvider
  *      └─ Pages
  */
-export function AuthProvider({
-  children,
-}: AuthProviderProps) {
-  const [user, setUser] =
-    useState<AuthUser | null>(null);
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<AuthUser | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * ==========================================================
@@ -90,24 +83,20 @@ export function AuthProvider({
    * Combina informações do Auth com os dados
    * persistidos na tabela profiles.
    */
-    async function loadAuthenticatedUser() {
-      const currentUser =
-        await getCurrentUser();
+  async function loadAuthenticatedUser() {
+    const currentUser = await getCurrentUser();
 
-      if (!currentUser) {
-        return null;
-      }
-
-      const profile =
-        await getProfile(currentUser.id);
-
-      return {
-        ...currentUser,
-        name:
-          profile?.name ??
-          currentUser.name,
-      };
+    if (!currentUser) {
+      return null;
     }
+
+    const profile = await getProfile(currentUser.id);
+
+    return {
+      ...currentUser,
+      name: profile?.name ?? currentUser.name,
+    };
+  }
   /**
    * ==========================================================
    * REFRESH USER
@@ -116,193 +105,128 @@ export function AuthProvider({
    * Recarrega o usuário atual a partir
    * da sessão persistida.
    */
-  const refreshUser =
-    useCallback(async () => {
-      try {
-        const currentUser =
-          await loadAuthenticatedUser();
+  const refreshUser = useCallback(async () => {
+    try {
+      const currentUser = await loadAuthenticatedUser();
 
-        setUser(currentUser);
-      } catch (err) {
-        console.error(
-          "Erro ao carregar usuário:",
-          err
-        );
+      setUser(currentUser);
+    } catch (err) {
+      console.error("Erro ao carregar usuário:", err);
 
-        setError(
-          "Erro ao carregar usuário"
-        );
-      }
-    }, []);
+      setError("Erro ao carregar usuário");
+    }
+  }, []);
 
   /**
    * ==========================================================
    * LOGIN
    * ==========================================================
    */
-  const login =
-    useCallback(
-      async (
-        payload: LoginPayload
-      ) => {
-        setError(null);
+  const login = useCallback(async (payload: LoginPayload) => {
+    setError(null);
 
-        try {
-          const authenticatedUser =
-            await loginService(payload);
+    try {
+      const authenticatedUser = await loginService(payload);
 
-          setUser(authenticatedUser);
-        } catch (err) {
-          console.error(
-            "Erro ao realizar login:",
-            err
-          );
+      setUser(authenticatedUser);
+    } catch (err) {
+      console.error("Erro ao realizar login:", err);
 
-          const message =
-            err instanceof Error
-              ? err.message
-              : "Erro ao realizar login";
+      const message =
+        err instanceof Error ? err.message : "Erro ao realizar login";
 
-          setError(message);
+      setError(message);
 
-          throw err;
-        }
-      },
-      []
-    );
+      throw err;
+    }
+  }, []);
 
   /**
    * ==========================================================
    * REGISTER
    * ==========================================================
    */
-  const register =
-    useCallback(
-      async (
-        payload: RegisterPayload
-      ) => {
-        setError(null);
+  const register = useCallback(async (payload: RegisterPayload) => {
+    setError(null);
 
-        try {
-          const newUser =
-          await registerService(
-            payload
-          );
+    try {
+      const newUser = await registerService(payload);
 
-          setUser(newUser);
-        } catch (err) {
-          console.error(
-            "Erro ao criar conta:",
-            err
-          );
+      setUser(newUser);
+    } catch (err) {
+      console.error("Erro ao criar conta:", err);
 
-          const message =
-            err instanceof Error
-              ? err.message
-              : "Erro ao criar conta";
+      const message =
+        err instanceof Error ? err.message : "Erro ao criar conta";
 
-          setError(message);
+      setError(message);
 
-          throw err;
-        }
-      },
-      []
-    );
+      throw err;
+    }
+  }, []);
 
   /**
    * ==========================================================
    * LOGOUT
    * ==========================================================
    */
-  const logout =
-    useCallback(async () => {
-      setError(null);
+  const logout = useCallback(async () => {
+    setError(null);
 
-      try {
-        await logoutService();
+    try {
+      await logoutService();
 
-        setUser(null);
-      } catch (err) {
-        console.error(
-          "Erro ao realizar logout:",
-          err
-        );
+      setUser(null);
+    } catch (err) {
+      console.error("Erro ao realizar logout:", err);
 
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Erro ao realizar logout";
+      const message =
+        err instanceof Error ? err.message : "Erro ao realizar logout";
 
-        setError(message);
+      setError(message);
 
-        throw err;
-      }
-    }, []);
+      throw err;
+    }
+  }, []);
 
   /**
    * ==========================================================
    * RESET PASSWORD
    * ==========================================================
    */
-  const resetPassword =
-    useCallback(
-      async (
-        payload: ResetPasswordPayload
-      ) => {
-        setError(null);
+  const resetPassword = useCallback(async (payload: ResetPasswordPayload) => {
+    setError(null);
 
-        try {
-          await resetPasswordService(
-            payload
-          );
-        } catch (err) {
-          console.error(
-            "Erro ao enviar recuperação:",
-            err
-          );
+    try {
+      await resetPasswordService(payload);
+    } catch (err) {
+      console.error("Erro ao enviar recuperação:", err);
 
-          const message =
-            err instanceof Error
-              ? err.message
-              : "Erro ao enviar recuperação";
+      const message =
+        err instanceof Error ? err.message : "Erro ao enviar recuperação";
 
-          setError(message);
+      setError(message);
 
-          throw err;
-        }
-      },
-      []
-    );
+      throw err;
+    }
+  }, []);
 
-  const updatePassword =
-  useCallback(
-    async (
-      password: string
-    ) => {
-      setError(null);
+  const updatePassword = useCallback(async (password: string) => {
+    setError(null);
 
-      try {
-        await updatePasswordService(
-          password
-        );
-      } catch (err) {
-        console.error(
-          "Erro ao atualizar senha:",
-          err
-        );
+    try {
+      await updatePasswordService(password);
+    } catch (err) {
+      console.error("Erro ao atualizar senha:", err);
 
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Erro ao atualizar senha";
+      const message =
+        err instanceof Error ? err.message : "Erro ao atualizar senha";
 
-        setError(message);
+      setError(message);
 
-        throw err;
-      }
-    },
-    []
-  );
+      throw err;
+    }
+  }, []);
 
   /**
    * ==========================================================
@@ -319,24 +243,17 @@ export function AuthProvider({
   useEffect(() => {
     async function initializeAuth() {
       try {
-        const session =
-          await getSession();
+        const session = await getSession();
 
         if (session) {
-          const currentUser =
-            await loadAuthenticatedUser();
+          const currentUser = await loadAuthenticatedUser();
 
           setUser(currentUser);
         }
       } catch (err) {
-        console.error(
-          "Erro ao recuperar sessão:",
-          err
-        );
+        console.error("Erro ao recuperar sessão:", err);
 
-        setError(
-          "Erro ao recuperar sessão"
-        );
+        setError("Erro ao recuperar sessão");
       } finally {
         setLoading(false);
       }
@@ -353,35 +270,30 @@ export function AuthProvider({
    * Memoriza o valor para evitar
    * renderizações desnecessárias.
    */
-  const value =
-    useMemo<AuthContextValue>(
-      () => ({
-        user,
-        loading,
-        error,
-        login,
-        register,
-        logout,
-        resetPassword,
-        refreshUser,
-        updatePassword,
-      }),
-      [
-        user,
-        loading,
-        error,
-        login,
-        register,
-        logout,
-        resetPassword,
-        updatePassword,
-        refreshUser,
-      ]
-    );
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      loading,
+      error,
+      login,
+      register,
+      logout,
+      resetPassword,
+      refreshUser,
+      updatePassword,
+    }),
+    [
+      user,
+      loading,
+      error,
+      login,
+      register,
+      logout,
+      resetPassword,
+      updatePassword,
+      refreshUser,
+    ],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

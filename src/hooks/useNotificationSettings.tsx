@@ -158,10 +158,7 @@ export function useNotificationSettings() {
     }
 
     const settings = await loadNotificationSettings(user.id);
-console.log(
-  "Banco:",
-  settings.enabled,
-);
+
     updateSetting("notifications", settings.enabled);
   }
 
@@ -177,21 +174,21 @@ console.log(
    * o comportamento já existente na aplicação.
    */
   async function syncPushState() {
-    
     try {
-      
       const registration = await getSWReady();
 
       const subscription = await registration.pushManager.getSubscription();
-console.log(
-  "Subscription:",
-  !!subscription,
-);
-console.log(
-  "Subscription:",
-  subscription,
-);
-      updateSetting("notifications", !!subscription);
+
+      /**
+       * Apenas auditoria.
+       *
+       * O estado visual do toggle é controlado
+       * exclusivamente pelas configurações
+       * persistidas em reminder_settings.
+       */
+      if (!subscription) {
+        console.warn("Push Subscription inexistente.");
+      }
     } catch (error) {
       console.error("Erro ao sincronizar Push Subscription:", error);
     }
@@ -223,19 +220,11 @@ console.log(
       }
 
       try {
-if (enabled) {
-  console.log("Antes do disable:", enabled);
-
-  await disableNotifications(user.id);
-
-  console.log("Disable executado");
-} else {
-  console.log("Antes do enable:", enabled);
-
-  await enableNotifications(user.id);
-
-  console.log("Enable executado");
-}
+        if (enabled) {
+          await disableNotifications(user.id);
+        } else {
+          await enableNotifications(user.id);
+        }
 
         updateSetting(id, !enabled);
       } catch (error) {
@@ -250,21 +239,12 @@ if (enabled) {
      * LOCAL SETTINGS
      * ========================================================
      */
+
     const currentSetting = generalSettings.find((item) => item.id === id);
 
     updateSetting(id, !(currentSetting?.enabled ?? false));
   }
 
-  /**
-   * ==========================================================
-   * EFFECTS
-   * ==========================================================
-   *
-   * Inicializa o hook carregando:
-   *
-   * 1. Configurações persistidas.
-   * 2. Estado atual da Push Subscription.
-   */
   useEffect(() => {
     const initialize = async () => {
       await loadSettings();
@@ -274,28 +254,8 @@ if (enabled) {
 
     void initialize();
 
-    /**
-     * ========================================================
-     * IMPORTANTE
-     * ========================================================
-     *
-     * A inicialização ocorre apenas na montagem do hook.
-     *
-     * As funções utilizadas neste efeito pertencem ao próprio
-     * hook e não são compartilhadas nem utilizadas como
-     * dependência de outros hooks.
-     *
-     * Por esse motivo, mantemos deliberadamente este efeito
-     * executando apenas uma vez.
-     */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  /**
-   * ==========================================================
-   * PUBLIC API
-   * ==========================================================
-   */
 
   return {
     generalSettings,

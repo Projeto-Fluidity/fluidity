@@ -1,12 +1,6 @@
-import {
-  createOrGetSubscription,
-  unsubscribePush,
-} from "./pushService";
+import { createOrGetSubscription, unsubscribePush } from "./pushService";
 
-import {
-  getSettings,
-  saveSettings,
-} from "./settingsService";
+import { getSettings, saveSettings } from "./settingsService";
 
 /**
  * ============================================================
@@ -68,22 +62,16 @@ async function loadCurrentSettings(
   const settings = await getSettings(userId);
 
   return {
-    start_hour:
-      settings?.start_hour ?? DEFAULT_SETTINGS.start_hour,
+    start_hour: settings?.start_hour ?? DEFAULT_SETTINGS.start_hour,
 
-    end_hour:
-      settings?.end_hour ?? DEFAULT_SETTINGS.end_hour,
+    end_hour: settings?.end_hour ?? DEFAULT_SETTINGS.end_hour,
 
     frequency_minutes:
-      settings?.frequency_minutes ??
-      DEFAULT_SETTINGS.frequency_minutes,
+      settings?.frequency_minutes ?? DEFAULT_SETTINGS.frequency_minutes,
 
-    max_per_day:
-      settings?.max_per_day ??
-      DEFAULT_SETTINGS.max_per_day,
+    max_per_day: settings?.max_per_day ?? DEFAULT_SETTINGS.max_per_day,
 
-    enabled:
-      settings?.enabled ?? DEFAULT_SETTINGS.enabled,
+    enabled: settings?.enabled ?? DEFAULT_SETTINGS.enabled,
   };
 }
 
@@ -126,11 +114,8 @@ export async function loadNotificationSettings(
  * 2. Garante a existência da Push Subscription.
  * 3. Persiste a preferência do usuário.
  */
-export async function enableNotifications(
-  userId: string,
-): Promise<void> {
-  const settings =
-    await loadCurrentSettings(userId);
+export async function enableNotifications(userId: string): Promise<void> {
+  const settings = await loadCurrentSettings(userId);
 
   await createOrGetSubscription(userId);
 
@@ -158,11 +143,8 @@ export async function enableNotifications(
  * 2. Remove a Push Subscription.
  * 3. Persiste a preferência do usuário.
  */
-export async function disableNotifications(
-  userId: string,
-): Promise<void> {
-  const settings =
-    await loadCurrentSettings(userId);
+export async function disableNotifications(userId: string): Promise<void> {
+  const settings = await loadCurrentSettings(userId);
 
   await unsubscribePush();
 

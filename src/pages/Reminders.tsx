@@ -38,8 +38,6 @@ export default function Reminders() {
     postponeReminder,
     reloadReminders,
   } = useReminders();
-  console.log("REMINDERS:", reminders); // ✅ aqui sim
-  console.log("NOW:", new Date());
 
   /**
    * Etapa atual do fluxo de adiamento.

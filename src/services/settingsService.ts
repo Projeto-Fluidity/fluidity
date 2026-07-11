@@ -68,15 +68,20 @@ export async function saveSettings(
 ) {
   const deviceId = getDeviceId();
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("reminder_settings")
-    .upsert({
-      user_id: userId,
+    .update({
       device_id: deviceId,
       ...settings,
-    });
+    })
+    .eq("user_id", userId)
+    .select();
 
   if (error) {
     console.error("Erro ao salvar settings:", error);
+
+    throw error;
   }
+
+  return data;
 }
