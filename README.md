@@ -1,54 +1,119 @@
-# Fluidity
+# 🌊 Fluidity
 
 ![React](https://img.shields.io/badge/React-19-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Node](https://img.shields.io/badge/Node-22.13.0-green)
+![Vite](https://img.shields.io/badge/Vite-7-purple)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E)
+![PWA](https://img.shields.io/badge/PWA-Ready-success)
 ![Status](https://img.shields.io/badge/status-MVP-yellow)
 
-Aplicação web para **registro e acompanhamento do humor diário**, com foco em bem-estar emocional.
+Aplicação web focada no **registro e acompanhamento do humor diário**, oferecendo uma experiência simples para monitoramento do bem-estar emocional através de check-ins, histórico, lembretes inteligentes e recursos voltados à saúde emocional.
 
 ---
 
-# 🧠 Visão do Produto
+# 📖 Visão Geral
 
-O **Fluidity** permite que usuários:
+O **Fluidity** nasceu com o objetivo de incentivar o hábito do registro emocional diário, permitindo que o usuário acompanhe sua evolução ao longo do tempo e receba lembretes inteligentes para manter a consistência dos registros.
 
-* Registrem seu humor diariamente
-* Acompanhem padrões emocionais ao longo do tempo
-* Visualizem histórico de registros
-* Acessem práticas simples de bem-estar
+O projeto foi desenvolvido seguindo princípios modernos de arquitetura de software, priorizando:
 
-O projeto está em fase de **MVP (Minimum Viable Product)**, com foco na validação da experiência de check-in emocional.
-
----
-
-# 📱 Interface do projeto
-
-![Tela de emoção](docs/screens/emotion.png)
-![Tela de sucesso](docs/screens/success.png)
-![Tela de erro](docs/screens/error.png)
-![Tela de histórico](docs/screens/history.png)
+- Clean Code
+- Baixo acoplamento
+- Separação de responsabilidades
+- Componentização
+- Escalabilidade
+- Facilidade de manutenção
 
 ---
 
-# 🏗 Arquitetura (Visão Geral)
+# ✨ Funcionalidades
+
+## ✅ Implementadas
+
+### Autenticação
+
+- Cadastro de usuários
+- Login
+- Logout
+- Recuperação de senha
+- Atualização de senha
+- Contexto global de autenticação
+
+---
+
+### Registro de Humor
+
+- Check-in diário
+- Regra de um registro por dia
+- Confirmação antes do envio
+- Histórico completo
+- Visualização dos registros
+
+---
+
+### Exercícios
+
+- Recomendações de práticas de bem-estar
+- Exercícios rápidos
+- Navegação integrada ao fluxo principal
+
+---
+
+### Lembretes Inteligentes
+
+- Central de lembretes
+- Configuração de lembretes
+- Gerenciamento de notificações
+- Configuração de horários
+- Controle de habilitação/desabilitação
+
+---
+
+### Notificações Push
+
+- Infraestrutura preparada para Web Push
+- Service Worker
+- Push Subscription
+- Supabase Edge Functions
+- Persistência de configurações
+
+---
+
+### Progressive Web App (PWA)
+
+- Instalável
+- Funcionamento semelhante a aplicativo
+- Service Worker
+- Preparado para notificações
+
+---
+
+# 🏗 Arquitetura
+
+O projeto segue uma arquitetura em camadas buscando reduzir acoplamento entre interface, regras de negócio e infraestrutura.
 
 ```mermaid
 flowchart TD
 
-A[Pages] --> B[Components]
-B --> C[Hooks]
-C --> D[Services]
-D --> E[(Supabase)]
-D --> F[(Mock Data)]
+Page["Pages"]
+Component["Components"]
+Hook["Hooks"]
+Service["Services"]
+Supabase["Supabase"]
+Edge["Edge Functions"]
 
-style A fill:#1e293b,color:#fff
-style B fill:#0f172a,color:#fff
-style C fill:#334155,color:#fff
-style D fill:#475569,color:#fff
-style E fill:#065f46,color:#fff
-style F fill:#7c2d12,color:#fff
+Page --> Component
+Component --> Hook
+Hook --> Service
+Service --> Supabase
+Supabase --> Edge
+
+style Page fill:#1e293b,color:#fff
+style Component fill:#0f172a,color:#fff
+style Hook fill:#334155,color:#fff
+style Service fill:#475569,color:#fff
+style Supabase fill:#065f46,color:#fff
+style Edge fill:#7c3aed,color:#fff
 ```
 
 ---
@@ -57,125 +122,134 @@ style F fill:#7c2d12,color:#fff
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant P as Page
-    participant H as Hook
-    participant S as Service
-    participant DB as Supabase/Mock
 
-    U->>P: Interação
-    P->>H: Chama hook (useMood)
-    H->>S: Requisição
-    S->>DB: Persistência
+participant U as Usuário
+participant UI as Interface
+participant H as Hook
+participant S as Service
+participant DB as Supabase
 
-    DB-->>S: Resposta
-    S-->>H: Dados
-    H-->>P: Atualiza estado
-    P-->>U: UI atualizada
+U->>UI: Interação
+UI->>H: Evento
+H->>S: Regra de negócio
+S->>DB: Persistência
+
+DB-->>S: Dados
+S-->>H: Resultado
+H-->>UI: Atualização de estado
+UI-->>U: Interface atualizada
 ```
 
 ---
 
-# 🧩 Arquitetura de Pastas
-
-```mermaid
-graph TD
-    src --> components
-    src --> pages
-    src --> hooks
-    src --> services
-    src --> mocks
-    src --> config
-    src --> lib
-    src --> types
-```
-
-### Estrutura
-
-| Pasta      | Responsabilidade   |
-| ---------- | ------------------ |
-| components | UI reutilizável    |
-| pages      | Páginas            |
-| hooks      | Lógica e estado    |
-| services   | Integração com API |
-| mocks      | Dados simulados    |
-| config     | Configuração       |
-| lib        | Utilitários        |
-| types      | Tipagens           |
-
----
-
-# 🔄 Estratégia de Dados
+# 🔔 Fluxo das Notificações
 
 ```mermaid
 flowchart LR
 
-A[App] --> B{Modo de dados}
-B -->|Mock| C[Mocks locais]
-B -->|API| D[Supabase]
+User --> Hook
+Hook --> NotificationService
+NotificationService --> SettingsService
+SettingsService --> Supabase
 
-C --> E[Simulação]
-D --> F[Persistência real]
+Supabase --> EdgeFunction
+
+EdgeFunction --> WebPush
 ```
+
+---
+
+# 📁 Organização do Projeto
+
+```text
+src
+├── components
+├── config
+├── hooks
+├── lib
+├── mocks
+├── pages
+├── services
+├── types
+├── utils
+
+supabase
+└── functions
+    └── send-push
+```
+
+| Diretório | Responsabilidade |
+|------------|------------------|
+| components | Componentes reutilizáveis |
+| pages | Páginas da aplicação |
+| hooks | Estado e lógica de UI |
+| services | Regras de negócio e integração |
+| config | Configurações globais |
+| lib | Utilitários compartilhados |
+| mocks | Dados simulados |
+| types | Tipagens |
+| utils | Funções auxiliares |
+| supabase/functions | Edge Functions |
 
 ---
 
 # ⚙️ Stack Tecnológica
 
-| Camada       | Tecnologia       | Versão  |
-| ------------ | ---------------- | ------- |
-| Frontend     | React            | 19.2.x  |
-| DOM Renderer | React DOM        | 19.2.x  |
-| Linguagem    | TypeScript       | 5.9.x   |
-| Roteamento   | React Router DOM | 7.13.x  |
-| Build Tool   | Vite             | 7.3.x   |
-| Estilização  | Tailwind CSS     | 3.4.x   |
-| Backend      | Supabase JS      | 2.98.x  |
-| Ícones       | Lucide React     | 0.577.x |
+| Camada | Tecnologia |
+|---------|------------|
+| Frontend | React 19 |
+| Linguagem | TypeScript |
+| Build | Vite |
+| Estilização | TailwindCSS |
+| Backend | Supabase |
+| Banco | PostgreSQL |
+| Autenticação | Supabase Auth |
+| Push | Web Push API |
+| Edge Functions | Supabase Edge Functions |
+| PWA | Service Worker |
+| Roteamento | React Router |
 
 ---
 
-# 🧩 Ambiente de desenvolvimento
+# 🔀 Estratégia de Dados
 
-* Node.js: **22.13.0**
-* NPM: **10+**
+O projeto suporta múltiplos modos de execução.
 
-> Consulte o `package.json` para versões exatas.
+```mermaid
+flowchart LR
 
----
+App --> Mode
 
-# 🚀 Funcionalidades
+Mode --> Seed
+Mode --> Storage
+Mode --> API
 
-## ✔ Implementadas
+Seed --> Mock
+Storage --> LocalStorage
+API --> Supabase
+```
 
-* Check-in diário de humor
-* Histórico de registros
-* Regra de 1 registro por dia
-* Persistência com Supabase
-* Atualização reativa da UI
-* Hooks customizados
-* Modo QA com mock
-
-## 🔜 Planejadas
-
-* Autenticação de usuários
-* Notificações (reminders)
-* Dashboard analítico
-* Evolução para PWA
-* Biblioteca de práticas
+| Modo | Finalidade |
+|-------|------------|
+| Seed | Dados fixos para desenvolvimento |
+| Storage | Persistência local |
+| API | Persistência real no Supabase |
 
 ---
 
-# ▶️ Como executar o projeto
+# 🚀 Executando Localmente
 
 ```bash
-git clone https://github.com/pipocaagil-hash/projeto-fluidity.git
+git clone https://github.com/Projeto-Fluidity/fluidity
+
 cd projeto-fluidity
+
 npm install
+
 npm run dev
 ```
 
-Acesse:
+Aplicação disponível em:
 
 ```
 http://localhost:5173
@@ -183,55 +257,94 @@ http://localhost:5173
 
 ---
 
-# 🔐 Variáveis de ambiente
-
-Crie um `.env`:
+# 🔐 Variáveis de Ambiente
 
 ```env
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
-VITE_USE_MOCK=false
+
+VITE_DATA_MODE=api
+
+VITE_FORCE_ERROR=false
 ```
 
 ---
 
-# 🧪 Modo QA (Mock)
+# 🧪 Qualidade
 
-Ativar:
+Durante o desenvolvimento são seguidas as seguintes práticas:
 
-```env
-VITE_USE_MOCK=true
+- Auditoria antes de qualquer implementação
+- Desenvolvimento incremental
+- Pequenos commits
+- Baixo acoplamento
+- Clean Code
+- SOLID
+- Componentização
+- Hooks especializados
+- Services desacoplados
+- Validação contínua através de:
+
+```bash
+npm run lint
 ```
 
-### Comportamento
-
-* Dados simulados
-* Sem chamadas ao backend
-* Fluxo completo funcional
-* Regra de 1 registro por dia mantida
-
-### Uso ideal
-
-* QA
-* Demonstrações
-* Desenvolvimento offline
+```bash
+npm run build
+```
 
 ---
 
-# 🧭 Roadmap
+# 🛣 Roadmap
 
-* Integração completa com UX
-* Sistema de autenticação
-* Notificações inteligentes
-* Insights emocionais
-* Evolução para PWA
+## Em andamento
+
+- Evolução das notificações inteligentes
+- Agendamento automático de lembretes
+- Insights emocionais
+
+## Futuro
+
+- Dashboard analítico
+- Gamificação
+- Compartilhamento de progresso
+- Integração com dispositivos móveis
+- Inteligência Artificial para recomendações personalizadas
 
 ---
 
-# 👨‍💻 Autores
+# 👥 Autores
 
-**Jair Sousa**
+*DEV*
+
+*Full Stack*
+### Jair Sousa 
 https://github.com/jair-sousa
+https://www.linkedin.com/in/jair-sousa-ads
 
-**Carlos Eduardo**
+*Front end*
+### Carlos Eduardo
+
 https://github.com/Carlosedukj
+https://www.linkedin.com/in/carlosedusobrinho/
+
+*UX*
+### Luiz Felipe
+
+*QA*
+### João Felismino
+https://www.linkedin.com/in/joaofelismino/
+
+*SM*
+### Thaise Caires
+https://www.linkedin.com/in/thaisecaires
+
+*PO*
+### Agatha
+http://linkedin.com/in/agathasoaresrita
+
+---
+
+# 📄 Licença
+
+Projeto desenvolvido para fins acadêmicos e de estudo, podendo evoluir para um produto completo de acompanhamento do bem-estar emocional.
