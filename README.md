@@ -30,7 +30,7 @@ O projeto foi desenvolvido seguindo princípios modernos de arquitetura de softw
 
 ## ✅ Implementadas
 
-### Autenticação
+### 🔐 Autenticação
 
 - Cadastro de usuários
 - Login
@@ -41,7 +41,7 @@ O projeto foi desenvolvido seguindo princípios modernos de arquitetura de softw
 
 ---
 
-### Registro de Humor
+### 😊 Registro de Humor
 
 - Check-in diário
 - Regra de um registro por dia
@@ -51,7 +51,7 @@ O projeto foi desenvolvido seguindo princípios modernos de arquitetura de softw
 
 ---
 
-### Exercícios
+### 🧘 Exercícios
 
 - Recomendações de práticas de bem-estar
 - Exercícios rápidos
@@ -59,7 +59,7 @@ O projeto foi desenvolvido seguindo princípios modernos de arquitetura de softw
 
 ---
 
-### Lembretes Inteligentes
+### ⏰ Lembretes Inteligentes
 
 - Central de lembretes
 - Configuração de lembretes
@@ -69,28 +69,31 @@ O projeto foi desenvolvido seguindo princípios modernos de arquitetura de softw
 
 ---
 
-### Notificações Push
+### 🔔 Notificações Push
 
-- Infraestrutura preparada para Web Push
+- Infraestrutura Web Push
 - Service Worker
 - Push Subscription
+- Push Server dedicado
 - Supabase Edge Functions
-- Persistência de configurações
+- Persistência das inscrições
+- Gerenciamento de chaves VAPID
 
 ---
 
-### Progressive Web App (PWA)
+### 📱 Progressive Web App (PWA)
 
 - Instalável
-- Funcionamento semelhante a aplicativo
+- Experiência semelhante a aplicativo
+- Funcionamento offline parcial
 - Service Worker
-- Preparado para notificações
+- Preparado para notificações Push
 
 ---
 
 # 🏗 Arquitetura
 
-O projeto segue uma arquitetura em camadas buscando reduzir acoplamento entre interface, regras de negócio e infraestrutura.
+O projeto segue uma arquitetura em camadas buscando reduzir o acoplamento entre interface, regras de negócio e infraestrutura.
 
 ```mermaid
 flowchart TD
@@ -153,8 +156,8 @@ NotificationService --> SettingsService
 SettingsService --> Supabase
 
 Supabase --> EdgeFunction
-
-EdgeFunction --> WebPush
+EdgeFunction --> PushServer
+PushServer --> WebPush
 ```
 
 ---
@@ -176,13 +179,21 @@ src
 supabase
 └── functions
     └── send-push
+
+push-server
+├── src
+├── dist
+└── package.json
+
+docs
+└── infra
 ```
 
 | Diretório | Responsabilidade |
 |------------|------------------|
 | components | Componentes reutilizáveis |
 | pages | Páginas da aplicação |
-| hooks | Estado e lógica de UI |
+| hooks | Estado e lógica da interface |
 | services | Regras de negócio e integração |
 | config | Configurações globais |
 | lib | Utilitários compartilhados |
@@ -190,6 +201,8 @@ supabase
 | types | Tipagens |
 | utils | Funções auxiliares |
 | supabase/functions | Edge Functions |
+| push-server | Servidor responsável pelo envio das notificações Push |
+| docs/infra | Documentação da infraestrutura |
 
 ---
 
@@ -204,8 +217,11 @@ supabase
 | Backend | Supabase |
 | Banco | PostgreSQL |
 | Autenticação | Supabase Auth |
+| Push Server | Node.js + Express |
 | Push | Web Push API |
 | Edge Functions | Supabase Edge Functions |
+| Hospedagem Frontend | Vercel |
+| Hospedagem Push Server | Railway |
 | PWA | Service Worker |
 | Roteamento | React Router |
 
@@ -239,13 +255,27 @@ API --> Supabase
 
 # 🚀 Executando Localmente
 
+Clone o repositório:
+
 ```bash
 git clone https://github.com/Projeto-Fluidity/fluidity
+```
 
-cd projeto-fluidity
+Acesse o projeto:
 
+```bash
+cd fluidity
+```
+
+Instale as dependências:
+
+```bash
 npm install
+```
 
+Inicie o frontend:
+
+```bash
 npm run dev
 ```
 
@@ -255,35 +285,88 @@ Aplicação disponível em:
 http://localhost:5173
 ```
 
+Para testar notificações Push localmente, execute também o servidor dedicado:
+
+```bash
+cd push-server
+
+npm install
+
+npm run dev
+```
+
 ---
 
 # 🔐 Variáveis de Ambiente
+
+Frontend:
 
 ```env
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 
 VITE_DATA_MODE=api
-
 VITE_FORCE_ERROR=false
+
+VITE_PUSH_API_URL=https://fluidity-production.up.railway.app
 ```
+
+Push Server:
+
+```env
+SUPABASE_URL=
+SUPABASE_SERVICE_ROLE_KEY=
+
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+
+PORT=3000
+```
+
+---
+
+# 🏗 Infraestrutura
+
+A documentação da infraestrutura encontra-se em:
+
+```text
+docs/
+└── infra/
+    ├── DEPLOYMENT.md
+    ├── RAILWAY.md
+    ├── VERCEL.md
+    └── ARCHITECTURE.md
+```
+
+Esses documentos descrevem:
+
+- arquitetura da plataforma;
+- estratégia de deploy;
+- integração entre Vercel, Railway e Supabase;
+- configuração do Push Server;
+- fluxo de CI/CD;
+- procedimentos de auditoria;
+- boas práticas para manutenção da infraestrutura.
 
 ---
 
 # 🧪 Qualidade
 
-Durante o desenvolvimento são seguidas as seguintes práticas:
+Durante o desenvolvimento são adotadas as seguintes práticas:
 
 - Auditoria antes de qualquer implementação
 - Desenvolvimento incremental
-- Pequenos commits
-- Baixo acoplamento
+- Commits pequenos e objetivos
+- Pull Requests focadas
 - Clean Code
 - SOLID
 - Componentização
 - Hooks especializados
 - Services desacoplados
-- Validação contínua através de:
+- Documentação contínua
+- Revisão da arquitetura
+
+Validações recomendadas antes de abrir uma Pull Request:
 
 ```bash
 npm run lint
@@ -297,54 +380,66 @@ npm run build
 
 # 🛣 Roadmap
 
-## Em andamento
+## 🚧 Em andamento
 
 - Evolução das notificações inteligentes
 - Agendamento automático de lembretes
 - Insights emocionais
 
-## Futuro
+## 🔮 Futuro
 
 - Dashboard analítico
 - Gamificação
 - Compartilhamento de progresso
-- Integração com dispositivos móveis
+- Aplicativo mobile
 - Inteligência Artificial para recomendações personalizadas
 
 ---
 
 # 👥 Autores
 
-*DEV*
+### 👨‍💻 Jair Sousa
+**Full Stack Developer**
 
-*Full Stack*
-### Jair Sousa 
-https://github.com/jair-sousa
-https://www.linkedin.com/in/jair-sousa-ads
+- GitHub: https://github.com/jair-sousa
+- LinkedIn: https://www.linkedin.com/in/jair-sousa-ads
 
-*Front end*
-### Carlos Eduardo
+---
 
-https://github.com/Carlosedukj
-https://www.linkedin.com/in/carlosedusobrinho/
+### 💻 Carlos Eduardo
+**Front-end Developer**
 
-*UX*
-### Luiz Felipe
+- GitHub: https://github.com/Carlosedukj
+- LinkedIn: https://www.linkedin.com/in/carlosedusobrinho/
 
-*QA*
-### João Felismino
-https://www.linkedin.com/in/joaofelismino/
+---
 
-*SM*
-### Thaise Caires
-https://www.linkedin.com/in/thaisecaires
+### 🎨 Luiz Felipe
+**UX Designer**
 
-*PO*
-### Agatha
-http://linkedin.com/in/agathasoaresrita
+---
+
+### 🧪 João Felismino
+**QA Engineer**
+
+- LinkedIn: https://www.linkedin.com/in/joaofelismino/
+
+---
+
+### 📋 Thaise Caires
+**Scrum Master**
+
+- LinkedIn: https://www.linkedin.com/in/thaisecaires
+
+---
+
+### 📌 Agatha Soares
+**Product Owner**
+
+- LinkedIn: http://linkedin.com/in/agathasoaresrita
 
 ---
 
 # 📄 Licença
 
-Projeto desenvolvido para fins acadêmicos e de estudo, podendo evoluir para um produto completo de acompanhamento do bem-estar emocional.
+Projeto desenvolvido inicialmente para fins acadêmicos, estruturado para evoluir continuamente como uma plataforma de acompanhamento do bem-estar emocional.
