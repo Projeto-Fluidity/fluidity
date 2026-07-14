@@ -352,6 +352,8 @@ Esses documentos descrevem:
 
 # 🧪 Qualidade
 
+O projeto adota uma abordagem incremental de Quality Engineering, priorizando a validação contínua da arquitetura, do comportamento da aplicação e da qualidade do código.
+
 Durante o desenvolvimento são adotadas as seguintes práticas:
 
 - Auditoria antes de qualquer implementação
@@ -360,9 +362,11 @@ Durante o desenvolvimento são adotadas as seguintes práticas:
 - Pull Requests focadas
 - Clean Code
 - SOLID
+- Separação de responsabilidades
 - Componentização
 - Hooks especializados
 - Services desacoplados
+- Testes unitários com Vitest
 - Documentação contínua
 - Revisão da arquitetura
 
@@ -370,6 +374,10 @@ Validações recomendadas antes de abrir uma Pull Request:
 
 ```bash
 npm run lint
+```
+
+```bash
+npm run test
 ```
 
 ```bash
