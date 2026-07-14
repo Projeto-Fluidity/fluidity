@@ -1,5 +1,17 @@
 name: CI
 
+# ============================================================================
+# CONTINUOUS INTEGRATION
+# ============================================================================
+#
+# Executa a validação automática das Pull Requests antes
+# da integração com as branches protegidas.
+#
+# Este workflow garante que:
+# - o código segue os padrões definidos pelo projeto;
+# - os testes unitários continuam passando;
+# - a aplicação permanece compilando corretamente.
+
 on:
   pull_request:
     branches:
@@ -8,22 +20,45 @@ on:
 
 jobs:
   validate:
+    # Utiliza um ambiente Linux padronizado fornecido pelo GitHub.
     runs-on: ubuntu-latest
 
     steps:
+      # Recupera o código do repositório.
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Configura a mesma versão do Node utilizada pelo projeto.
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
+      # Instala as dependências exatamente como definidas no package-lock.json.
       - name: Install dependencies
         run: npm ci
 
+      # Executa a análise estática do código.
       - name: Lint
         run: npm run lint
 
+      # Executa a suíte de testes unitários.
+      #
+      # Caso algum teste falhe, o workflow será interrompido
+      # e a Pull Request não poderá ser integrada até que
+      # o comportamento esperado seja restaurado.
+      - name: Unit Tests
+        run: npm run test
+
+      # Garante que a aplicação continua compilando corretamente.
+      #
+      # Esta etapa valida:
+      # - TypeScript
+      # - Build do Vite
+      # - Geração do PWA
+      #
+      # Caso ocorra qualquer erro durante a compilação,
+      # o workflow será interrompido.
       - name: Build
         run: npm run build
+        
