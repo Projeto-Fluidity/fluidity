@@ -350,6 +350,17 @@ Esses documentos descrevem:
 
 ---
 
+# 📦 Versionamento
+
+O Fluidity adota oficialmente o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)** para identificar e organizar suas releases.
+
+O formato das versões segue a estrutura:
+
+```text
+MAJOR.MINOR.PATCH
+
+---
+
 # 🧪 Qualidade
 
 O projeto adota uma abordagem incremental de Quality Engineering, priorizando a validação contínua da arquitetura, do comportamento da aplicação e da qualidade do código.
