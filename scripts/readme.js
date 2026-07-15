@@ -15,54 +15,31 @@ import path from "node:path";
 
 /**
  * Atualiza uma seção delimitada por marcadores.
- *
- * Exemplo:
- *
- * <!-- VERSION:START -->
- * Conteúdo antigo
- * <!-- VERSION:END -->
- *
- * ↓
- *
- * <!-- VERSION:START -->
- * Conteúdo novo
- * <!-- VERSION:END -->
  */
 function replaceSection(content, startMarker, endMarker, newContent) {
+  const regex = new RegExp(`${startMarker}[\\s\\S]*?${endMarker}`, "m");
 
-  const regex = new RegExp(
-    `${startMarker}[\\s\\S]*?${endMarker}`,
-    "m"
-  );
-
-  return content.replace(
-    regex,
-    `${startMarker}
-${newContent}
-${endMarker}`
-  );
+  return content.replace(regex, `${startMarker}\n${newContent}\n${endMarker}`);
 }
 
 /**
- * Atualiza automaticamente o README.
+ * Sincroniza automaticamente o README.
  */
 export function updateReadme(version) {
-
   const readmePath = path.join(process.cwd(), "README.md");
 
+  // Lê todo o conteúdo do README
   let content = fs.readFileSync(readmePath, "utf8");
 
-  /**
-   * Primeira sincronização:
-   * atualiza apenas a versão do projeto.
-   */
+  // Atualiza apenas a seção da versão
   content = replaceSection(
     content,
     "<!-- VERSION:START -->",
     "<!-- VERSION:END -->",
-    `Versão atual: **${version}**`
+    `Versão atual: **${version}**`,
   );
 
+  // Salva novamente o arquivo
   fs.writeFileSync(readmePath, content);
 
   console.log("📘 README sincronizado.");

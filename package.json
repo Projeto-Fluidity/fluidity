@@ -12,10 +12,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
 
-    "release:patch": "npm version patch --no-git-tag-version",
-    "release:minor": "npm version minor --no-git-tag-version",
-    "release:major": "npm version major --no-git-tag-version"
-  },
+    "release:patch": "npm version patch --no-git-tag-version && node scripts/prepare-release.js",
+    "release:minor": "npm version minor --no-git-tag-version && node scripts/prepare-release.js",
+    "release:major": "npm version major --no-git-tag-version && node scripts/prepare-release.js"
+    },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@supabase/supabase-js": "^2.98.0",
