@@ -330,12 +330,14 @@ PORT=3000
 A documentação da infraestrutura encontra-se em:
 
 ```text
-docs/
-└── infra/
+docs
+├── governance
+│   └── branch-protection.md
+└── infra
+    ├── ARCHITECTURE.md
     ├── DEPLOYMENT.md
     ├── RAILWAY.md
-    ├── VERCEL.md
-    └── ARCHITECTURE.md
+    └── VERCEL.md
 ```
 
 Esses documentos descrevem:
@@ -349,6 +351,31 @@ Esses documentos descrevem:
 - boas práticas para manutenção da infraestrutura.
 
 ---
+
+# 🛡 Governança
+
+O Fluidity adota uma estratégia de governança para garantir que toda alteração publicada em produção siga um fluxo controlado e rastreável.
+
+Atualmente o repositório possui proteção da branch principal (`main`), integrada ao processo de Continuous Integration.
+
+A documentação de governança encontra-se em:
+
+```text
+docs/
+└── governance/
+    └── branch-protection.md
+```
+
+Esse documento descreve:
+
+- política de proteção da branch `main`;
+- fluxo oficial de desenvolvimento;
+- regras de Pull Request;
+- integração com a Continuous Integration;
+- justificativas técnicas da estratégia adotada.
+
+---
+
 
 # 📦 Versionamento
 
@@ -380,6 +407,7 @@ Durante o desenvolvimento são adotadas as seguintes práticas:
 - Testes unitários com Vitest
 - Documentação contínua
 - Revisão da arquitetura
+- Governança do repositório
 
 Validações recomendadas antes de abrir uma Pull Request:
 
