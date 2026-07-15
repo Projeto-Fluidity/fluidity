@@ -1,7 +1,7 @@
 {
   "name": "fluidity",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,9 +9,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write .",
-
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "release:patch": "npm version patch --no-git-tag-version && node scripts/prepare-release.js",
+    "release:minor": "npm version minor --no-git-tag-version && node scripts/prepare-release.js",
+    "release:major": "npm version major --no-git-tag-version && node scripts/prepare-release.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
