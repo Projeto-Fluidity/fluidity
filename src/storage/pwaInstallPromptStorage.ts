@@ -1,52 +1,45 @@
 /**
  * ============================================================
- * PWA INSTALL STORAGE
+ * PWA INSTALL PROMPT STORAGE
  * ============================================================
  *
- * Responsável por persistir informações
- * relacionadas à instalação do PWA.
+ * Responsável por persistir preferências relacionadas
+ * ao convite de instalação do aplicativo.
+ *
+ * Este armazenamento NÃO representa o estado de instalação
+ * do PWA.
+ *
+ * Sua única responsabilidade é registrar preferências
+ * da interface, como o usuário ter dispensado o convite.
  *
  * Não possui dependência de React.
  * Não possui dependência de UI.
  */
 
-const STORAGE_KEY =
-  "fluidity:pwa-installed";
+const STORAGE_KEY = "fluidity:install-prompt-dismissed";
 
 /**
- * Verifica se o usuário já instalou
- * o aplicativo.
+ * Verifica se o usuário optou por
+ * não visualizar novamente o convite
+ * de instalação.
  */
-export function isPWAInstalled(): boolean {
-  return (
-    localStorage.getItem(STORAGE_KEY) ===
-    "true"
-  );
+
+export function hasDismissedInstallPrompt(): boolean {
+  return localStorage.getItem(STORAGE_KEY) === "true";
 }
 
 /**
- * Marca o aplicativo como instalado.
+ * Registra que o usuário dispensou
+ * o convite de instalação.
  */
-export function markPWAInstalled(): void {
-  localStorage.setItem(
-    STORAGE_KEY,
-    "true"
-  );
-}
 
-/**
- * Verifica se o aplicativo
- * está rodando como PWA instalado.
- */
-export function isRunningAsPWA(): boolean {
-  return window.matchMedia(
-    "(display-mode: standalone)"
-  ).matches;
+export function markInstallPromptDismissed(): void {
+  localStorage.setItem(STORAGE_KEY, "true");
 }
 
 /**
  * Utilitário para QA.
  */
-export function resetPWAInstallState(): void {
+export function resetInstallPromptState(): void {
   localStorage.removeItem(STORAGE_KEY);
 }

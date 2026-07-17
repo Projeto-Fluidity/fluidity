@@ -1,8 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * ============================================================
@@ -18,16 +14,13 @@ import {
  * - controlar quando exibi-lo;
  * - capturar a escolha do usuário.
  */
-type BeforeInstallPromptEvent =
-  Event & {
-    prompt: () => Promise<void>;
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
 
-    userChoice: Promise<{
-      outcome:
-        | "accepted"
-        | "dismissed";
-    }>;
-  };
+  userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+  }>;
+};
 
 /**
  * ============================================================
@@ -70,12 +63,8 @@ export function usePWAInstall() {
    * Armazena o evento interceptado
    * pelo beforeinstallprompt.
    */
-  const [
-    installEvent,
-    setInstallEvent,
-  ] = useState<BeforeInstallPromptEvent | null>(
-    null
-  );
+  const [installEvent, setInstallEvent] =
+    useState<BeforeInstallPromptEvent | null>(null);
 
   /**
    * ==========================================================
@@ -85,8 +74,7 @@ export function usePWAInstall() {
    * Indica se o navegador permite
    * exibir o convite de instalação.
    */
-  const [canInstall, setCanInstall] =
-    useState(false);
+  const [canInstall, setCanInstall] = useState(false);
 
   /**
    * ==========================================================
@@ -103,27 +91,24 @@ export function usePWAInstall() {
    * será exibido ao usuário.
    */
   useEffect(() => {
-    function handleBeforeInstallPrompt(
-      event: Event
-    ) {
-      event.preventDefault();
+    function handleBeforeInstallPrompt(event: Event) {
+      const installPromptEvent = event as BeforeInstallPromptEvent;
 
-      setInstallEvent(
-        event as BeforeInstallPromptEvent
-      );
+      installPromptEvent.preventDefault();
+
+      setInstallEvent(installPromptEvent);
+
+      setCanInstall(true);
 
       setCanInstall(true);
     }
 
-    window.addEventListener(
-      "beforeinstallprompt",
-      handleBeforeInstallPrompt
-    );
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
 
     return () => {
       window.removeEventListener(
         "beforeinstallprompt",
-        handleBeforeInstallPrompt
+        handleBeforeInstallPrompt,
       );
     };
   }, []);
@@ -142,27 +127,23 @@ export function usePWAInstall() {
    * - impede novas exibições;
    * - aguarda decisão do navegador.
    */
-  const install = useCallback(
-    async (): Promise<
-      "accepted" | "dismissed" | null
-    > => {
-      if (!installEvent) {
-        return null;
-      }
+  const install = useCallback(async (): Promise<
+    "accepted" | "dismissed" | null
+  > => {
+    if (!installEvent) {
+      return null;
+    }
 
-      await installEvent.prompt();
+    await installEvent.prompt();
 
-      const { outcome } =
-        await installEvent.userChoice;
+    const { outcome } = await installEvent.userChoice;
 
-      setCanInstall(false);
+    setCanInstall(false);
 
-      setInstallEvent(null);
+    setInstallEvent(null);
 
-      return outcome;
-    },
-    [installEvent]
-  );
+    return outcome;
+  }, [installEvent]);
 
   /**
    * ==========================================================
