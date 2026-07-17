@@ -64,12 +64,19 @@ export async function saveSubscription(
    * UPSERT
    * ==========================================================
    *
-   * Mantido temporariamente utilizando device_id
-   * até a conclusão da migração do banco.
+   * A Push Subscription é identificada unicamente pelo
+   * device_id, conforme definido na ADR-0002.
+   *
+   * Quando um dispositivo já possui uma assinatura,
+   * o registro existente é atualizado preservando
+   * sua identidade.
+   *
+   * O user_id representa apenas o usuário atualmente
+   * associado ao dispositivo.
    */
 
   const response = await fetch(
-    `${url}/rest/v1/push_subscriptions?on_conflict=user_id`,
+    `${url}/rest/v1/push_subscriptions?on_conflict=device_id`,
     {
       method: "POST",
 
@@ -110,13 +117,8 @@ export async function saveSubscription(
   if (!response.ok) {
     const errorText = await response.text();
 
-    console.error(
-      "Erro ao salvar Push Subscription:",
-      errorText,
-    );
+    console.error("Erro ao salvar Push Subscription:", errorText);
 
-    throw new Error(
-      "Erro ao salvar Push Subscription",
-    );
+    throw new Error("Erro ao salvar Push Subscription");
   }
 }
