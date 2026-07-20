@@ -33,6 +33,13 @@ O Fluidity segue o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)
 - Padronização da documentação técnica.
 - Integração dos scripts de versionamento ao fluxo de preparação de releases.
 - Sincronização automática da versão exibida no README durante o processo de release.
+- Migração da identidade da infraestrutura de Push Notifications para `device_id`.
+- Implementação da sincronização automática entre autenticação e Push Subscription.
+- Criação do `subscriptionSyncService`.
+- Atualização da modelagem da tabela `push_subscriptions`.
+- Atualização da modelagem da tabela `reminder_settings`, tornando `user_id` a identidade da configuração.
+- Remoção da restrição `UNIQUE(device_id)` de `reminder_settings`, permitindo múltiplos usuários utilizarem o mesmo dispositivo.
+- Correção do carregamento inicial das configurações de notificações.
 
 ### Segurança
 
@@ -54,3 +61,13 @@ O Fluidity segue o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)
 ### Observações
 
 - Primeira release oficial publicada utilizando Git Tags e GitHub Releases.
+
+### Alterado
+
+- Migração da identidade da infraestrutura de Push Notifications para `device_id`.
+- Implementação da sincronização automática entre autenticação e Push Subscription.
+- Criação do `subscriptionSyncService`.
+- Atualização da modelagem da tabela `push_subscriptions`.
+- Atualização da modelagem da tabela `reminder_settings`, tornando `user_id` a identidade da configuração.
+- Remoção da restrição `UNIQUE(device_id)` de `reminder_settings`, permitindo múltiplos usuários utilizarem o mesmo dispositivo.
+- Correção do carregamento inicial das configurações de notificações.

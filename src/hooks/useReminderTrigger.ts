@@ -56,6 +56,7 @@ export function useReminderTrigger() {
   const lastResetDateRef = useRef<string | null>(null);
 
   useEffect(() => {
+    
     /**
      * ============================================================
      * PROTEÇÃO GLOBAL
@@ -88,6 +89,7 @@ export function useReminderTrigger() {
      * ============================================================
      */
 async function runTrigger() {
+
   const now = new Date();
 
   /**

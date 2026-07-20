@@ -122,3 +122,106 @@ export async function saveSubscription(
     throw new Error("Erro ao salvar Push Subscription");
   }
 }
+
+/**
+ * ============================================================
+ * ASSOCIATE USER TO DEVICE
+ * ============================================================
+ *
+ * Atualiza o usuário associado ao dispositivo.
+ *
+ * A Push Subscription permanece inalterada.
+ *
+ * Apenas o campo user_id é atualizado.
+ */
+export async function associateUserToDevice(
+  deviceId: string,
+  userId: string,
+): Promise<void> {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  const response = await fetch(
+    `${url}/rest/v1/push_subscriptions?device_id=eq.${encodeURIComponent(deviceId)}`,
+    {
+      method: "PATCH",
+
+      headers: {
+        "Content-Type": "application/json",
+
+        apikey: key,
+
+        Authorization: `Bearer ${key}`,
+      },
+
+      body: JSON.stringify({
+        user_id: userId,
+        updated_at: new Date().toISOString(),
+        last_seen_at: new Date().toISOString(),
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error(
+      "Erro ao associar usuário ao dispositivo:",
+      errorText,
+    );
+
+    throw new Error(
+      "Erro ao associar usuário ao dispositivo",
+    );
+  }
+}
+
+/**
+ * ============================================================
+ * CLEAR DEVICE ASSOCIATION
+ * ============================================================
+ *
+ * Remove a associação entre o usuário e o
+ * dispositivo atual.
+ *
+ * A Push Subscription permanece registrada.
+ */
+export async function clearDeviceAssociation(
+  deviceId: string,
+): Promise<void> {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  const response = await fetch(
+    `${url}/rest/v1/push_subscriptions?device_id=eq.${encodeURIComponent(deviceId)}`,
+    {
+      method: "PATCH",
+
+      headers: {
+        "Content-Type": "application/json",
+
+        apikey: key,
+
+        Authorization: `Bearer ${key}`,
+      },
+
+      body: JSON.stringify({
+        user_id: null,
+        updated_at: new Date().toISOString(),
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+
+    console.error(
+      "Erro ao remover associação do dispositivo:",
+      errorText,
+    );
+
+    throw new Error(
+      "Erro ao remover associação do dispositivo",
+    );
+  }
+}

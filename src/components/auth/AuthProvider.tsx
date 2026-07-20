@@ -20,6 +20,11 @@ import {
   updatePassword as updatePasswordService,
 } from "../../services/authService";
 
+import {
+  associateUserToCurrentDevice,
+  clearCurrentDeviceAssociation,
+} from "../../services/subscriptionSyncService";
+
 import type {
   AuthContextValue,
   AuthUser,
@@ -128,6 +133,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const authenticatedUser = await loginService(payload);
 
+      await associateUserToCurrentDevice(authenticatedUser.id);
+
       setUser(authenticatedUser);
     } catch (err) {
       console.error("Erro ao realizar login:", err);
@@ -174,6 +181,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setError(null);
 
     try {
+      await clearCurrentDeviceAssociation();
+
       await logoutService();
 
       setUser(null);
@@ -247,6 +256,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (session) {
           const currentUser = await loadAuthenticatedUser();
+
+          if (currentUser) {
+            await associateUserToCurrentDevice(currentUser.id);
+          }
 
           setUser(currentUser);
         }

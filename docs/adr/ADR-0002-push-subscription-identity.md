@@ -1,6 +1,29 @@
 # ADR-0002 — Identidade da Push Subscription
 
-- **Status:** Proposta
+---
+
+## Evolução da implementação
+
+Durante a implementação observou-se que a tabela
+`reminder_settings` ainda utilizava a restrição
+`UNIQUE(device_id)`.
+
+Essa restrição fazia sentido quando o dispositivo era
+considerado a identidade da configuração.
+
+Após a adoção da arquitetura baseada em `user_id`,
+essa restrição tornou-se incompatível, impedindo que
+múltiplos usuários utilizassem o mesmo dispositivo.
+
+Como consequência:
+
+- `user_id` passa a representar a identidade da configuração;
+- `device_id` permanece apenas como metadado técnico;
+- a restrição `UNIQUE(device_id)` foi removida de
+  `reminder_settings`;
+- permanece apenas `UNIQUE(user_id)`.
+
+- **Status:** Implementada
 - **Data:** 2026-07-17
 
 ---
@@ -108,20 +131,24 @@ Representa apenas o proprietário atual da assinatura.
 - Eliminação de conflitos entre banco e aplicação.
 - Arquitetura alinhada ao funcionamento da Web Push API.
 - Melhor separação entre autenticação e infraestrutura de notificações.
+- Compatibilidade com múltiplos usuários utilizando o mesmo dispositivo.
 
 ### Negativas
 
 - Necessidade de revisão da modelagem da tabela.
 - Ajustes no `subscriptionService`.
 - Revisão do fluxo de login e logout.
+- Migração das tabelas que ainda utilizavam device_id como identidade.
 
 ---
 
 ## Componentes impactados
 
 - subscriptionService
+- subscriptionSyncService
 - pushService
 - notificationSettingsService
+- AuthProvider
 - Push Server
 - Supabase
 - Documentação da arquitetura
@@ -130,4 +157,13 @@ Representa apenas o proprietário atual da assinatura.
 
 ## Status da implementação
 
-🚧 Em andamento.
+✅ Implementada.
+
+Principais entregas:
+
+- migração da identidade da Push Subscription para `device_id`;
+- sincronização automática entre autenticação e assinatura;
+- criação do `subscriptionSyncService`;
+- atualização da modelagem das tabelas;
+- remoção da restrição `UNIQUE(device_id)` em `reminder_settings`;
+- compatibilidade com múltiplos usuários utilizando o mesmo dispositivo.
