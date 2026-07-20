@@ -19,7 +19,7 @@ export async function getSettings(userId: string) {
     .from("reminder_settings")
     .select("*")
     .eq("user_id", userId)
-    .single();
+    .maybeSingle();
 
   /**
    * PGRST116 = "nenhum resultado encontrado"
@@ -70,11 +70,16 @@ export async function saveSettings(
 
   const { data, error } = await supabase
     .from("reminder_settings")
-    .update({
-      device_id: deviceId,
-      ...settings,
-    })
-    .eq("user_id", userId)
+    .upsert(
+      {
+        user_id: userId,
+        device_id: deviceId,
+        ...settings,
+      },
+      {
+        onConflict: "user_id",
+      },
+    )
     .select();
 
   if (error) {
