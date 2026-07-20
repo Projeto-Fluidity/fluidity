@@ -16,7 +16,7 @@ O Fluidity segue o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)
 
 ---
 
-## [0.4.0] - Em desenvolvimento
+## [0.5.0] - Em desenvolvimento
 
 ### Adicionado
 
