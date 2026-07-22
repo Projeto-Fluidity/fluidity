@@ -161,9 +161,10 @@ Representa apenas o proprietário atual da assinatura.
 
 Principais entregas:
 
-- migração da identidade da Push Subscription para `device_id`;
+- consolidação da arquitetura da Push Subscription baseada no dispositivo;
 - sincronização automática entre autenticação e assinatura;
 - criação do `subscriptionSyncService`;
 - atualização da modelagem das tabelas;
 - remoção da restrição `UNIQUE(device_id)` em `reminder_settings`;
+- adoção de `user_id` como identidade da configuração de notificações;
 - compatibilidade com múltiplos usuários utilizando o mesmo dispositivo.
