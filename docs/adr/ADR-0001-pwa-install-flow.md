@@ -50,7 +50,8 @@ Isso dificultava:
 
 ## Decisão
 
-O convite de instalação deve depender exclusivamente das informações disponibilizadas pelo navegador e das preferências temporárias da interface.
+A interpretação dessas informações é centralizada
+na política de exibição da aplicação.
 
 A lógica de exibição considera:
 
@@ -101,6 +102,8 @@ Essas informações representam apenas preferências temporárias da interface e
 - InstallAppCard
 - Hooks relacionados à instalação da PWA
 - Serviços de instalação
+- pwaInstallPromptPolicy
+- pwaInstallPromptStorage
 - Fluxo de registro de humor
 
 ---

@@ -4,7 +4,7 @@
 
 ## Evolução da implementação
 
-Durante a implementação observou-se que a tabela
+Durante a implementação da nova arquitetura observou-se que a tabela
 `reminder_settings` ainda utilizava a restrição
 `UNIQUE(device_id)`.
 
@@ -157,7 +157,7 @@ Representa apenas o proprietário atual da assinatura.
 
 ## Status da implementação
 
-✅ Implementada.
+✅ Em evolução.
 
 Principais entregas:
 
