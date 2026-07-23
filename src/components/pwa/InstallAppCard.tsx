@@ -3,7 +3,6 @@ import { useState } from "react";
 import { usePWAInstall } from "../../hooks/usePWAInstall";
 
 import {
-  hasDismissedInstallPrompt,
   markInstallPromptDismissed,
 } from "../../storage/pwaInstallPromptStorage";
 
@@ -28,69 +27,44 @@ import {
  * - Auth;
  * - Navegação.
  *
- * Toda a lógica de exibição da tela
- * permanece responsabilidade da página.
+ * Este componente permanece responsável
+ * apenas pela renderização da interface.
+ *
+ * A decisão sobre quando o convite deve
+ * ser exibido permanece centralizada
+ * no Hook usePWAInstall().
  */
 export default function InstallAppCard() {
-  /**
-   * ==========================================================
-   * PWA INSTALL
-   * ==========================================================
-   */
-  const { canInstall, install } = usePWAInstall();
-
-  /**
+    /**
    * ==========================================================
    * LOCAL STATE
    * ==========================================================
    *
-   * Controla remoção imediata do card
-   * sem depender de re-render externo.
+   * Controla apenas a remoção imediata
+   * do card durante o ciclo de vida
+   * do componente.
+   *
+   * Não representa persistência.
    */
   const [dismissed, setDismissed] = useState(false);
 
-  /**
-   * ==========================================================
-   * REGRAS DE EXIBIÇÃO
-   * ==========================================================
-   *
-   * Centraliza todas as condições que determinam
-   * se o convite de instalação deve ser renderizado.
-   *
-   * Manter essa decisão em um único ponto facilita
-   * futuras evoluções da regra de negócio sem
-   * espalhar condicionais pelo componente.
-   */
-  function shouldRenderCard(): boolean {
-    return (
-      canInstall &&
-      !dismissed &&
-      !hasDismissedInstallPrompt() 
-    );
-  }
+  /** ==========================================================
+  * PWA INSTALL
+  * ==========================================================
+  */
+  const {
+    shouldShowInstallPrompt,
+    install,
+  } = usePWAInstall();
 
-  /**
-   * ==========================================================
-   * GUARD
-   * ==========================================================
-   *
-   * Interrompe a renderização quando o convite
-   * não deve ser exibido.
-   */
-  if (!shouldRenderCard()) {
+  if (!shouldShowInstallPrompt || dismissed) {
     return null;
   }
 
-  /**
-   * ==========================================================
-   * DISPENSAR CONVITE
-   * ==========================================================
-   *
-   * Remove imediatamente o card da interface.
-   *
-   * Nesta etapa o estado é apenas visual.
-   * A persistência será tratada posteriormente.
-   */
+  /** ==========================================================
+  * DISPENSAR CONVITE
+  * ==========================================================
+  */
 
   function handleDismiss() {
     markInstallPromptDismissed();
@@ -98,34 +72,19 @@ export default function InstallAppCard() {
   }
 
   /**
-   * ==========================================================
-   * INSTALAÇÃO
-   * ==========================================================
+   * Dispara o prompt nativo de instalação.
    *
-   * Dispara o prompt nativo do navegador.
-   *
-   * Caso o usuário aceite a instalação,
-   * o convite é marcado como dispensado
-   * para evitar novas exibições.
-   *
-   * A detecção da instalação permanece
-   * responsabilidade do navegador.
+   * A decisão do navegador permanece
+   * encapsulada no Hook usePWAInstall().
    */
   async function handleInstall() {
-    const result = await install();
-
-    if (result === "accepted") {
-      markInstallPromptDismissed();
-    }
-
-    setDismissed(true);
+    await install();
   }
 
-  /**
-   * ==========================================================
-   * RENDERIZAÇÃO
-   * ==========================================================
-   */
+  /**  ==========================================================
+  * RENDERIZAÇÃO
+  * ==========================================================
+  */
 
   return (
     <section className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">

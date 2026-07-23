@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { canShowInstallPrompt } from "../utils/pwaInstallPromptPolicy";
+import { isRunningAsPWA } from "../storage/pwaInstallState";
+
 /**
  * ============================================================
  * BEFORE INSTALL PROMPT EVENT
@@ -27,32 +30,18 @@ type BeforeInstallPromptEvent = Event & {
  * HOOK: USE PWA INSTALL
  * ============================================================
  *
- * Responsável por centralizar toda a lógica
- * relacionada à instalação do PWA.
+ * Responsável por centralizar a lógica relacionada
+ * ao estado de instalação do Progressive Web App (PWA).
  *
- * Objetivos:
+ * Atualmente este Hook:
  *
- * - detectar quando o aplicativo pode ser instalado;
- * - armazenar o evento beforeinstallprompt;
- * - expor método para disparar instalação;
- * - evitar que componentes manipulem eventos
- *   nativos diretamente.
+ * - consulta o estado da instalação;
+ * - aplica a política de exibição;
+ * - expõe uma API simplificada para a interface.
  *
- * Fluxo:
- *
- * Navegador
- *      ↓
- * beforeinstallprompt
- *      ↓
- * usePWAInstall
- *      ↓
- * canInstall = true
- *      ↓
- * Componente visual
- *      ↓
- * install()
- *      ↓
- * Prompt nativo
+ * A captura do evento beforeinstallprompt
+ * poderá ser centralizada em um Provider
+ * em uma evolução futura da arquitetura.
  */
 export function usePWAInstall() {
   /**
@@ -76,6 +65,11 @@ export function usePWAInstall() {
    */
   const [canInstall, setCanInstall] = useState(false);
 
+  const shouldShowInstallPrompt =
+    canInstall &&
+    !isRunningAsPWA() &&
+    canShowInstallPrompt();
+
   /**
    * ==========================================================
    * BEFORE INSTALL PROMPT
@@ -92,13 +86,12 @@ export function usePWAInstall() {
    */
   useEffect(() => {
     function handleBeforeInstallPrompt(event: Event) {
+
       const installPromptEvent = event as BeforeInstallPromptEvent;
 
       installPromptEvent.preventDefault();
 
       setInstallEvent(installPromptEvent);
-
-      setCanInstall(true);
 
       setCanInstall(true);
     }
@@ -152,6 +145,7 @@ export function usePWAInstall() {
    */
   return {
     canInstall,
+    shouldShowInstallPrompt,
     install,
   };
 }
