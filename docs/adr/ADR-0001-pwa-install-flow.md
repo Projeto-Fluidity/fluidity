@@ -1,121 +1,170 @@
 # ADR-0001 — Desacoplamento do Fluxo de Instalação da PWA
 
-- **Status:** Implementada
+- **Status:** ✅ Implementado
 - **Data:** 2026-07-17
 
 ---
 
-## Evolução da implementação
+# Contexto
 
-Durante a implementação e validação do novo fluxo observou-se que a decisão de exibir o convite de instalação não deve depender apenas da existência do evento `beforeinstallprompt`.
+O fluxo de instalação da Progressive Web App (PWA) estava acoplado ao registro de humor da aplicação.
 
-A exibição do convite deve refletir o contexto atual informado pelo navegador e respeitar as preferências temporárias do usuário, evitando apresentar ações que não possuem utilidade.
+O convite para instalação era exibido somente após o usuário registrar um humor, utilizando estados temporários armazenados em `sessionStorage`.
 
-Como consequência:
-
-- o navegador permanece como fonte de verdade sobre o estado da instalação;
-- a aplicação não persiste um estado próprio indicando que a PWA está instalada;
-- o armazenamento local é utilizado apenas para registrar preferências temporárias da interface;
-- o convite poderá ser reapresentado futuramente após uma dispensa temporária, respeitando as regras definidas pela aplicação.
-
----
-
-## Contexto
-
-Inicialmente, o card de instalação da PWA era exibido somente após o registro de um humor.
-
-A lógica dependia de estados temporários (`sessionStorage`) criados pelo fluxo de registro de humor.
-
-Essa abordagem gerava um forte acoplamento entre duas funcionalidades independentes:
+Essa abordagem fazia com que uma funcionalidade de interface dependesse diretamente de uma funcionalidade de domínio, criando um acoplamento entre duas responsabilidades independentes:
 
 - Registro de humor;
 - Instalação da PWA.
 
-Além disso, a exibição do convite deixava de refletir o estado real da aplicação e do navegador.
+Além disso, a decisão de exibição do convite deixava de refletir o estado real informado pelo navegador, tornando o comportamento menos previsível e mais difícil de manter.
 
 ---
 
-## Problema
+# Problema
 
-O fluxo de instalação da PWA dependia de eventos que não possuem relação com a instalação da aplicação.
+A lógica responsável pela instalação da PWA dependia de eventos que não possuíam qualquer relação com a instalação da aplicação.
 
-Isso dificultava:
+Como consequência:
 
-- manutenção;
-- evolução do código;
-- reutilização dos componentes;
-- previsibilidade do comportamento.
+- havia acoplamento entre funcionalidades independentes;
+- componentes de interface assumiam responsabilidades relacionadas à API do navegador;
+- o fluxo era difícil de evoluir;
+- o comportamento tornava-se pouco previsível;
+- a reutilização dos componentes era limitada.
 
 ---
 
-## Decisão
+# Decisão
 
-A interpretação dessas informações é centralizada
-na política de exibição da aplicação.
+A responsabilidade pela captura e gerenciamento do evento `beforeinstallprompt` passa a ser centralizada em um único Provider da aplicação.
 
-A lógica de exibição considera:
+A arquitetura passa a ser composta por:
+
+```text
+Browser
+      │
+beforeinstallprompt
+      │
+      ▼
+PWAInstallProvider
+      │
+      ▼
+PWAInstallContext
+      │
+      ▼
+usePWAInstall
+      │
+      ▼
+InstallAppCard
+```
+
+O navegador passa a ser a única fonte de verdade sobre o estado de instalação da aplicação.
+
+A aplicação deixa de manter qualquer estado próprio indicando se a PWA está instalada.
+
+A decisão de exibição do convite passa a considerar exclusivamente:
 
 - disponibilidade de instalação informada pelo navegador;
 - execução da aplicação em modo `standalone`;
 - plataforma suportada;
+- política de exibição definida pela aplicação;
 - preferência temporária do usuário em dispensar o convite.
 
 O fluxo de registro de humor deixa de participar dessa decisão.
 
-A aplicação não mantém um estado próprio indicando que o aplicativo está instalado.
-
 ---
 
-## Preferências da interface
+# Preferências da Interface
 
-A aplicação poderá persistir apenas preferências relacionadas à experiência do usuário.
+A aplicação poderá persistir apenas informações relacionadas à experiência do usuário.
 
 Exemplos:
 
-- data da última dispensa do convite de instalação.
+- data da última dispensa do convite;
+- período para reapresentação do card de instalação.
 
-Essas informações representam apenas preferências temporárias da interface e não substituem o estado informado pelo navegador.
+Essas informações representam apenas preferências temporárias da interface e nunca substituem o estado informado pelo navegador.
 
 ---
 
-## Consequências
+# Evolução da Implementação
 
-### Positivas
+Durante a implementação foi identificada a necessidade de separar a lógica de instalação da responsabilidade dos componentes de interface.
+
+Como consequência, foi adotada uma arquitetura baseada em Provider/Context, responsável por centralizar toda a comunicação com a API de instalação da PWA.
+
+Essa mudança permitiu:
+
+- eliminar dependências entre funcionalidades distintas;
+- remover estados artificiais relacionados à instalação;
+- simplificar os componentes consumidores;
+- manter uma única origem para o estado de instalação.
+
+---
+
+# Observações para Testes
+
+Durante a validação da implementação foi observado um comportamento importante do Chrome.
+
+O evento `beforeinstallprompt` não é disparado quando a aplicação já está instalada para a mesma origem.
+
+Para validar novamente o fluxo de instalação é necessário:
+
+- desinstalar previamente a PWA;
+- ou utilizar outra origem (porta ou domínio diferente).
+
+Esse comportamento pertence ao navegador e não à aplicação.
+
+Durante a investigação esse comportamento foi inicialmente interpretado como um possível problema na implementação. Após auditoria completa da arquitetura foi confirmado que o fluxo estava correto e que a ausência do evento era consequência do estado de instalação mantido pelo navegador.
+
+---
+
+# Consequências
+
+## Positivas
 
 - Separação clara de responsabilidades.
-- Fluxo aderente às recomendações para PWAs.
-- Eliminação de dependências em `sessionStorage`.
+- Arquitetura baseada em Provider/Context.
 - Navegador definido como fonte de verdade sobre o estado da instalação.
+- Eliminação do acoplamento entre instalação da PWA e registro de humor.
+- Eliminação da dependência de `sessionStorage`.
 - Separação entre estado técnico da aplicação e preferências da interface.
 - Código mais previsível.
+- Componentes com responsabilidade única.
 - Facilidade para evolução futura.
 
-### Negativas
+## Negativas
 
-- Necessidade de revisar os componentes relacionados ao fluxo de instalação.
 - Dependência das capacidades disponibilizadas por cada navegador.
+- Necessidade de adaptação dos componentes relacionados ao fluxo de instalação.
+- O comportamento pode variar conforme as políticas de instalação adotadas pelo navegador.
 
 ---
 
-## Componentes impactados
+# Componentes Impactados
 
-- InstallAppCard
-- Hooks relacionados à instalação da PWA
-- Serviços de instalação
-- pwaInstallPromptPolicy
-- pwaInstallPromptStorage
-- Fluxo de registro de humor
+- `PWAInstallProvider`
+- `PWAInstallContext`
+- `usePWAInstall`
+- `InstallAppCard`
+- `pwaInstallPromptPolicy`
+- `pwaInstallPromptStorage`
+- fluxo de registro de humor
 
 ---
 
-## Status da implementação
+# Status da Implementação
 
 ✅ Implementado.
 
 Principais entregas:
 
-- remoção do acoplamento entre registro de humor e instalação da PWA;
+- criação do `PWAInstallProvider`;
+- criação do `PWAInstallContext`;
+- centralização da captura do evento `beforeinstallprompt`;
+- simplificação do `usePWAInstall` através do Context;
+- desacoplamento entre instalação da PWA e registro de humor;
 - remoção da dependência de `sessionStorage`;
 - adoção do navegador como fonte de verdade sobre o estado da instalação;
 - separação entre estado técnico da PWA e preferências da interface;
-- arquitetura preparada para reexibição controlada do convite de instalação.
+- arquitetura preparada para evolução do fluxo de instalação sem impacto nas funcionalidades de domínio.
