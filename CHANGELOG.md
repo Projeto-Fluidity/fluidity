@@ -18,22 +18,28 @@ O Fluidity segue o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)
 
 ## [0.6.0] - 2026-07-24
 
-### Changed
+### Alterado
 
-- Refatorada a arquitetura do fluxo de instalação da PWA.
-- Browser definido como fonte da verdade para instalação da PWA.
-- Melhorada a arquitetura das notificações Push.
-- Consolidada a documentação técnica do projeto.
+- Refatoração completa do fluxo de instalação da PWA.
+- Centralização da lógica de instalação em `PWAInstallProvider`.
+- Navegador definido como fonte da verdade para o estado da instalação.
+- Separação entre estado técnico da PWA e preferências da interface.
+- Evolução da arquitetura das notificações Push.
 
-### Documentation
+### Documentação
 
-- Atualizado o README.
-- Padronizados os Architecture Decision Records (ADRs).
-- Atualizada a documentação de governança.
+- Atualização completa do README.
+- Consolidação dos Architecture Decision Records (ADRs).
+- Padronização da documentação técnica.
+- Atualização da documentação de governança.
+
+### Segurança
+
+- Consolidação do fluxo de release com validação obrigatória da pipeline de CI antes da publicação.
 
 ---
 
-## [0.5.0] - Em desenvolvimento
+## [0.5.0] - 2026-06-18
 
 ### Adicionado
 
@@ -88,7 +94,7 @@ O Fluidity segue o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)
 
 ### Observações
 
-- Primeira release oficial publicada utilizando Git Tags e GitHub Releases.
+- Consolidação da arquitetura da PWA para preparação da aplicação para ambiente de produção.
 
 ### Alterado
 
