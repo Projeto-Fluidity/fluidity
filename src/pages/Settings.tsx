@@ -28,7 +28,8 @@ export default function Settings() {
    * ==========================================================
    */
 
-  const { generalSettings, handleToggleGeneral } = useNotificationSettings();
+  const { generalSettings, handleToggleGeneral, isLoading } =
+    useNotificationSettings();
 
   /**
    * ==========================================================
@@ -71,30 +72,41 @@ export default function Settings() {
             Geral
           </span>
 
-          <div className="space-y-4">
-            {generalSettings.map((item) => (
-              <div key={item.id} className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
-                    {item.icon}
+          {isLoading ? (
+            <p className="text-sm text-[#64748B]">
+              Carregando configurações...
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {generalSettings.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#DCFCE7] text-[#16A34A]">
+                      {item.icon}
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium text-[#0F172A]">
+                        {item.label}
+                      </p>
+
+                      <p className="text-xs text-[#94A3B8]">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <p className="text-sm font-medium text-[#0F172A]">
-                      {item.label}
-                    </p>
-
-                    <p className="text-xs text-[#94A3B8]">{item.description}</p>
-                  </div>
+                  <Toggle
+                    active={item.enabled}
+                    onToggle={() => handleToggleGeneral(item.id)}
+                  />
                 </div>
-
-                <Toggle
-                  active={item.enabled}
-                  onToggle={() => handleToggleGeneral(item.id)}
-                />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/**

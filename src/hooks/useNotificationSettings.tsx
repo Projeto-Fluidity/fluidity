@@ -106,6 +106,8 @@ export function useNotificationSettings() {
 
   const [generalSettings, setGeneralSettings] = useState(INITIAL_SETTINGS);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   /**
    * ==========================================================
    * AUTH
@@ -153,6 +155,7 @@ export function useNotificationSettings() {
    * usuário autenticado.
    */
   async function loadSettings() {
+
     if (!user) {
       return;
     }
@@ -245,20 +248,27 @@ export function useNotificationSettings() {
     updateSetting(id, !(currentSetting?.enabled ?? false));
   }
 
-  useEffect(() => {
-    const initialize = async () => {
+useEffect(() => {
+  const initialize = async () => {
+    try {
+      setIsLoading(true);
+
       await loadSettings();
 
       await syncPushState();
-    };
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    void initialize();
+  void initialize();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
   return {
     generalSettings,
     handleToggleGeneral,
+    isLoading,
   };
 }

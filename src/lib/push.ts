@@ -89,7 +89,5 @@ export async function registerPush(): Promise<void> {
 
   if (error) {
     console.error("Erro ao salvar subscription:", error);
-  } else {
-    console.log("Push registrado com sucesso");
   }
 }

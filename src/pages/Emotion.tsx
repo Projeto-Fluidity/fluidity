@@ -115,9 +115,6 @@ export default function Emotion() {
    */
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  const [showInstallPrompt, setShowInstallPrompt] =
-  useState(false);
-
   const [showAlreadyRegistered, setShowAlreadyRegistered] =
   useState(false);
 
@@ -134,27 +131,6 @@ export default function Emotion() {
       {setShowAlreadyRegistered(true);
   }
   }, [status, navigate]);
-
-  /**
-   * Exibe convite de instalação
-   * após retorno da tela de sucesso.
-   */
-useEffect(() => {
-  const shouldShow =
-    sessionStorage.getItem(
-      "fluidity:show-install-prompt"
-    ) === "true";
-
-  if (!shouldShow) {
-    return;
-  }
-
-  setShowInstallPrompt(true);
-
-  sessionStorage.removeItem(
-    "fluidity:show-install-prompt"
-  );
-}, []);
 
   /**
    * Quando o usuário seleciona um humor:
@@ -267,9 +243,8 @@ useEffect(() => {
           </div>
 
           {/* Instalação do App */}
-          {showInstallPrompt && (
+
             <InstallAppCard />
-          )}
 
           {/* ======================================================
               Seleção de Humor

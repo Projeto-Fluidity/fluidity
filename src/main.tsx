@@ -5,11 +5,10 @@ import "./index.css";
 import App from "./App.tsx";
 import { resetMoodMock } from "./utils/debug/resetMoodMock";
 import { resetReminderLogs } from "./utils/debug/resetReminderLogs";
-import { registerSW }
-  from "virtual:pwa-register";
+import { registerSW } from "virtual:pwa-register";
 
-import { AuthProvider }
-  from "./components/auth/AuthProvider";  
+import { AuthProvider } from "./components/auth/AuthProvider";
+import { PWAInstallProvider } from "./components/pwa/PWAInstallProvider.tsx";
 
 /**
  * ============================================================
@@ -36,7 +35,6 @@ declare global {
 }
 
 if (import.meta.env.DEV) {
-
   /**
    * RESETS
    */
@@ -49,13 +47,18 @@ if (import.meta.env.DEV) {
  * RENDER APP
  * ============================================================
  */
+registerSW({
+  immediate: true,
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </BrowserRouter>
+      <AuthProvider>
+        <PWAInstallProvider>
+          <App />
+        </PWAInstallProvider>
+      </AuthProvider>
+    </BrowserRouter>
   </StrictMode>,
 );
