@@ -2,9 +2,7 @@ import { useState } from "react";
 
 import { usePWAInstall } from "../../hooks/usePWAInstall";
 
-import {
-  markInstallPromptDismissed,
-} from "../../storage/pwaInstallPromptStorage";
+import { markInstallPromptDismissed } from "../../storage/pwaInstallPromptStorage";
 
 /**
  * ============================================================
@@ -35,7 +33,7 @@ import {
  * no Hook usePWAInstall().
  */
 export default function InstallAppCard() {
-    /**
+  /**
    * ==========================================================
    * LOCAL STATE
    * ==========================================================
@@ -49,22 +47,19 @@ export default function InstallAppCard() {
   const [dismissed, setDismissed] = useState(false);
 
   /** ==========================================================
-  * PWA INSTALL
-  * ==========================================================
-  */
-  const {
-    shouldShowInstallPrompt,
-    install,
-  } = usePWAInstall();
+   * PWA INSTALL
+   * ==========================================================
+   */
+  const { shouldShowInstallPrompt, install } = usePWAInstall();
 
   if (!shouldShowInstallPrompt || dismissed) {
     return null;
   }
 
   /** ==========================================================
-  * DISPENSAR CONVITE
-  * ==========================================================
-  */
+   * DISPENSAR CONVITE
+   * ==========================================================
+   */
 
   function handleDismiss() {
     markInstallPromptDismissed();
@@ -82,9 +77,9 @@ export default function InstallAppCard() {
   }
 
   /**  ==========================================================
-  * RENDERIZAÇÃO
-  * ==========================================================
-  */
+   * RENDERIZAÇÃO
+   * ==========================================================
+   */
 
   return (
     <section className="rounded-2xl border border-green-100 bg-white p-4 shadow-sm">
