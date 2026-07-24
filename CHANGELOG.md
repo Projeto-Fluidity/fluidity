@@ -16,6 +16,23 @@ O Fluidity segue o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)
 
 ---
 
+## [0.6.0] - 2026-07-24
+
+### Changed
+
+- Refatorada a arquitetura do fluxo de instalação da PWA.
+- Browser definido como fonte da verdade para instalação da PWA.
+- Melhorada a arquitetura das notificações Push.
+- Consolidada a documentação técnica do projeto.
+
+### Documentation
+
+- Atualizado o README.
+- Padronizados os Architecture Decision Records (ADRs).
+- Atualizada a documentação de governança.
+
+---
+
 ## [0.5.0] - Em desenvolvimento
 
 ### Adicionado
