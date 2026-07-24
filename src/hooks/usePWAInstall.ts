@@ -1,176 +1,68 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useContext } from "react";
 
-/**
- * ============================================================
- * BEFORE INSTALL PROMPT EVENT
- * ============================================================
- *
- * Evento disponibilizado pelos navegadores
- * compatíveis com instalação de PWAs.
- *
- * Permite:
- *
- * - interceptar o prompt nativo;
- * - controlar quando exibi-lo;
- * - capturar a escolha do usuário.
- */
-type BeforeInstallPromptEvent =
-  Event & {
-    prompt: () => Promise<void>;
+import { PWAInstallContext } from "../components/pwa/PWAInstallContext";
 
-    userChoice: Promise<{
-      outcome:
-        | "accepted"
-        | "dismissed";
-    }>;
-  };
+import { canShowInstallPrompt } from "../utils/pwaInstallPromptPolicy";
+
+import { isRunningAsPWA } from "../storage/pwaInstallState";
 
 /**
  * ============================================================
  * HOOK: USE PWA INSTALL
  * ============================================================
  *
- * Responsável por centralizar toda a lógica
- * relacionada à instalação do PWA.
+ * Responsável por compor as regras de negócio relacionadas
+ * ao fluxo de instalação do Progressive Web App.
  *
- * Objetivos:
+ * Este Hook não possui integração direta com APIs do navegador.
  *
- * - detectar quando o aplicativo pode ser instalado;
- * - armazenar o evento beforeinstallprompt;
- * - expor método para disparar instalação;
- * - evitar que componentes manipulem eventos
- *   nativos diretamente.
+ * Suas responsabilidades são:
  *
- * Fluxo:
- *
- * Navegador
- *      ↓
- * beforeinstallprompt
- *      ↓
- * usePWAInstall
- *      ↓
- * canInstall = true
- *      ↓
- * Componente visual
- *      ↓
- * install()
- *      ↓
- * Prompt nativo
+ * - consumir o estado disponibilizado pelo PWAInstallProvider;
+ * - aplicar a política de exibição do convite;
+ * - verificar se a aplicação já está instalada;
+ * - disponibilizar uma API simplificada para a interface.
  */
 export function usePWAInstall() {
   /**
    * ==========================================================
-   * INSTALL EVENT
+   * CONTEXT
    * ==========================================================
    *
-   * Armazena o evento interceptado
-   * pelo beforeinstallprompt.
+   * Recupera o estado global disponibilizado pelo
+   * PWAInstallProvider.
    */
-  const [
-    installEvent,
-    setInstallEvent,
-  ] = useState<BeforeInstallPromptEvent | null>(
-    null
-  );
+  const context = useContext(PWAInstallContext);
 
-  /**
-   * ==========================================================
-   * CAN INSTALL
-   * ==========================================================
-   *
-   * Indica se o navegador permite
-   * exibir o convite de instalação.
-   */
-  const [canInstall, setCanInstall] =
-    useState(false);
-
-  /**
-   * ==========================================================
-   * BEFORE INSTALL PROMPT
-   * ==========================================================
-   *
-   * Intercepta o evento nativo
-   * disparado pelo navegador.
-   *
-   * Importante:
-   *
-   * Utilizamos preventDefault()
-   * para controlar quando o prompt
-   * será exibido ao usuário.
-   */
-  useEffect(() => {
-    function handleBeforeInstallPrompt(
-      event: Event
-    ) {
-      event.preventDefault();
-
-      setInstallEvent(
-        event as BeforeInstallPromptEvent
-      );
-
-      setCanInstall(true);
-    }
-
-    window.addEventListener(
-      "beforeinstallprompt",
-      handleBeforeInstallPrompt
+  if (!context) {
+    throw new Error(
+      "usePWAInstall deve ser utilizado dentro de um PWAInstallProvider.",
     );
-
-    return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      );
-    };
-  }, []);
+  }
 
   /**
    * ==========================================================
-   * INSTALL
+   * INSTALL PROMPT POLICY
    * ==========================================================
    *
-   * Exibe o prompt nativo
-   * de instalação do PWA.
+   * O convite somente poderá ser exibido quando:
    *
-   * Após a escolha do usuário:
-   *
-   * - limpa o evento armazenado;
-   * - impede novas exibições;
-   * - aguarda decisão do navegador.
+   * - o navegador permitir instalação;
+   * - a aplicação ainda não estiver instalada;
+   * - a política de exibição permitir.
    */
-  const install = useCallback(
-    async (): Promise<
-      "accepted" | "dismissed" | null
-    > => {
-      if (!installEvent) {
-        return null;
-      }
-
-      await installEvent.prompt();
-
-      const { outcome } =
-        await installEvent.userChoice;
-
-      setCanInstall(false);
-
-      setInstallEvent(null);
-
-      return outcome;
-    },
-    [installEvent]
-  );
+  const shouldShowInstallPrompt =
+    context.canInstall && !isRunningAsPWA() && canShowInstallPrompt();
 
   /**
    * ==========================================================
    * PUBLIC API
    * ==========================================================
    */
+
   return {
-    canInstall,
-    install,
+    canInstall: context.canInstall,
+    shouldShowInstallPrompt,
+    install: context.install,
   };
 }

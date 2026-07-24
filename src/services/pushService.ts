@@ -7,8 +7,7 @@ import { getSWReady } from "./swService";
  * ============================================================
  */
 
-const VAPID_PUBLIC_KEY =
-  import.meta.env.VITE_VAPID_PUBLIC_KEY;
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 /**
  * ============================================================
@@ -16,27 +15,14 @@ const VAPID_PUBLIC_KEY =
  * ============================================================
  */
 
-function urlBase64ToUint8Array(
-  base64String: string,
-): Uint8Array {
-  const padding =
-    "=".repeat(
-      (4 - (base64String.length % 4)) % 4,
-    );
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
 
-  const base64 =
-    (base64String + padding)
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
-  const rawData =
-    window.atob(base64);
+  const rawData = window.atob(base64);
 
-  return Uint8Array.from(
-    [...rawData].map((char) =>
-      char.charCodeAt(0),
-    ),
-  );
+  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
 
 /**
@@ -54,13 +40,8 @@ export async function createOrGetSubscription(
    * ==========================================================
    */
 
-  if (
-    !("serviceWorker" in navigator) ||
-    !("PushManager" in window)
-  ) {
-    throw new Error(
-      "Push notifications não suportadas",
-    );
+  if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    throw new Error("Push notifications não suportadas");
   }
 
   /**
@@ -70,9 +51,7 @@ export async function createOrGetSubscription(
    */
 
   if (!VAPID_PUBLIC_KEY) {
-    throw new Error(
-      "VITE_VAPID_PUBLIC_KEY não definida",
-    );
+    throw new Error("VITE_VAPID_PUBLIC_KEY não definida");
   }
 
   /**
@@ -82,19 +61,14 @@ export async function createOrGetSubscription(
    */
 
   if (Notification.permission === "denied") {
-    throw new Error(
-      "Notificações bloqueadas pelo usuário",
-    );
+    throw new Error("Notificações bloqueadas pelo usuário");
   }
 
   if (Notification.permission === "default") {
-    const permission =
-      await Notification.requestPermission();
+    const permission = await Notification.requestPermission();
 
     if (permission !== "granted") {
-      throw new Error(
-        "Permissão não concedida",
-      );
+      throw new Error("Permissão não concedida");
     }
   }
 
@@ -104,8 +78,7 @@ export async function createOrGetSubscription(
    * ==========================================================
    */
 
-  const registration =
-    await getSWReady();
+  const registration = await getSWReady();
 
   /**
    * ==========================================================
@@ -113,8 +86,7 @@ export async function createOrGetSubscription(
    * ==========================================================
    */
 
-  let subscription =
-    await registration.pushManager.getSubscription();
+  let subscription = await registration.pushManager.getSubscription();
 
   /**
    * ==========================================================
@@ -123,15 +95,13 @@ export async function createOrGetSubscription(
    */
 
   if (!subscription) {
-    subscription =
-      await registration.pushManager.subscribe({
-        userVisibleOnly: true,
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
 
-        applicationServerKey:
-          urlBase64ToUint8Array(
-            VAPID_PUBLIC_KEY,
-          ) as BufferSource,
-      });
+      applicationServerKey: urlBase64ToUint8Array(
+        VAPID_PUBLIC_KEY,
+      ) as BufferSource,
+    });
   }
 
   /**
@@ -140,10 +110,7 @@ export async function createOrGetSubscription(
    * ==========================================================
    */
 
-  await saveSubscription(
-    userId,
-    subscription,
-  );
+  await saveSubscription(userId, subscription);
 
   return subscription;
 }
@@ -152,16 +119,24 @@ export async function createOrGetSubscription(
  * ============================================================
  * HAS PUSH SUBSCRIPTION
  * ============================================================
+ *
+ * Verifica se o navegador já possui uma Push Subscription
+ * registrada.
+ *
+ * Diferente de createOrGetSubscription(), esta função
+ * nunca solicita permissão nem cria uma nova assinatura.
+ *
+ * É utilizada em fluxos onde apenas precisamos saber se
+ * existe uma assinatura ativa antes de sincronizar dados
+ * com o servidor.
  */
 
 export async function hasPushSubscription(): Promise<boolean> {
-  const registration =
-    await getSWReady();
+  const registration = await getSWReady();
 
-  const subscription =
-    await registration.pushManager.getSubscription();
+  const subscription = await registration.pushManager.getSubscription();
 
-  return !!subscription;
+  return subscription !== null;
 }
 
 /**
@@ -171,11 +146,9 @@ export async function hasPushSubscription(): Promise<boolean> {
  */
 
 export async function unsubscribePush(): Promise<void> {
-  const registration =
-    await getSWReady();
+  const registration = await getSWReady();
 
-  const subscription =
-    await registration.pushManager.getSubscription();
+  const subscription = await registration.pushManager.getSubscription();
 
   if (!subscription) {
     return;

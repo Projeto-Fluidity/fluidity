@@ -26,6 +26,19 @@ O projeto foi desenvolvido seguindo princípios modernos de arquitetura de softw
 
 ---
 
+# 📚 Documentação
+
+A documentação do Fluidity está organizada por responsabilidade.
+
+| Documento | Finalidade |
+|-----------|------------|
+| README.md | Visão geral do projeto e guia de utilização |
+| CHANGELOG.md | Histórico das versões publicadas |
+| CONTRIBUTING.md *(futuro)* | Guia para contribuição |
+| docs/adr | Registro das decisões arquiteturais |
+| docs/infra | Arquitetura, deploy e infraestrutura |
+| docs/governance | Processo de desenvolvimento e governança |
+
 # ✨ Funcionalidades
 
 ## ✅ Implementadas
@@ -98,25 +111,44 @@ O projeto segue uma arquitetura em camadas buscando reduzir o acoplamento entre 
 ```mermaid
 flowchart TD
 
+User["👤 Usuário"]
+
 Page["Pages"]
 Component["Components"]
+
+Provider["Providers / Context"]
 Hook["Hooks"]
+
 Service["Services"]
+
+Storage["Local Storage"]
 Supabase["Supabase"]
-Edge["Edge Functions"]
+Push["Push Server"]
+
+User --> Page
 
 Page --> Component
-Component --> Hook
-Hook --> Service
-Service --> Supabase
-Supabase --> Edge
 
+Component --> Provider
+Component --> Hook
+
+Provider --> Service
+Hook --> Service
+
+Service --> Storage
+Service --> Supabase
+
+Supabase --> Push
+
+style User fill:#0f766e,color:#fff
 style Page fill:#1e293b,color:#fff
 style Component fill:#0f172a,color:#fff
+style Provider fill:#2563eb,color:#fff
 style Hook fill:#334155,color:#fff
 style Service fill:#475569,color:#fff
+style Storage fill:#92400e,color:#fff
 style Supabase fill:#065f46,color:#fff
-style Edge fill:#7c3aed,color:#fff
+style Push fill:#7c3aed,color:#fff
 ```
 
 ---
@@ -150,14 +182,49 @@ UI-->>U: Interface atualizada
 ```mermaid
 flowchart LR
 
-User --> Hook
-Hook --> NotificationService
-NotificationService --> SettingsService
-SettingsService --> Supabase
+User["👤 Usuário"]
 
-Supabase --> EdgeFunction
-EdgeFunction --> PushServer
-PushServer --> WebPush
+Hook["useNotificationSettings"]
+
+Notification["Notification Service"]
+Settings["Settings Service"]
+Subscription["Subscription Service"]
+Bootstrap["Notification Bootstrap"]
+
+Supabase["Supabase"]
+
+Edge["Edge Functions"]
+
+Push["Push Server"]
+
+WebPush["Web Push API"]
+
+User --> Hook
+
+Hook --> Notification
+
+Notification --> Settings
+Notification --> Subscription
+Notification --> Bootstrap
+
+Settings --> Supabase
+Subscription --> Supabase
+Bootstrap --> Supabase
+
+Supabase --> Edge
+Edge --> Push
+Push --> WebPush
+
+style User fill:#0f766e,color:#fff
+style Hook fill:#1d4ed8,color:#fff
+style Notification fill:#475569,color:#fff
+style Settings fill:#334155,color:#fff
+style Subscription fill:#334155,color:#fff
+style Bootstrap fill:#334155,color:#fff
+style Supabase fill:#065f46,color:#fff
+style Edge fill:#7c3aed,color:#fff
+style Push fill:#9333ea,color:#fff
+style WebPush fill:#2563eb,color:#fff
 ```
 
 ---
@@ -186,6 +253,8 @@ push-server
 └── package.json
 
 docs
+├── adr
+├── governance
 └── infra
 ```
 
@@ -350,6 +419,15 @@ Esses documentos descrevem:
 - procedimentos de auditoria;
 - boas práticas para manutenção da infraestrutura.
 
+A documentação arquitetural complementar encontra-se em:
+
+```text
+docs/
+└── adr/
+```
+
+As ADRs registram decisões arquiteturais permanentes do projeto e servem como histórico técnico para futuras evoluções.
+
 ---
 
 # 🛡 Governança
@@ -368,6 +446,10 @@ docs/
 
 Esse documento descreve:
 
+- estratégia de branches;
+- fluxo de releases;
+- processo de revisão;
+- integração com Continuous Integration.
 - política de proteção da branch `main`;
 - fluxo oficial de desenvolvimento;
 - regras de Pull Request;
@@ -389,6 +471,7 @@ O formato das versões segue a estrutura:
 
 ```text
 MAJOR.MINOR.PATCH
+```
 
 ---
 
@@ -412,6 +495,10 @@ Durante o desenvolvimento são adotadas as seguintes práticas:
 - Documentação contínua
 - Revisão da arquitetura
 - Governança do repositório
+- ADRs para registro das decisões arquiteturais
+- Conventional Commits
+- Semantic Versioning
+- GitHub Releases
 
 Validações recomendadas antes de abrir uma Pull Request:
 
@@ -431,7 +518,7 @@ npm run build
 
 # 🛣 Roadmap
 
-## 🚧 Em andamento
+## 🚧 Próximas Evoluções
 
 - Evolução das notificações inteligentes
 - Agendamento automático de lembretes
@@ -447,7 +534,8 @@ npm run build
 
 ---
 
-# 👥 Autores
+## Maintainers
+Contributors
 
 ### 👨‍💻 Jair Sousa
 **Full Stack Developer**
@@ -491,6 +579,18 @@ npm run build
 
 ---
 
+# 📖 Documentação Complementar
+
+Para mais detalhes consulte:
+
+- `CHANGELOG.md` — histórico das versões
+- `docs/adr` — decisões arquiteturais
+- `docs/infra` — infraestrutura
+- `docs/governance` — governança do projeto
+
+
+---
+
 # 📄 Licença
 
-Projeto desenvolvido inicialmente para fins acadêmicos, estruturado para evoluir continuamente como uma plataforma de acompanhamento do bem-estar emocional.
+Projeto desenvolvido inicialmente no contexto acadêmico e mantido como uma plataforma open source para acompanhamento do bem-estar emocional, seguindo práticas modernas de engenharia de software.
