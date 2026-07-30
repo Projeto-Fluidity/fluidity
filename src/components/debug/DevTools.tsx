@@ -11,9 +11,11 @@ import { useState, useRef, useEffect } from "react";
 
 import { sendPushNotification } from "../../services/notificationService";
 
-import { getOrCreateDeviceId } from "../../services/deviceService";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function DevTools() {
+
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(true);
   const [position, setPosition] = useState({ x: 20, y: 20 });
 
@@ -100,8 +102,12 @@ export default function DevTools() {
    */
   async function handleTestPush() {
     try {
+
+      if (!user) {
+        return;
+      }
       await sendPushNotification({
-        device_id: getOrCreateDeviceId(),
+        user_id: user.id,
 
         title: "Fluidity",
 

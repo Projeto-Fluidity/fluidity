@@ -3,7 +3,7 @@ import cors from "cors";
 
 import { ENV } from "./config/env.js";
 
-import { sendPushToDevice } from "./services/push.service.js";
+import { sendPushToUser } from "./services/push.service.js";
 
 /**
  * ============================================================
@@ -80,7 +80,7 @@ app.get("/", (_, res) => {
  */
 app.post("/send-push", async (req, res) => {
   try {
-    const { device_id, title, body, url } = req.body;
+    const { user_id, title, body, url } = req.body;
 
     /**
      * ========================================================
@@ -88,10 +88,10 @@ app.post("/send-push", async (req, res) => {
      * ========================================================
      */
 
-    if (!device_id) {
+    if (!user_id) {
       return res.status(400).json({
         success: false,
-        error: "device_id obrigatório",
+        error: "user_id obrigatório",
       });
     }
 
@@ -101,7 +101,7 @@ app.post("/send-push", async (req, res) => {
      * ========================================================
      */
 
-    await sendPushToDevice(device_id, {
+    await sendPushToUser(user_id, {
       title: title || "Fluidity 💧",
 
       body: body || "Hora do check-in emocional",
