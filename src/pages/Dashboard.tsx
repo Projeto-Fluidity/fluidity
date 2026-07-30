@@ -7,6 +7,8 @@ import { LayoutDashboard, Smile, History } from "lucide-react";
 
 import { sendPushNotification } from "../services/notificationService";
 
+import { useAuth } from "../hooks/useAuth";
+
 /**
  * Página principal da aplicação.
  *
@@ -67,18 +69,19 @@ export default function Dashboard() {
    * Substituir device_id fixo
    * por device_id dinâmico centralizado.
    */
+  const { user } = useAuth();
+
   const handleTestPush = async () => {
+    if (!user) {
+      console.warn("Usuário não autenticado.");
+      return;
+    }
+
     try {
       await sendPushNotification({
-        // TODO:
-        // remover device_id fixo após
-        // estabilização da infraestrutura cloud
-        device_id: "684f8619-74e0-43cb-bb47-413aba5fc7aa",
-
+        user_id: user.id,
         title: "Fluidity 💧",
-
         body: "Teste manual de push notification",
-
         url: "/",
       });
     } catch (err) {

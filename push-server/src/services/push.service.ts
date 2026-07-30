@@ -61,8 +61,8 @@ export type PushMessage = {
  *   ↓
  * Navegador
  */
-export async function sendPushToDevice(
-  deviceId: string,
+export async function sendPushToUser(
+  userId: string,
   message: PushMessage
 ) {
 
@@ -78,7 +78,7 @@ export async function sendPushToDevice(
   } = await supabase
     .from("push_subscriptions")
     .select("*")
-    .eq("device_id", deviceId);
+    .eq("user_id", userId);
 
   /**
    * ==========================================================

@@ -5,6 +5,7 @@ import { getSettings } from "../services/settingsService";
 
 import { shouldTriggerReminder, toUiReminder } from "../lib/reminderAdapter";
 import { useAuth } from "./useAuth";
+import { deliver } from "../services/reminderDeliveryService";
 /**
  * ============================================================
  * GLOBAL WINDOW TYPE
@@ -146,7 +147,7 @@ async function runTrigger() {
    * VERIFICAR CADA LEMBRETE
    * ============================================================
    */
-  reminders.forEach((reminder) => {
+  for (const reminder of reminders) {
     const alreadyTriggered =
       triggeredRef.current.has(reminder.id);
 
@@ -160,7 +161,7 @@ async function runTrigger() {
      * Não deve disparar.
      */
     if (!shouldTrigger) {
-      return;
+      continue;
     }
 
     /**
@@ -170,18 +171,20 @@ async function runTrigger() {
      */
     const uiReminder = toUiReminder(reminder);
 
-    /**
-     * ==========================================================
-     * MVP TEMPORÁRIO
-     * ==========================================================
-     *
-     * Futuramente este fluxo será substituído por:
-     *
-     * - Notification API;
-     * - Push Notifications;
-     * - Service Worker.
-     */
-    alert(`${uiReminder.title}\n${uiReminder.description}`);
+  /**
+   * ==========================================================
+   * ENTREGA DO LEMBRETE
+   * ==========================================================
+   *
+   * A responsabilidade de entregar o lembrete foi
+   * delegada ao ReminderDeliveryService.
+   *
+   * Dessa forma, este hook permanece responsável
+   * apenas pelo agendamento e pelas regras de
+   * disparo, sem conhecer detalhes da infraestrutura
+   * de entrega.
+   */
+  await deliver(user.id, uiReminder);
 
     /**
      * Marca o lembrete como disparado
@@ -189,7 +192,7 @@ async function runTrigger() {
      * o mesmo dia.
      */
     triggeredRef.current.add(reminder.id);
-  });
+  };
 }
 
     /**
