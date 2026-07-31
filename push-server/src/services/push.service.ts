@@ -20,7 +20,7 @@ webpush.setVapidDetails(
 
   ENV.VAPID_PUBLIC_KEY,
 
-  ENV.VAPID_PRIVATE_KEY
+  ENV.VAPID_PRIVATE_KEY,
 );
 
 /**
@@ -61,24 +61,21 @@ export type PushMessage = {
  *   ↓
  * Navegador
  */
-export async function sendPushToUser(
-  userId: string,
-  message: PushMessage
-) {
-
+export async function sendPushToUser(userId: string, message: PushMessage) {
   /**
    * ==========================================================
    * GET SUBSCRIPTIONS
    * ==========================================================
    */
 
-  const {
-    data: subscriptions,
-    error,
-  } = await supabase
+  const { data: subscriptions, error } = await supabase
     .from("push_subscriptions")
     .select("*")
     .eq("user_id", userId);
+  console.log("========================================");
+  console.log("SEND PUSH");
+  console.log("User:", userId);
+  console.log("Subscriptions encontradas:", subscriptions?.length ?? 0);
 
   /**
    * ==========================================================
@@ -87,7 +84,6 @@ export async function sendPushToUser(
    */
 
   if (error) {
-
     throw new Error(error.message);
   }
 
@@ -97,14 +93,8 @@ export async function sendPushToUser(
    * ==========================================================
    */
 
-  if (
-    !subscriptions ||
-    subscriptions.length === 0
-  ) {
-
-    throw new Error(
-      "Subscription não encontrada"
-    );
+  if (!subscriptions || subscriptions.length === 0) {
+    throw new Error("Subscription não encontrada");
   }
 
   /**
@@ -129,8 +119,7 @@ export async function sendPushToUser(
 
     url: message.url || "/",
 
-    icon:
-      "https://fluidity.vercel.app/icons/192.png",
+    icon: "https://fluidity.vercel.app/icons/192.png",
   });
 
   /**
@@ -138,85 +127,97 @@ export async function sendPushToUser(
    * SEND PUSH
    * ==========================================================
    */
+  
+  console.log(
+    "Subscription IDs:",
+    subscriptions?.map((sub) => sub.id),
+  );
+for (const sub of subscriptions) {
 
-  for (const sub of subscriptions) {
+  console.log("----------------------------------------");
+  console.log("Endpoint:");
+  console.log(sub.endpoint);
 
-    try {
+  console.log("Payload:");
+  console.log(payload);
 
-      /**
-       * ======================================================
-       * WEB PUSH SEND
-       * ======================================================
-       */
+  try {
 
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
+    /**
+     * ======================================================
+     * WEB PUSH SEND
+     * ======================================================
+     */
 
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
-          },
+    const response = await webpush.sendNotification(
+      {
+        endpoint: sub.endpoint,
+        keys: {
+          p256dh: sub.p256dh,
+          auth: sub.auth,
         },
+      },
+      payload,
+    );
 
-        payload
+    console.log("✅ Push enviado");
+    console.log(response);
+
+  } catch (err: unknown) {
+
+    console.error("========================================");
+    console.error("❌ Erro ao enviar Push Notification");
+
+    console.error(err);
+
+    type WebPushError = {
+      statusCode?: number;
+      body?: string;
+      headers?: unknown;
+    };
+
+    const error = err as WebPushError;
+
+    console.error("STATUS:", error.statusCode);
+    console.error("BODY:", error.body);
+    console.error("HEADERS:", error.headers);
+
+    /**
+     * ======================================================
+     * REMOVE INVALID SUBSCRIPTION
+     * ======================================================
+     */
+
+    if (
+      error.statusCode === 404 ||
+      error.statusCode === 410
+    ) {
+
+      console.warn(
+        "⚠️ Subscription inválida. Removendo do banco..."
       );
 
-    } catch (err: unknown) {
+      const { error: deleteError } =
+        await supabase
+          .from("push_subscriptions")
+          .delete()
+          .eq("endpoint", sub.endpoint);
 
-      console.error(
-        "Erro ao enviar push notification:",
-        err
-      );
+      if (deleteError) {
 
-      type WebPushError = {
-        statusCode?: number;
-        body?: string;
-      };
+        console.error(
+          "Erro ao remover subscription inválida:",
+          deleteError,
+        );
 
-      const error =
-        err as WebPushError;
+      } else {
 
-      console.error(
-        "STATUS:",
-        error.statusCode
-      );
-
-      console.error(
-        "BODY:",
-        error.body
-      );
-
-      /**
-       * ======================================================
-       * REMOVE INVALID SUBSCRIPTION
-       * ======================================================
-       *
-       * 404 / 410:
-       *
-       * Subscription expirou
-       * ou foi invalidada pelo navegador.
-       */
-      if (
-        error.statusCode === 404 ||
-        error.statusCode === 410
-      ) {
-
-        const { error: deleteError } =
-          await supabase
-            .from("push_subscriptions")
-            .delete()
-            .eq("endpoint", sub.endpoint);
-
-        if (deleteError) {
-
-          console.error(
-            "Erro ao remover subscription inválida:",
-            deleteError
-          );
-        }
+        console.log(
+          "✅ Subscription removida com sucesso."
+        );
 
       }
     }
   }
+}
 }
