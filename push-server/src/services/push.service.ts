@@ -72,10 +72,6 @@ export async function sendPushToUser(userId: string, message: PushMessage) {
     .from("push_subscriptions")
     .select("*")
     .eq("user_id", userId);
-  console.log("========================================");
-  console.log("SEND PUSH");
-  console.log("User:", userId);
-  console.log("Subscriptions encontradas:", subscriptions?.length ?? 0);
 
   /**
    * ==========================================================
@@ -127,97 +123,61 @@ export async function sendPushToUser(userId: string, message: PushMessage) {
    * SEND PUSH
    * ==========================================================
    */
-  
-  console.log(
-    "Subscription IDs:",
-    subscriptions?.map((sub) => sub.id),
-  );
-for (const sub of subscriptions) {
 
-  console.log("----------------------------------------");
-  console.log("Endpoint:");
-  console.log(sub.endpoint);
+  for (const sub of subscriptions) {
+    try {
+      /**
+       * ======================================================
+       * WEB PUSH SEND
+       * ======================================================
+       */
 
-  console.log("Payload:");
-  console.log(payload);
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
 
-  try {
-
-    /**
-     * ======================================================
-     * WEB PUSH SEND
-     * ======================================================
-     */
-
-    const response = await webpush.sendNotification(
-      {
-        endpoint: sub.endpoint,
-        keys: {
-          p256dh: sub.p256dh,
-          auth: sub.auth,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
+          },
         },
-      },
-      payload,
-    );
 
-    console.log("✅ Push enviado");
-    console.log(response);
-
-  } catch (err: unknown) {
-
-    console.error("========================================");
-    console.error("❌ Erro ao enviar Push Notification");
-
-    console.error(err);
-
-    type WebPushError = {
-      statusCode?: number;
-      body?: string;
-      headers?: unknown;
-    };
-
-    const error = err as WebPushError;
-
-    console.error("STATUS:", error.statusCode);
-    console.error("BODY:", error.body);
-    console.error("HEADERS:", error.headers);
-
-    /**
-     * ======================================================
-     * REMOVE INVALID SUBSCRIPTION
-     * ======================================================
-     */
-
-    if (
-      error.statusCode === 404 ||
-      error.statusCode === 410
-    ) {
-
-      console.warn(
-        "⚠️ Subscription inválida. Removendo do banco..."
+        payload,
       );
+    } catch (err: unknown) {
+      console.error("Erro ao enviar push notification:", err);
 
-      const { error: deleteError } =
-        await supabase
+      type WebPushError = {
+        statusCode?: number;
+        body?: string;
+      };
+
+      const error = err as WebPushError;
+
+      console.error("STATUS:", error.statusCode);
+
+      console.error("BODY:", error.body);
+
+      /**
+       * ======================================================
+       * REMOVE INVALID SUBSCRIPTION
+       * ======================================================
+       *
+       * 404 / 410:
+       *
+       * Subscription expirou
+       * ou foi invalidada pelo navegador.
+       */
+      if (error.statusCode === 404 || error.statusCode === 410) {
+        const { error: deleteError } = await supabase
           .from("push_subscriptions")
           .delete()
           .eq("endpoint", sub.endpoint);
 
-      if (deleteError) {
-
-        console.error(
-          "Erro ao remover subscription inválida:",
-          deleteError,
-        );
-
-      } else {
-
-        console.log(
-          "✅ Subscription removida com sucesso."
-        );
-
+        if (deleteError) {
+          console.error("Erro ao remover subscription inválida:", deleteError);
+        }
       }
     }
   }
-}
 }
