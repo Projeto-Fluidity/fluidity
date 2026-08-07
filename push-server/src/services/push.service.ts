@@ -33,6 +33,7 @@ export type PushMessage = {
   title: string;
   body: string;
   url?: string;
+  category?: "mood" | "hydration";
 };
 
 /**
@@ -116,6 +117,8 @@ export async function sendPushToUser(userId: string, message: PushMessage) {
     url: message.url || "/",
 
     icon: "https://fluidity.vercel.app/icons/192.png",
+
+    category: message.category,
   });
 
   /**

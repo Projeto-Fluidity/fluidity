@@ -80,7 +80,8 @@ app.get("/", (_, res) => {
  */
 app.post("/send-push", async (req, res) => {
   try {
-    const { user_id, title, body, url } = req.body;
+
+    const { user_id, title, body, url, category } = req.body;
 
     /**
      * ========================================================
@@ -107,6 +108,8 @@ app.post("/send-push", async (req, res) => {
       body: body || "Hora do check-in emocional",
 
       url,
+
+      category,
     });
 
     /**

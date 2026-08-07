@@ -28,6 +28,8 @@ export type DbReminder = {
   label: string | null;
   days: string[] | null;
   active: boolean | null;
+
+  category: "mood" | "hydration";
 };
 
 export type UiReminder = {
@@ -35,6 +37,7 @@ export type UiReminder = {
   title: string;
   description: string;
   time: string;
+  category: "mood" | "hydration";
   variant: "emotion" | "warning" | "info" | "relax";
 };
 
@@ -61,6 +64,8 @@ export function toUiReminder(r: DbReminder): UiReminder {
 
     time: r.time ?? "00:00",
 
+    category: r.category,
+    
     variant: isCheckin
       ? "emotion"
       : isHydration
