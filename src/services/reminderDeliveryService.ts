@@ -65,11 +65,13 @@ export async function deliver(
   reminder: UiReminder,
 ): Promise<void> {
   try {
+    const url = reminder.category === "hydration" ? "/water" : "/";
     await sendPushNotification({
       user_id: userId,
       title: reminder.title,
       body: reminder.description,
-      url: "/",
+      url,
+      category: reminder.category,
     });
   } catch (error) {
     console.error("Erro ao entregar lembrete:", error);

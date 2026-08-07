@@ -27,6 +27,8 @@ type SendPushPayload = {
   title?: string;
   body?: string;
   url?: string;
+
+  category?: "mood" | "hydration";
 };
 
 type SendPushResponse = {

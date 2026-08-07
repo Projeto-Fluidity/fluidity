@@ -57,7 +57,6 @@ export function useReminderTrigger() {
   const lastResetDateRef = useRef<string | null>(null);
 
   useEffect(() => {
-    
     /**
      * ============================================================
      * PROTEÇÃO GLOBAL
@@ -89,111 +88,112 @@ export function useReminderTrigger() {
      * LOOP PRINCIPAL
      * ============================================================
      */
-async function runTrigger() {
+    async function runTrigger() {
 
-  const now = new Date();
+      const now = new Date();
 
-  /**
-   * ============================================================
-   * CONFIGURAÇÕES DO USUÁRIO
-   * ============================================================
-   *
-   * Respeita a preferência global de notificações.
-   *
-   * Caso o usuário tenha desabilitado os lembretes,
-   * nenhuma verificação adicional será realizada.
-   */
-  if (!user) {
-    return;
-  }
+      /**
+       * ============================================================
+       * CONFIGURAÇÕES DO USUÁRIO
+       * ============================================================
+       *
+       * Respeita a preferência global de notificações.
+       *
+       * Caso o usuário tenha desabilitado os lembretes,
+       * nenhuma verificação adicional será realizada.
+       */
+      if (!user) {
+        return;
+      }
 
-  const settings = await getSettings(user.id);
+      const settings = await getSettings(user.id);
 
-  /**
-   * Caso as notificações estejam desabilitadas
-   * globalmente, interrompe o processamento dos
-   * lembretes.
-   */
-  if (!settings?.enabled) {
-    return;
-  }
+      /**
+       * Caso as notificações estejam desabilitadas
+       * globalmente, interrompe o processamento dos
+       * lembretes.
+       */
+      if (!settings?.enabled) {
+        return;
+      }
 
-  /**
-   * ============================================================
-   * RESET DIÁRIO
-   * ============================================================
-   *
-   * Todo novo dia:
-   * - limpa reminders já disparados;
-   * - permite novos disparos.
-   */
-  const todayKey = now.toDateString();
+      /**
+       * ============================================================
+       * RESET DIÁRIO
+       * ============================================================
+       *
+       * Todo novo dia:
+       * - limpa reminders já disparados;
+       * - permite novos disparos.
+       */
+      const todayKey = now.toDateString();
 
-  if (lastResetDateRef.current !== todayKey) {
-    triggeredRef.current.clear();
+      if (lastResetDateRef.current !== todayKey) {
+        triggeredRef.current.clear();
 
-    lastResetDateRef.current = todayKey;
-  }
+        lastResetDateRef.current = todayKey;
+      }
 
-  /**
-   * ============================================================
-   * BUSCAR LEMBRETES
-   * ============================================================
-   */
-  const reminders = await getScheduledReminders(user.id);
+      /**
+       * ============================================================
+       * BUSCAR LEMBRETES
+       * ============================================================
+       */
+      const reminders = await getScheduledReminders(user.id);
 
-  /**
-   * ============================================================
-   * VERIFICAR CADA LEMBRETE
-   * ============================================================
-   */
-  for (const reminder of reminders) {
-    const alreadyTriggered =
-      triggeredRef.current.has(reminder.id);
+      /**
+       * ============================================================
+       * VERIFICAR CADA LEMBRETE
+       * ============================================================
+       */
+      for (const reminder of reminders) {
 
-    const shouldTrigger = shouldTriggerReminder(
-      reminder,
-      now,
-      alreadyTriggered,
-    );
+        const alreadyTriggered = triggeredRef.current.has(reminder.id);
 
-    /**
-     * Não deve disparar.
-     */
-    if (!shouldTrigger) {
-      continue;
+        const shouldTrigger = shouldTriggerReminder(
+          reminder,
+          now,
+          alreadyTriggered,
+        );
+
+        /**
+         * Não deve disparar.
+         */
+        if (!shouldTrigger) {
+          continue;
+        }
+
+        /**
+         * ==========================================================
+         * CONVERTER PARA UI
+         * ==========================================================
+         */
+        const uiReminder = toUiReminder(reminder);
+
+        /**
+         * ==========================================================
+         * ENTREGA DO LEMBRETE
+         * ==========================================================
+         *
+         * A responsabilidade de entregar o lembrete foi
+         * delegada ao ReminderDeliveryService.
+         *
+         * Dessa forma, este hook permanece responsável
+         * apenas pelo agendamento e pelas regras de
+         * disparo, sem conhecer detalhes da infraestrutura
+         * de entrega.
+         */
+
+        await deliver(user.id, uiReminder);
+
+        /**
+         * Marca o lembrete como disparado
+         * para evitar duplicidade durante
+         * o mesmo dia.
+         */
+        triggeredRef.current.add(reminder.id);
+      }
     }
-
-    /**
-     * ==========================================================
-     * CONVERTER PARA UI
-     * ==========================================================
-     */
-    const uiReminder = toUiReminder(reminder);
-
-  /**
-   * ==========================================================
-   * ENTREGA DO LEMBRETE
-   * ==========================================================
-   *
-   * A responsabilidade de entregar o lembrete foi
-   * delegada ao ReminderDeliveryService.
-   *
-   * Dessa forma, este hook permanece responsável
-   * apenas pelo agendamento e pelas regras de
-   * disparo, sem conhecer detalhes da infraestrutura
-   * de entrega.
-   */
-  await deliver(user.id, uiReminder);
-
-    /**
-     * Marca o lembrete como disparado
-     * para evitar duplicidade durante
-     * o mesmo dia.
-     */
-    triggeredRef.current.add(reminder.id);
-  };
-}
 
     /**
      * ============================================================
