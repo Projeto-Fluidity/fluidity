@@ -206,7 +206,6 @@ export async function sendPushToUser(
       }
     }
   }
-  
   return {
     sent,
     failed,

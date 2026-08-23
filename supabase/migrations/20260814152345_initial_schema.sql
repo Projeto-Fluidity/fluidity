@@ -275,6 +275,3 @@ CREATE POLICY "users can insert own profile" ON "public"."profiles" FOR INSERT W
 
 
 CREATE POLICY "users can update own profile" ON "public"."profiles" FOR UPDATE USING (("auth"."uid"() = "id"));
-
-
-
