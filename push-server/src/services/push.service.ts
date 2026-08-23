@@ -36,6 +36,12 @@ export type PushMessage = {
   category?: "mood" | "hydration";
 };
 
+export type PushDeliveryResult = {
+  sent: number;
+  failed: number;
+  removed: number;
+};
+
 /**
  * ============================================================
  * SEND PUSH TO DEVICE
@@ -62,7 +68,10 @@ export type PushMessage = {
  *   ↓
  * Navegador
  */
-export async function sendPushToUser(userId: string, message: PushMessage) {
+export async function sendPushToUser(
+  userId: string,
+  message: PushMessage,
+): Promise<PushDeliveryResult> {
   /**
    * ==========================================================
    * GET SUBSCRIPTIONS
@@ -127,6 +136,10 @@ export async function sendPushToUser(userId: string, message: PushMessage) {
    * ==========================================================
    */
 
+  let sent = 0;
+  let failed = 0;
+  let removed = 0;
+
   for (const sub of subscriptions) {
     try {
       /**
@@ -147,7 +160,12 @@ export async function sendPushToUser(userId: string, message: PushMessage) {
 
         payload,
       );
+
+      sent++;
+
     } catch (err: unknown) {
+      failed++;
+
       console.error("Erro ao enviar push notification:", err);
 
       type WebPushError = {
@@ -178,9 +196,20 @@ export async function sendPushToUser(userId: string, message: PushMessage) {
           .eq("endpoint", sub.endpoint);
 
         if (deleteError) {
-          console.error("Erro ao remover subscription inválida:", deleteError);
+          console.error(
+            "Erro ao remover subscription inválida:",
+            deleteError,
+          );
+        } else {
+          removed++;
         }
       }
     }
   }
+  
+  return {
+    sent,
+    failed,
+    removed,
+  };
 }

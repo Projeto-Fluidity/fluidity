@@ -102,7 +102,7 @@ app.post("/send-push", async (req, res) => {
      * ========================================================
      */
 
-    await sendPushToUser(user_id, {
+    const result = await sendPushToUser(user_id, {
       title: title || "Fluidity 💧",
 
       body: body || "Hora do check-in emocional",
@@ -118,9 +118,21 @@ app.post("/send-push", async (req, res) => {
      * ========================================================
      */
 
+    if (result.sent === 0) {
+      return res.status(502).json({
+        success: false,
+        message: "Nenhuma Push Notification foi entregue",
+        ...result,
+      });
+    }
+
     return res.json({
       success: true,
-      message: "Push enviado com sucesso",
+      message:
+        result.failed > 0
+          ? "Push enviado parcialmente"
+          : "Push enviado com sucesso",
+      ...result,
     });
   } catch (err: unknown) {
     console.error("SEND PUSH ERROR:", err);
