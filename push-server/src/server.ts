@@ -118,20 +118,14 @@ app.post("/send-push", async (req, res) => {
      * ========================================================
      */
 
-    if (result.sent === 0) {
-      return res.status(502).json({
-        success: false,
-        message: "Nenhuma Push Notification foi entregue",
-        ...result,
-      });
-    }
-
     return res.json({
       success: true,
       message:
-        result.failed > 0
-          ? "Push enviado parcialmente"
-          : "Push enviado com sucesso",
+        result.sent === 0
+          ? "Nenhuma Push Notification foi entregue"
+          : result.failed > 0
+            ? "Push enviado parcialmente"
+            : "Push enviado com sucesso",
       ...result,
     });
   } catch (err: unknown) {
