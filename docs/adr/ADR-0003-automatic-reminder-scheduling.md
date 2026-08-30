@@ -46,3 +46,11 @@ O navegador não precisará estar aberto para que o
 lembrete seja processado.
 
 O backend passa a ser responsável pelo agendamento.
+
+## Regras de Execução
+
+- `days = NULL` representa um lembrete válido todos os dias.
+- Quando `days` possuir valores, o lembrete será processado somente nos dias configurados.
+- O campo `time` representa o horário local configurado pelo usuário.
+- Os registros de execução serão persistidos utilizando UTC.
+- Cada execução será identificada pelo lembrete e pelo horário agendado, permitindo evitar disparos duplicados.
