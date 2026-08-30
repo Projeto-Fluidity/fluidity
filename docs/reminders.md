@@ -2,70 +2,131 @@
 
 ## Visão Geral
 
-O sistema de lembretes foi projetado para exibir sugestões diárias de bem-estar,
-garantindo que cada lembrete seja apresentado apenas uma vez por dia.
+O sistema de lembretes do Fluidity permite configurar lembretes
+de bem-estar associados a horários e dias específicos.
+
+Atualmente, o processamento automático dos lembretes é realizado
+pelo frontend.
+
+A arquitetura definida no ADR-0003 prevê a migração desse
+processamento para o backend, permitindo que as notificações sejam
+entregues mesmo quando o frontend não está aberto.
 
 ---
 
 ## Estrutura de Dados
 
-### reminders (tabela base)
+### scheduled_reminders
 
-Armazena os lembretes fixos do sistema.
+Armazena os lembretes agendados para cada usuário.
+
+| campo      | descrição |
+|------------|-----------|
+| id         | identificador único |
+| user_id    | usuário proprietário |
+| category   | categoria do lembrete |
+| label      | nome exibido |
+| time       | horário do lembrete |
+| days       | dias da semana |
+| active     | indica se o lembrete está ativo |
+| is_fixed   | indica se o lembrete é obrigatório |
+| created_at | data de criação |
+
+### reminder_logs
+
+Armazena o histórico das ações relacionadas aos lembretes.
 
 | campo       | descrição |
-|------------|----------|
-| id         | identificador único |
-| title      | título do lembrete |
-| description| descrição |
-| time       | horário sugerido |
-| variant    | tipo visual |
+|-------------|-----------|
+| id          | identificador único |
+| reminder_id | referência ao lembrete |
+| action      | ação realizada |
+| created_at  | data da ação |
+| device_id   | dispositivo relacionado |
 
 ---
 
-### reminder_logs (histórico)
+## Tipos de Lembretes
 
-Armazena todas as interações do usuário.
+### Lembretes fixos
 
-| campo        | descrição |
-|-------------|----------|
-| id          | identificador |
-| reminder_id | referência ao reminder |
-| action      | accepted / postponed |
-| created_at  | data da interação |
+São lembretes obrigatórios da aplicação.
 
----
+Atualmente existe:
 
-## Regra de Negócio
+- Registro diário de humor
 
-Um lembrete é exibido apenas se:
+Lembretes fixos são garantidos pelo serviço
+`scheduledReminderService`.
 
-- NÃO houver registro em `reminder_logs` no dia atual
+### Lembretes configuráveis
 
----
+São criados e gerenciados pelo usuário.
 
-## Fluxo
+Exemplo:
 
-1. Usuário acessa a tela
-2. Sistema busca reminders
-3. Sistema busca logs do dia
-4. Filtra lembretes já utilizados
-5. Exibe apenas os disponíveis
+- Lembretes de hidratação
+
+Esses lembretes não são recriados automaticamente.
 
 ---
 
-## Interação
+## Regra de Disparo
 
-Ao clicar em um lembrete:
+Um lembrete pode ser disparado quando:
 
-- Um registro é criado em `reminder_logs`
-- O lembrete é removido da interface
-- Não aparece novamente no mesmo dia
+- está ativo;
+- o horário atual corresponde ao horário configurado;
+- o dia atual está configurado no lembrete;
+- ainda não foi processado para aquela execução.
+
+Quando `days` é `NULL`, o lembrete é considerado válido para todos
+os dias.
+
+A verificação de horário utiliza uma janela de disparo de até
+1 minuto após o horário configurado.
 
 ---
 
-## Benefícios
+## Agendamento Automático
 
-- Histórico completo de interações
-- Comportamento consistente por dia
-- Base para métricas e análises futuras
+O processamento automático dos lembretes é realizado pelo backend.
+
+Fluxo:
+
+1. Scheduler executa periodicamente.
+2. Sistema consulta `scheduled_reminders`.
+3. Sistema identifica lembretes ativos.
+4. Sistema verifica dia e horário.
+5. Sistema verifica se o lembrete já foi processado.
+6. Sistema solicita a entrega da notificação.
+7. Push Server envia a notificação por Web Push.
+8. A execução é registrada no histórico.
+
+---
+
+## Arquitetura de Entrega
+
+```text
+scheduled_reminders
+        │
+        ▼
+Reminder Scheduler
+        │
+        ▼
+Regra de disparo
+        │
+        ▼
+Reminder Delivery
+        │
+        ▼
+Push Server
+        │
+        ▼
+Web Push
+        │
+        ▼
+Service Worker
+        │
+        ▼
+Sistema operacional
