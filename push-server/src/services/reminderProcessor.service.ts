@@ -1,4 +1,8 @@
-import { getActiveReminders } from "./reminder.service.js";
+import {
+  getActiveReminders,
+  type ScheduledReminder,
+} from "./reminder.service.js";
+
 import {
   getScheduledFor,
   shouldRunReminder,
@@ -63,7 +67,7 @@ import { claimDelivery } from "../repositories/reminderDelivery.repository.js";
  * O Push ainda não é enviado neste estágio.
  */
 export type DueReminder = {
-  reminderId: string;
+  reminder: ScheduledReminder;
   scheduledFor: Date;
 };
 
@@ -121,7 +125,7 @@ export async function processDueReminders(
      * e está pronta para a próxima etapa do processamento.
      */
     dueReminders.push({
-      reminderId: reminder.id,
+      reminder,
       scheduledFor,
     });
   }
