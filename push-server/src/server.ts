@@ -4,6 +4,7 @@ import cors from "cors";
 import { ENV } from "./config/env.js";
 
 import { sendPushToUser } from "./services/push.service.js";
+import { runReminderScheduler } from "./services/reminderSchedulerRunner.service.js";
 
 /**
  * ============================================================
@@ -146,6 +147,42 @@ app.post("/send-push", async (req, res) => {
     });
   }
 });
+
+/**
+ * ============================================================
+ * REMINDER SCHEDULER
+ * ============================================================
+ *
+ * Mantém a mesma frequência utilizada anteriormente
+ * pelo scheduler local do frontend.
+ */
+runReminderScheduler().catch((error) => {
+  console.error("REMINDER SCHEDULER ERROR:", error);
+});
+
+setInterval(() => {
+  runReminderScheduler().catch((error) => {
+    console.error("REMINDER SCHEDULER ERROR:", error);
+  });
+}, 30 * 1000);
+
+/**
+ * ============================================================
+ * REMINDER SCHEDULER
+ * ============================================================
+ *
+ * Mantém a mesma frequência utilizada anteriormente
+ * pelo scheduler local do frontend.
+ */
+runReminderScheduler().catch((error) => {
+  console.error("REMINDER SCHEDULER ERROR:", error);
+});
+
+setInterval(() => {
+  runReminderScheduler().catch((error) => {
+    console.error("REMINDER SCHEDULER ERROR:", error);
+  });
+}, 30 * 1000);
 
 /**
  * ============================================================
