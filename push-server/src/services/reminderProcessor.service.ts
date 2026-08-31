@@ -9,6 +9,8 @@ import {
 } from "./reminderScheduler.service.js";
 import { claimDelivery } from "../repositories/reminderDelivery.repository.js";
 
+import { isReminderEnabled } from "./reminderSettings.service.js";
+
 /**
  * ============================================================
  * REMINDER PROCESSOR SERVICE
@@ -86,9 +88,30 @@ export async function processDueReminders(
 ): Promise<DueReminder[]> {
   const reminders = await getActiveReminders();
 
+  const enabledByUser = new Map<string, boolean>();
+
   const dueReminders: DueReminder[] = [];
 
   for (const reminder of reminders) {
+    /**
+     * Verifica se as notificações estão habilitadas
+     * para o usuário.
+     *
+     * A configuração é consultada uma única vez
+     * por usuário durante esta execução.
+     */
+    let enabled = enabledByUser.get(reminder.user_id);
+
+    if (enabled === undefined) {
+      enabled = await isReminderEnabled(reminder.user_id);
+
+      enabledByUser.set(reminder.user_id, enabled);
+    }
+
+    if (!enabled) {
+      continue;
+    }
+
     /**
      * Verifica as regras de horário e dia.
      */
