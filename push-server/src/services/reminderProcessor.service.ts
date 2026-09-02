@@ -53,7 +53,8 @@ import { isReminderEnabled } from "./reminderSettings.service.js";
  *        ↓
  * ocorrência reservada
  *
- * A entrega do Push será integrada posteriormente.
+  * A entrega do Push é realizada pelo
+ * reminderSchedulerRunner.service.
  */
 
 /**
