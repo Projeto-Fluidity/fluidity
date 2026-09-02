@@ -168,24 +168,6 @@ setInterval(() => {
 
 /**
  * ============================================================
- * REMINDER SCHEDULER
- * ============================================================
- *
- * Mantém a mesma frequência utilizada anteriormente
- * pelo scheduler local do frontend.
- */
-runReminderScheduler().catch((error) => {
-  console.error("REMINDER SCHEDULER ERROR:", error);
-});
-
-setInterval(() => {
-  runReminderScheduler().catch((error) => {
-    console.error("REMINDER SCHEDULER ERROR:", error);
-  });
-}, 30 * 1000);
-
-/**
- * ============================================================
  * SERVER START
  * ============================================================
  */
