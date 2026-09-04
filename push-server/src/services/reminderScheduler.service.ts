@@ -2,6 +2,137 @@ import type { ScheduledReminder } from "./reminder.service.js";
 
 /**
  * ============================================================
+ * CONFIGURAÇÃO
+ * ============================================================
+ *
+ * O Fluidity considera, nesta versão, apenas usuários
+ * localizados no território brasileiro.
+ *
+ * Os horários configurados pelos usuários são interpretados
+ * no timezone de São Paulo.
+ */
+const FLUIDITY_TIMEZONE = "America/Sao_Paulo";
+
+/**
+ * ============================================================
+ * TIPOS
+ * ============================================================
+ */
+
+type ZonedDateParts = {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  weekday: string;
+};
+
+/**
+ * ============================================================
+ * DATA E HORA
+ * ============================================================
+ *
+ * Obtém os componentes de uma data no timezone utilizado
+ * pelo Fluidity.
+ *
+ * O objeto Date representa um instante absoluto.
+ * A função apenas projeta esse instante para o timezone
+ * do domínio para permitir a avaliação de horário e dia.
+ */
+function getZonedDateParts(date: Date): ZonedDateParts {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: FLUIDITY_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    weekday: "short",
+    hourCycle: "h23",
+  }).formatToParts(date);
+
+  const values = Object.fromEntries(
+    parts
+      .filter(({ type }) => type !== "literal")
+      .map(({ type, value }) => [type, value]),
+  );
+
+  return {
+    year: Number(values.year),
+    month: Number(values.month),
+    day: Number(values.day),
+    hour: Number(values.hour),
+    minute: Number(values.minute),
+    weekday: values.weekday,
+  };
+}
+
+/**
+ * Converte um horário do timezone do Fluidity
+ * para um instante absoluto representado por Date.
+ *
+ * Exemplo:
+ *
+ * 04/09/2026 13:09
+ * America/Sao_Paulo
+ *        ↓
+ * 04/09/2026 16:09 UTC
+ */
+function createDateFromZonedTime(
+  date: Date,
+  hour: number,
+  minute: number,
+): Date {
+  const { year, month, day } = getZonedDateParts(date);
+
+  /**
+   * Cria uma representação inicial utilizando UTC.
+   *
+   * Essa representação ainda não é o instante final.
+   * Ela serve como referência para calcular o offset
+   * efetivo do timezone do Fluidity.
+   */
+  const utcTimestamp = Date.UTC(
+    year,
+    month - 1,
+    day,
+    hour,
+    minute,
+    0,
+    0,
+  );
+
+  const utcDate = new Date(utcTimestamp);
+
+  /**
+   * Obtém como o timezone do Fluidity representa
+   * essa mesma referência.
+   */
+  const zonedParts = getZonedDateParts(utcDate);
+
+  /**
+   * Diferença entre a representação desejada e a
+   * representação obtida no timezone do domínio.
+   */
+
+  const zonedTimestamp = Date.UTC(
+    zonedParts.year,
+    zonedParts.month - 1,
+    zonedParts.day,
+    zonedParts.hour,
+    zonedParts.minute,
+    0,
+    0,
+  );
+
+  const offset = utcTimestamp - zonedTimestamp;
+
+  return new Date(utcTimestamp + offset);
+}
+
+/**
+ * ============================================================
  * REMINDER SCHEDULER SERVICE
  * ============================================================
  *
@@ -133,8 +264,14 @@ export function shouldRunReminder(
    * Dessa forma a comparação fica independente
    * dos segundos do relógio.
    */
+  const {
+    hour: currentHour,
+    minute: currentMinute,
+    weekday,
+  } = getZonedDateParts(now);
+
   const currentMinutes =
-    now.getHours() * 60 + now.getMinutes();
+    currentHour * 60 + currentMinute;
 
   const reminderMinutes =
     hour * 60 + minute;
@@ -195,7 +332,22 @@ export function shouldRunReminder(
    * Obtém o dia atual utilizando o mesmo padrão
    * armazenado em scheduled_reminders.
    */
-  const today = weekDays[now.getDay()];
+
+  const weekdayIndex = [
+    "Sun",
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+  ].indexOf(weekday);
+
+  if (weekdayIndex === -1) {
+    return false;
+  }
+
+  const today = weekDays[weekdayIndex];
 
   /**
    * Executa somente quando o dia atual estiver
@@ -257,18 +409,13 @@ export function getScheduledFor(
   }
 
   /**
-   * Cria uma cópia da data atual.
-   *
-   * Não alteramos o objeto `now` recebido pela função.
+   * Converte o horário configurado pelo usuário,
+   * interpretado em America/Sao_Paulo, para um
+   * instante absoluto.
    */
-  const scheduledFor = new Date(now);
-
-  /**
-   * Substitui somente o horário.
-   *
-   * A data permanece sendo a data da ocorrência.
-   */
-  scheduledFor.setHours(hour, minute, 0, 0);
-
-  return scheduledFor;
+  return createDateFromZonedTime(
+    now,
+    hour,
+    minute,
+  );
 }
