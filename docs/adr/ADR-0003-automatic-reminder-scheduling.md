@@ -2,17 +2,21 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Contexto
 
-Atualmente o disparo dos lembretes é realizado pelo
-hook `useReminderTrigger`, utilizando `setInterval`
+O agendamento de lembretes era originalmente realizado
+pelo hook `useReminderTrigger`, utilizando `setInterval`
 no frontend.
 
-Esse mecanismo depende da aplicação React estar em
-execução e, portanto, não permite disparos quando o
-navegador está fechado.
+Esse mecanismo dependia da aplicação React estar em
+execução e, portanto, não permitia disparos quando o
+navegador estava fechado.
+
+Para garantir que os lembretes sejam processados
+independentemente da execução do frontend, o processamento
+automático passou a ser responsabilidade do backend.
 
 ## Problema
 
