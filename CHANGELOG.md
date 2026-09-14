@@ -16,6 +16,35 @@ O Fluidity segue o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)
 
 ---
 
+## [0.7.0] - 2026-09-14
+
+### Adicionado
+
+- Implementação do agendamento automático de lembretes no Push Server.
+- Criação do processamento de lembretes agendados.
+- Criação do serviço de construção de notificações de lembretes.
+- Implementação do controle de ocorrências por meio de `reminder_deliveries`.
+- Validação das configurações de notificações durante o processamento dos lembretes.
+
+### Alterado
+
+- Migração do processamento automático de lembretes do frontend para o backend.
+- Remoção do scheduler local baseado em React e `setInterval`.
+- Separação das responsabilidades entre agendamento, processamento, construção da notificação e envio Push.
+- Controle de idempotência para impedir o processamento duplicado de uma mesma ocorrência agendada.
+
+### Corrigido
+
+- Correção do tratamento de timezone dos lembretes utilizando `America/Sao_Paulo`.
+
+### Documentação
+
+- Criação do ADR-0003 sobre a arquitetura de agendamento automático de lembretes.
+- Atualização da documentação técnica do sistema de lembretes.
+- Documentação das limitações atuais do MVP de agendamento automático.
+
+---
+
 ## [0.6.0] - 2026-07-24
 
 ### Alterado
