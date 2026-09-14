@@ -17,7 +17,6 @@ import AppLayout from "./components/layout/AppLayout";
  */
 
 import { useAppBootstrap } from "./hooks/useAppBootstrap";
-import { useReminderTrigger } from "./hooks/useReminderTrigger";
 
 /**
  * ============================================================
@@ -57,18 +56,6 @@ function App() {
    * Inicializa serviços globais da aplicação.
    */
   useAppBootstrap();
-
-  /**
-   * ============================================================
-   * MOTOR DE LEMBRETES
-   * ============================================================
-   *
-   * Mantido por compatibilidade com a arquitetura atual.
-   *
-   * Em uma evolução futura pode ser movido para a área
-   * autenticada da aplicação.
-   */
-  useReminderTrigger();
 
   return (
     <>

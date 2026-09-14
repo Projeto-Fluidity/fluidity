@@ -3,7 +3,8 @@ import cors from "cors";
 
 import { ENV } from "./config/env.js";
 
-import { sendPushToDevice } from "./services/push.service.js";
+import { sendPushToUser } from "./services/push.service.js";
+import { runReminderScheduler } from "./services/reminderSchedulerRunner.service.js";
 
 /**
  * ============================================================
@@ -80,7 +81,8 @@ app.get("/", (_, res) => {
  */
 app.post("/send-push", async (req, res) => {
   try {
-    const { device_id, title, body, url } = req.body;
+
+    const { user_id, title, body, url, category } = req.body;
 
     /**
      * ========================================================
@@ -88,10 +90,10 @@ app.post("/send-push", async (req, res) => {
      * ========================================================
      */
 
-    if (!device_id) {
+    if (!user_id) {
       return res.status(400).json({
         success: false,
-        error: "device_id obrigatório",
+        error: "user_id obrigatório",
       });
     }
 
@@ -101,12 +103,14 @@ app.post("/send-push", async (req, res) => {
      * ========================================================
      */
 
-    await sendPushToDevice(device_id, {
+    const result = await sendPushToUser(user_id, {
       title: title || "Fluidity 💧",
 
       body: body || "Hora do check-in emocional",
 
       url,
+
+      category,
     });
 
     /**
@@ -117,7 +121,13 @@ app.post("/send-push", async (req, res) => {
 
     return res.json({
       success: true,
-      message: "Push enviado com sucesso",
+      message:
+        result.sent === 0
+          ? "Nenhuma Push Notification foi entregue"
+          : result.failed > 0
+            ? "Push enviado parcialmente"
+            : "Push enviado com sucesso",
+      ...result,
     });
   } catch (err: unknown) {
     console.error("SEND PUSH ERROR:", err);
@@ -137,6 +147,24 @@ app.post("/send-push", async (req, res) => {
     });
   }
 });
+
+/**
+ * ============================================================
+ * REMINDER SCHEDULER
+ * ============================================================
+ *
+ * Mantém a mesma frequência utilizada anteriormente
+ * pelo scheduler local do frontend.
+ */
+runReminderScheduler().catch((error) => {
+  console.error("REMINDER SCHEDULER ERROR:", error);
+});
+
+setInterval(() => {
+  runReminderScheduler().catch((error) => {
+    console.error("REMINDER SCHEDULER ERROR:", error);
+  });
+}, 30 * 1000);
 
 /**
  * ============================================================

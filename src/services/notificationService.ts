@@ -7,22 +7,33 @@ import { env } from "../config/env";
  *
  * Payload esperado pelo push-server.
  *
- * device_id:
- * Identificador único persistido no navegador.
+ * user_id:
+ * Identificador único do usuário autenticado.
+
+ * A resolução dos dispositivos associados é responsabilidade
+ * do Push Server, refletindo a arquitetura N:N adotada pelo
+ * Fluidity.
  *
  * title/body/url:
  * Dados da notificação.
  *
- * Todos os campos além do device_id
- * são opcionais porque o backend já possui
- * fallback/default values.
+ * Todos os campos além do user_id
+ * são opcionais porque o backend possui
+ * valores padrão para título, corpo e URL.
  */
 type SendPushPayload = {
-  device_id: string;
+  user_id: string;
 
   title?: string;
   body?: string;
   url?: string;
+
+  category?: "mood" | "hydration";
+};
+
+type SendPushResponse = {
+  success: boolean;
+  message: string;
 };
 
 /**
@@ -68,8 +79,8 @@ type SendPushPayload = {
  * Navegador
  */
 export async function sendPushNotification(
-  payload: SendPushPayload
-) {
+  payload: SendPushPayload,
+): Promise<SendPushResponse> {
 
   /**
    * ==========================================================
@@ -102,8 +113,10 @@ export async function sendPushNotification(
    */
   if (!response.ok) {
 
+    const message = await response.text();
+
     throw new Error(
-      "Erro ao enviar push notification"
+      `Erro ao enviar push notification: ${message}`,
     );
   }
 
@@ -112,5 +125,7 @@ export async function sendPushNotification(
    * SUCCESS RESPONSE
    * ==========================================================
    */
-  return response.json();
+  const result: SendPushResponse = await response.json();
+
+  return result;
 }

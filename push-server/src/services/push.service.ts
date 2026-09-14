@@ -20,7 +20,7 @@ webpush.setVapidDetails(
 
   ENV.VAPID_PUBLIC_KEY,
 
-  ENV.VAPID_PRIVATE_KEY
+  ENV.VAPID_PRIVATE_KEY,
 );
 
 /**
@@ -33,6 +33,13 @@ export type PushMessage = {
   title: string;
   body: string;
   url?: string;
+  category?: "mood" | "hydration";
+};
+
+export type PushDeliveryResult = {
+  sent: number;
+  failed: number;
+  removed: number;
 };
 
 /**
@@ -61,24 +68,20 @@ export type PushMessage = {
  *   ↓
  * Navegador
  */
-export async function sendPushToDevice(
-  deviceId: string,
-  message: PushMessage
-) {
-
+export async function sendPushToUser(
+  userId: string,
+  message: PushMessage,
+): Promise<PushDeliveryResult> {
   /**
    * ==========================================================
    * GET SUBSCRIPTIONS
    * ==========================================================
    */
 
-  const {
-    data: subscriptions,
-    error,
-  } = await supabase
+  const { data: subscriptions, error } = await supabase
     .from("push_subscriptions")
     .select("*")
-    .eq("device_id", deviceId);
+    .eq("user_id", userId);
 
   /**
    * ==========================================================
@@ -87,7 +90,6 @@ export async function sendPushToDevice(
    */
 
   if (error) {
-
     throw new Error(error.message);
   }
 
@@ -97,14 +99,8 @@ export async function sendPushToDevice(
    * ==========================================================
    */
 
-  if (
-    !subscriptions ||
-    subscriptions.length === 0
-  ) {
-
-    throw new Error(
-      "Subscription não encontrada"
-    );
+  if (!subscriptions || subscriptions.length === 0) {
+    throw new Error("Subscription não encontrada");
   }
 
   /**
@@ -129,8 +125,9 @@ export async function sendPushToDevice(
 
     url: message.url || "/",
 
-    icon:
-      "https://fluidity.vercel.app/icons/192.png",
+    icon: "https://fluidity.vercel.app/icons/192.png",
+
+    category: message.category,
   });
 
   /**
@@ -139,10 +136,12 @@ export async function sendPushToDevice(
    * ==========================================================
    */
 
+  let sent = 0;
+  let failed = 0;
+  let removed = 0;
+
   for (const sub of subscriptions) {
-
     try {
-
       /**
        * ======================================================
        * WEB PUSH SEND
@@ -159,33 +158,26 @@ export async function sendPushToDevice(
           },
         },
 
-        payload
+        payload,
       );
+
+      sent++;
 
     } catch (err: unknown) {
+      failed++;
 
-      console.error(
-        "Erro ao enviar push notification:",
-        err
-      );
+      console.error("Erro ao enviar push notification:", err);
 
       type WebPushError = {
         statusCode?: number;
         body?: string;
       };
 
-      const error =
-        err as WebPushError;
+      const error = err as WebPushError;
 
-      console.error(
-        "STATUS:",
-        error.statusCode
-      );
+      console.error("STATUS:", error.statusCode);
 
-      console.error(
-        "BODY:",
-        error.body
-      );
+      console.error("BODY:", error.body);
 
       /**
        * ======================================================
@@ -197,26 +189,26 @@ export async function sendPushToDevice(
        * Subscription expirou
        * ou foi invalidada pelo navegador.
        */
-      if (
-        error.statusCode === 404 ||
-        error.statusCode === 410
-      ) {
-
-        const { error: deleteError } =
-          await supabase
-            .from("push_subscriptions")
-            .delete()
-            .eq("endpoint", sub.endpoint);
+      if (error.statusCode === 404 || error.statusCode === 410) {
+        const { error: deleteError } = await supabase
+          .from("push_subscriptions")
+          .delete()
+          .eq("endpoint", sub.endpoint);
 
         if (deleteError) {
-
           console.error(
             "Erro ao remover subscription inválida:",
-            deleteError
+            deleteError,
           );
+        } else {
+          removed++;
         }
-
       }
     }
   }
+  return {
+    sent,
+    failed,
+    removed,
+  };
 }
