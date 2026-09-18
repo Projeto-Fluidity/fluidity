@@ -462,7 +462,7 @@ Esse documento descreve:
 # 📦 Versionamento
 
 <!-- VERSION:START -->
-Versão atual: **0.5.0**
+Versão atual: **0.7.0**
 <!-- VERSION:END -->
 
 O Fluidity adota oficialmente o padrão de versionamento **Semantic Versioning (SemVer 2.0.0)** para identificar e organizar suas releases.
