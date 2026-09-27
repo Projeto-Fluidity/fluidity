@@ -36,8 +36,8 @@ const requiredEnv = {
   SUPABASE_URL:
     process.env.SUPABASE_URL,
 
-  SUPABASE_SERVICE_ROLE_KEY:
-    process.env.SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_SECRET_KEY:
+    process.env.SUPABASE_SECRET_KEY,
 
   VAPID_PUBLIC_KEY:
     process.env.VAPID_PUBLIC_KEY,
@@ -86,8 +86,8 @@ export const ENV = {
   SUPABASE_URL:
     requiredEnv.SUPABASE_URL!,
 
-  SUPABASE_SERVICE_ROLE_KEY:
-    requiredEnv.SUPABASE_SERVICE_ROLE_KEY!,
+  SUPABASE_SECRET_KEY:
+    requiredEnv.SUPABASE_SECRET_KEY!,
 
   VAPID_PUBLIC_KEY:
     requiredEnv.VAPID_PUBLIC_KEY!,

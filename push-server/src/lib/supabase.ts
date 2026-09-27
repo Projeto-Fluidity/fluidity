@@ -16,7 +16,7 @@ import { ENV } from "../config/env.js";
  *
  * Esse client utiliza:
  *
- * SUPABASE_SERVICE_ROLE_KEY
+ * SUPABASE_SECRET_KEY
  *
  * Portanto:
  *
@@ -36,5 +36,5 @@ import { ENV } from "../config/env.js";
  */
 export const supabase = createClient(
   ENV.SUPABASE_URL,
-  ENV.SUPABASE_SERVICE_ROLE_KEY
+  ENV.SUPABASE_SECRET_KEY
 );
